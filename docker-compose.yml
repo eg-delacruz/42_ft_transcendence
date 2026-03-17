@@ -47,13 +47,38 @@ services:
       SUPER_EMAIL: ${SUPER_EMAIL}
       SUPER_PASS: ${SUPER_PASS}
       JWT_SECRET: ${JWT_SECRET}
-      VITE_CLIENT_HEADER_KEY: ${VITE_CLIENT_HEADER_KEY}
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules # Host's node_modules changes won't affect container
+      - frontend_pnpm_store:/root/.local/share/pnpm/store # Host's pnpm store changes won't affect container
+    container_name: vite-frontend
+    init: true
+    command: sh -c "pnpm install && exec pnpm run dev -- --port 5173"
+    stdin_open: true
+    tty: true
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
+    depends_on:
+      - backend
     networks:
       - app-network
 
 volumes:
   backend_node_modules:
   backend_pnpm_store:
+  frontend_node_modules:
+  frontend_pnpm_store:
   mongo_data:
 
 networks:

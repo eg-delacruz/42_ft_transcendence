@@ -5,7 +5,7 @@ ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 
 # Install only minimal runtime tooling for local development
 RUN corepack enable \
-    && corepack use pnpm@10.30.3
+	&& corepack use pnpm@10.30.3
 
 WORKDIR /app
 
@@ -15,7 +15,7 @@ WORKDIR /app
 # RUN chown -R node:node /app
 # USER node
 
-EXPOSE 3000
+EXPOSE 5173
 
 # Signal handling via docker-compose init: true
 # See docker-compose.yml for details
