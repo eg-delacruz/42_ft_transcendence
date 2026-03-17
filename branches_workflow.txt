@@ -1,0 +1,98 @@
+///////////////////////////
+//   CREATE NEW BRANCH   //
+///////////////////////////
+
+1. Sync your local repository with the remote (to ensure you have the latest code):
+
+git checkout main
+git pull origin main
+
+2. Create a new branch locally:
+
+git checkout -b feature/[feat_name]
+(Replace feature-branch with a meaningful branch name.)
+
+3. Push the new branch to the remote repository:
+
+git push -u origin feature/[feat_name]
+The -u flag sets the upstream tracking so that future git push and git pull commands automatically use origin feature-branch.
+
+4. Switch between branches when needed:
+
+git checkout main  # Switch back to the main branch
+git checkout feature-branch  # Switch back to your feature branch
+
+///////////////////////////////////
+//   SYNC NEW BRANCHES LOCALLY   //
+///////////////////////////////////
+
+1. Fetching All Remote Branches
+After the partner created a new branch and pushed it to the remote repository, the other person needs to update his local reference to the remote branches. Run:
+
+git fetch origin
+This will update your local Git with information about all branches on the remote.
+
+2️. Check Available Branches
+To see all branches (both local and remote):
+
+git branch -a
+
+Local branches are listed like this:
+
+main
+
+Remote branches are listed like this:
+
+remotes/origin/dev
+remotes/origin/main
+If you see remotes/origin/dev but no local dev branch, that means the branch exists on the remote but hasn't been checked out locally yet.
+
+3️. Checkout the New Branch Locally
+To create a local version of the dev branch and track the remote one:
+
+git checkout -b dev origin/dev
+
+//////////////////////////
+//   MERGING BRANCHES   //
+//////////////////////////
+
+1. If you are working on a feature branch, make sure it is up to date with the dev branch before merging (in case there were changes in dev while you were working on the feature):
+
+git checkout dev
+git pull origin dev
+git checkout feature-branch
+git merge dev
+
+2. Swith to dev and update it with main:
+
+git checkout dev
+git pull origin dev  # Ensure you have the latest dev branch
+git merge main       # Merge the latest main changes into dev
+
+-> If conflicts occur, resolve them, commit the fixes, and continue.
+
+3. Merge feature/branch into dev:
+
+git merge feature/signal
+
+-> If there are merge conflicts, resolve them.
+-> Once merged, commit if necessary.
+
+4. Push dev to the remote repository (this allows the team to review and test changes):
+
+git push origin dev
+
+5. Test evetything on the dev branch
+
+-> Run tests and check if evetything wotks as expected.
+-> If issues arise, fix them in feature/branch or directly in dev
+
+6. Merge dev into main:
+
+git checkout main
+git pull origin main  # Ensure main is up to date
+git merge dev
+
+6. Push main to the remote repository:
+
+git push origin main
