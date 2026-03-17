@@ -1,0 +1,2 @@
+Put all needed scripts in this directory.
+-> This file can be erased, it is just a placeholder to keep the directory in the github repo.
