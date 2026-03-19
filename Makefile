@@ -5,7 +5,7 @@
 .PHONY: up down restart logs status clean help
 
 up:
-	docker-compose up -d
+	docker-compose up --build -d
 	@echo "Proyecto on-line:"
 	@echo "Frontend: http://localhost:5173"
 	@echo "Backend: http://localhost:3000"
@@ -26,7 +26,6 @@ logs:
 
 status:
 	docker-compose ps
-	docker-volume ls
 
 clean: down
 	docker volume rm $$(docker volume ls -qf dangling=true) || true
