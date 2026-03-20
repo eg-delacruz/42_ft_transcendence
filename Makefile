@@ -2,7 +2,7 @@
 #	42 - ft_trascendence	#
 # ========================= #
 
-.PHONY: up down restart logs status clean help
+.PHONY: up down restart logs status clean help mongo backend frontend re
 
 up:
 	docker-compose up --build -d
@@ -31,6 +31,17 @@ clean: down
 	docker volume rm $$(docker volume ls -qf dangling=true) || true
 	docker image prune -a -f
 
+mongo:
+	docker-compose exec mongo sh
+
+backend:
+	docker-compose exec backend sh
+
+frontend:
+	docker-compose exec frontend sh
+
+re: clean up
+
 help:
 	@echo "42 - ft_trascendence"
 	@echo "  make up       - Levanta los contenedores en segundo plano"
@@ -38,4 +49,8 @@ help:
 	@echo "  make restart  - Reinicia los contenedores"
 	@echo "  make logs     - Muestra los logs de los contenedores (puedes usar make logs CONTAINER=nombre)"
 	@echo "  make clean    - Limpia volúmenes e imágenes no usados"
+	@echo "  make mongo    - Abre una shell dentro del contenedor mongo"
+	@echo "  make backend  - Abre una shell dentro del contenedor backend"
+	@echo "  make frontend - Abre una shell dentro del contenedor frontend"
+	@echo "  make re       - Ejecuta clean seguido de up"
 	@echo "  make help     - Muestra esta ayuda"

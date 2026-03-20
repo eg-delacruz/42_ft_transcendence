@@ -3,6 +3,7 @@ dotenv.config();
 
 interface Env {
   PORT: number;
+  FRONT_PORT: number;
   MONGO_URI: string;
   SUPER_EMAIL: string;
   SUPER_PASS: string;
@@ -13,6 +14,7 @@ interface Env {
 
 const env: Env = {
   PORT: Number(process.env.PORT) || 3000,
+  FRONT_PORT: Number(process.env.FRONT_PORT) || 5173,
   MONGO_URI: process.env.MONGO_URI || '',
   SUPER_EMAIL: process.env.SUPER_EMAIL || '',
   SUPER_PASS: process.env.SUPER_PASS || '',
