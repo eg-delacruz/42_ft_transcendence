@@ -3,6 +3,8 @@ import cors from 'cors';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import path from 'path';
+import env from '@config/env';
+
 
 import { router } from '@routes/index';
 
@@ -25,7 +27,7 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 // CORS
 app.use(
   cors({
-    origin: 'http://localhost:5173', // Update this to your frontend URL in production
+    origin: `http://localhost:${env.NODE_ENV}`, // Update this to your frontend URL in production
     credentials: true, // Allow cookies to be sent in CORS requests
   }),
 );
