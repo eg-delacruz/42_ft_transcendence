@@ -11,6 +11,7 @@ import app from '@/app.ts';
 import env from '@config/env';
 
 import { logger } from '@config/logger';
+import { ensureSuperUser } from '@scripts/seed';
 
 async function startServer() {
   // Connect to MongoDB
@@ -20,6 +21,9 @@ async function startServer() {
   app.listen(env.PORT, () => {
     logger.info(`Server running in ${env.NODE_ENV} on port ${env.PORT}`);
   });
+
+  // Init a super user in the DB  (CAN BE CLEAN ¿?)
+  ensureSuperUser();
 
   try {
   } catch (error) {

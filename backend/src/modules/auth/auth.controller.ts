@@ -57,6 +57,66 @@ export const handleLogin = async (
   }
 };
 
+// Register a user into the db
+export const registerUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+
+    //  Checks for email and password availability in the petition
+    const { email, password } = req.body;
+    if (!email || !password)
+      return errorResponse(res, 'Email and password are required', 400);
+
+    //  Checks for user already exists in the db
+    const existingUser = await User.findOne({ email });
+    if (existingUser)
+      return errorResponse(res, 'User with this email already exists', 400);
+
+    //  Hash password and create user with default role
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = new User({
+      email,
+      password: hashedPassword,
+      role: 'standard_user',
+    });
+
+    const savedUser = await newUser.save();
+
+    //  Generates token/cookie and adapt to savedUser
+    const token = jwt.sign(
+      { userId: savedUser._id, role: savedUser.role, email: savedUser.email },
+      env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
+
+    res.cookie('access_token', token, {
+      httpOnly: true,
+      secure: env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000, // 1 day of duration
+    });
+
+    const body = {
+      user: {
+        id: savedUser._id,
+        email: savedUser.email,
+        role: savedUser.role,
+      },
+    };
+
+    return successResponse(res, body, 'User registered successfully', 201);
+
+  }
+
+  catch (error) {
+    next(error);
+  }
+}
+
 // Controller to get current authenticated user's info
 export const getCurrentUser = async (req: AuthRequest, res: Response) => {
   return successResponse(

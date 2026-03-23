@@ -34,6 +34,9 @@ clean: down
 mongo:
 	docker-compose exec mongo sh
 
+mongosh:
+	@docker-compose exec mongo sh -c 'mongosh -u "$$MONGO_INITDB_ROOT_USERNAME" -p "$$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase $$MONGO_ROOT_USER "$$MONGO_INITDB_DATABASE"'
+
 backend:
 	docker-compose exec backend sh
 
@@ -50,6 +53,7 @@ help:
 	@echo "  make logs     - Muestra los logs de los contenedores (puedes usar make logs CONTAINER=nombre)"
 	@echo "  make clean    - Limpia volúmenes e imágenes no usados"
 	@echo "  make mongo    - Abre una shell dentro del contenedor mongo"
+	@echo "  make mongosh  - Abre la consola interactiva de MongoDB (mongosh)"
 	@echo "  make backend  - Abre una shell dentro del contenedor backend"
 	@echo "  make frontend - Abre una shell dentro del contenedor frontend"
 	@echo "  make re       - Ejecuta clean seguido de up"

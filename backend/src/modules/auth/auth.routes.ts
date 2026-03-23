@@ -1,13 +1,17 @@
 import { Router } from 'express';
+
 import {
   handleLogin,
+  registerUser,
   getCurrentUser,
   handleLogout,
 } from '@modules/auth/auth.controller';
+
 import { authMiddleware } from '@middlewares/auth.middleware';
 
 const router = Router();
 
+router.post('/register', registerUser);
 router.post('/login', handleLogin);
 
 // Protected route to get current authenticated user's info
