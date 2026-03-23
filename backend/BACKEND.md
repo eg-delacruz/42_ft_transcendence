@@ -210,13 +210,74 @@ Expected response (role must be super_user)
 
 ```bash
 curl -i \
-  -b cookies.txt \
+  -b admin_cookies.txt \
   -X POST http://localhost:3000/api/users/create \
   -H "Content-Type: application/json" \
   -d '{"email":"agent@example.com","password":"AgentPass123","role":"standard_user"}' 
 ```
 
+Expeceted response:
 
+```json
+{
+  "error":"",
+  "body":
+  {
+    "_id":"69c15c5544dc8c41fbf588b8",
+    "email":"agent@example.com",
+    "role":"standard_user"
+  },
+  "message":"User created successfully"
+}
 
-4.  GET /api/users/all
-5.  DELETE /api/users/delete/:id
+```
+
+#### 5.3  Get all users (`/users/all`)
+
+Retrieve a list of all users:
+
+```bash
+curl -i \
+  -b admin_cookies.txt \
+  http://localhost:3000/api/users/all
+```
+
+Expected response:
+
+```json
+{
+  "error": "",
+  "body": [
+    {
+      "_id": "69c15c5544dc8c41fbf588b8",
+      "email": "agent@example.com",
+      "role": "standard_user"
+    }
+  ],
+  "message": "Users retrieved successfully"
+}
+```
+
+#### 5.4  Delete a user (`/users/delete/:id`)
+
+Delete a specific user by ID (replace the ID with one from the previous list):
+
+```bash
+curl -i \
+  -b admin_cookies.txt \
+  -X DELETE http://localhost:3000/api/users/delete/69c15c5544dc8c41fbf588b8
+```
+
+Expected response:
+
+```json
+{
+  "error": "",
+  "body": {
+    "_id": "69c15c5544dc8c41fbf588b8",
+    "email": "agent@example.com",
+    "role": "standard_user"
+  },
+  "message": "User deleted successfully"
+}
+```

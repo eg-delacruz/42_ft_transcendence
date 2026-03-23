@@ -49,7 +49,4 @@ async function seedSuperUser() {
         logger.error('Seed failed: ' + error);
         process.exitCode = 1;
     }
-    finally{
-        process.exit();
-    }
 }
