@@ -27,7 +27,7 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 // CORS
 app.use(
   cors({
-    origin: `http://localhost:${env.NODE_ENV}`, // Update this to your frontend URL in production
+    origin: `http://localhost:${env.FRONT_PORT}`, // Update this to your frontend URL in production
     credentials: true, // Allow cookies to be sent in CORS requests
   }),
 );
