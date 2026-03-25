@@ -24,7 +24,7 @@ function Login() {
 
     return (
         <form onSubmit={handleSummit}>
-            <h2>Login</h2>
+            <h2>FT_TRASCENDENCE - LOGIN</h2>
             <input
                 type="email"
                 placeholder="Email"
@@ -48,8 +48,9 @@ function Login() {
 export default Login;
 
 /**
- * Login page
- * - Uses useAuthContext() for login
- * - Redirects to /user on success
- * - Shows error message on failure
+ * Login - User login page.
+ *
+ * Renders a form for user login.
+ * On submit, calls the login function from the auth context.
+ * Shows feedback on success or error.
  */

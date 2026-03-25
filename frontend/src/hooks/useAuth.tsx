@@ -78,7 +78,25 @@ export function useAuth() {
         return data;
     }, []);
 
-    return { user, auth, loading, login, logout, register };
+    //  Delete acount
+
+    const deleteAccount = useCallback(async () => {
+        console.log("[useAuth] deleteAccount() called with:", user.email);
+        if (!user) return { error: "No user authenticated" };
+        try {
+            const res = await fetch(`http://localhost:3000/api/users/delete/${user.id || user._id}`, {
+                method: "DELETE",
+                credentials: "include",
+            });
+            const data = await res.json();
+            setUser(null);
+            return data;
+        } catch (err) {
+            return { error: "Network error: ", err };
+        }
+    }, [user]);
+
+    return { user, auth, loading, login, logout, register, deleteAccount };
 }
 
 

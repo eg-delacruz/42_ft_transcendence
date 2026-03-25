@@ -12,12 +12,11 @@ This document describes the actual state of the frontend implementation dictated
 -   authentication hooks defined in useAuth
 -   authProvider - global context of authentication for the app
 -   prototyping home, login, register and user pages
--   entrypoints checked auth and login
+-   entrypoints checked auth, login, logout, register and delete.
+-   check password strongness
 
 ## NEXT TODO
 
 -   define and create the base layout of the app
--   login with better styles
--   make home, register and user pages
--   checks all entrypoints
+-   add styles
 
