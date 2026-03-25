@@ -281,3 +281,69 @@ Expected response:
   "message": "User deleted successfully"
 }
 ```
+
+## MONGOSH COMMANDS
+
+Useful commands for managing your MongoDB database and the `users` collection from the `mongosh` shell, in line with the backend authentication and user flows:
+
+### 1. Connect to the database
+
+```bash
+make mongosh
+```
+
+### 2. Show all collections
+
+```mongodb
+show collections
+```
+
+### 3. List all users
+
+```mongodb
+db.users.find().pretty()
+```
+
+### 4. Find a user by email
+
+```mongodb
+db.users.findOne({ email: "user1@example.com" })
+```
+
+### 5. Manually create a user
+
+```mongodb
+db.users.insertOne({
+  email: "admin@example.com",
+  password: "<hashed_password>",
+  role: "super_user"
+})
+```
+> **Note:** The `password` field must be hashed as in your backend.
+
+### 6. Update a user's role
+
+```mongodb
+db.users.updateOne(
+  { email: "user1@example.com" },
+  { $set: { role: "super_user" } }
+)
+```
+
+### 7. Delete a user
+
+```mongodb
+db.users.deleteOne({ email: "user1@example.com" })
+```
+
+### 8. Delete all users (use with caution!)
+
+```mongodb
+db.users.deleteMany({})
+```
+
+### 9. Count users
+
+```mongodb
+db.users.countDocuments()
+```
