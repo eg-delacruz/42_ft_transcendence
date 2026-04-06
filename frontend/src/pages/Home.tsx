@@ -4,7 +4,7 @@ function Home ()
 {
     return (
         <>
-            FT_TRASCENDENCE - LANDING PAGE
+            <h2>FT_TRASCENDENCE - LANDING PAGE</h2>
         </>
     )
 }

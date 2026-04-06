@@ -1,6 +1,7 @@
 # BACKEND – Manual Tests
 
-This document describes how to manually test the current authentication flow of the backend API using `curl`.
+This document describes the **actual state of the backend implementation** dictated in the document `PLAN_DE_TRABAJO.md`, also how to manually test the current authentication flow of the backend API using `curl`
+and lastly, some utils and commands to actually use the mongo db (_monogosh_ command in MAKEFILE).
 
 ## 1. Register a Standard User
 
@@ -30,7 +31,7 @@ Expected response
 }
 ```
 
-## 2.   Check Current Session (`/auth/me`)
+## 2. Check Current Session (`/auth/me`)
 
 Use the cookie stored in cookies.txt to check the authenticated user:
 
@@ -58,7 +59,7 @@ Expected Response:
 }
 ```
 
-## 3.   Logout
+## 3. Logout
 
 Log out the current user:
 
@@ -86,7 +87,7 @@ If /auth/me still returns a valid user, double‑check that:
 - You are reusing the correct cookies.txt,
 - The client is not holding an old cookie.
 
-## 4.   Login with an Existing User
+## 4. Login with an Existing User
 
 Log in with the user created in the registration step and overwrite `cookies.txt`with the new session:
 
@@ -148,7 +149,7 @@ Expected response:
 
 - Once that admin user exists, manual tests should include:
 
-### 5.1.  Logging in as the admin (`/api/auth/login`).
+### 5.1. Logging in as the admin (`/api/auth/login`).
 
 ```bash
 curl -i \
@@ -187,24 +188,21 @@ Expected response (role must be super_user)
 
 ```json
 {
-  "error":"",
-  "body":
-  {
-    "user":
-    {
-      "userId":"69c153d5ead64855d9fa3b81",
-      "role":"super_user",
-      "email":"admin@example.com",
-      "iat":1774277744,
-      "exp":1774364144
-      }
+  "error": "",
+  "body": {
+    "user": {
+      "userId": "69c153d5ead64855d9fa3b81",
+      "role": "super_user",
+      "email": "admin@example.com",
+      "iat": 1774277744,
+      "exp": 1774364144
+    }
   },
-  "message":"Authenticated user"
+  "message": "Authenticated user"
 }
-
 ```
 
-### 5.2.  Managing users via admin-only endpoints:
+### 5.2. Managing users via admin-only endpoints:
 
 #### Create user as Admin (`/users/create`)
 
@@ -213,26 +211,24 @@ curl -i \
   -b admin_cookies.txt \
   -X POST http://localhost:3000/api/users/create \
   -H "Content-Type: application/json" \
-  -d '{"email":"agent@example.com","password":"AgentPass123","role":"standard_user"}' 
+  -d '{"email":"agent@example.com","password":"AgentPass123","role":"standard_user"}'
 ```
 
 Expeceted response:
 
 ```json
 {
-  "error":"",
-  "body":
-  {
-    "_id":"69c15c5544dc8c41fbf588b8",
-    "email":"agent@example.com",
-    "role":"standard_user"
+  "error": "",
+  "body": {
+    "_id": "69c15c5544dc8c41fbf588b8",
+    "email": "agent@example.com",
+    "role": "standard_user"
   },
-  "message":"User created successfully"
+  "message": "User created successfully"
 }
-
 ```
 
-#### 5.3  Get all users (`/users/all`)
+#### 5.3 Get all users (`/users/all`)
 
 Retrieve a list of all users:
 
@@ -258,7 +254,7 @@ Expected response:
 }
 ```
 
-#### 5.4  Delete a user (`/users/delete/:id`)
+#### 5.4 Delete a user (`/users/delete/:id`)
 
 Delete a specific user by ID (replace the ID with one from the previous list):
 
@@ -319,6 +315,7 @@ db.users.insertOne({
   role: "super_user"
 })
 ```
+
 > **Note:** The `password` field must be hashed as in your backend.
 
 ### 6. Update a user's role
