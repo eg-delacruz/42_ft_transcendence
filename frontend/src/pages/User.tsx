@@ -21,7 +21,7 @@ function User() {
                 <b> Valid until:</b> {user.exp ? new Date(user.exp * 1000).toLocaleString() : "N/A"}
 
             <ul>
-                <button onClick={logout}>Logout</button>
+                <button onClick={logout}>Logout </button>
                 <button onClick={deleteAccount}>Delete</button>
             </ul>
         </div>

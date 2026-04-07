@@ -16,14 +16,20 @@ function Register() {
     const handleSummit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
+        if (!email.includes("@"))
+            return setError("Invalid email address");
         if (password !== validPassword)
             return setError("Passwords does not match");
         if (!isStrongPassword(password))
             return setError("Password not secure");
-        const res = await register(email, password);
 
-        if (res.error) setError(res.error || "Register failed");
-        else navigate("/user"); // Optionally redirection to /user or show success
+        try {
+            const res = await register(email, password);
+        }
+        catch (err) {
+            setError("Registration failed, Please try again.");
+        }
+        navigate("/user"); // Optionally redirection to /user or show success
     }
 
     return (

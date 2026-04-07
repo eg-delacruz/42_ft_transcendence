@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
+import { api, ApiError } from "@/utils/api";
 
 export interface User {
+    _id: string; // Corrected to _id to match MongoDB
     id: string;
     email: string;
     // TODO: implement more fields as backend need
@@ -14,89 +16,90 @@ export function useAuth() {
     // Auth
     const auth = useCallback(async () => {
         setLoading(true);
-        console.log("[useAuth] auth() called. Current user:", user);
-
         try {
-            const res = await fetch("http://localhost:3000/api/auth/me", {
-                credentials: "include",
-            });
-            const data = await res.json();
-            console.log("[useAuth] auth() respone:", data);
+            const data = await api.get("/auth/me");
             setUser(data.body?.user ?? null);
-        }
-        catch (err) {
-            console.error("[useAuth] auth() error: ", err);
+            return data;
+        } catch (error) {
             setUser(null);
-
+            if (error instanceof ApiError) {
+                // Don't log 401 errors as they are expected when not logged in
+                if (error.status !== 401) console.error("Auth failed", error);
+                return { error: error.message };
+            }
+            return { error: "Network error or invalid response" };
+        } finally {
+            setLoading(false);
         }
-        finally { setLoading(false); }
     }, []);
 
-    // Called here in fact in the protected route comp to avoid called in each render
+    // Called on initial load to check authentication status
     useEffect(() => {
         auth();
     }, [auth]);
 
     // Login
     const login = useCallback(async (email: string, password: string) => {
-        console.log("[useAuth] login() called with:", email);
-        const res = await fetch("http://localhost:3000/api/auth/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ email, password }),
-        })
-        const data = await res.json()
-        console.log("[useAuth] login() response:", data);
-        if (data.body?.user)
-            setUser(data.body.user);
-        return data;
-    }, []);
-
-    // Logout
-    const logout = useCallback(async () => {
-        console.log("[useAuth] logout() called");
-        await fetch("http://localhost:3000/api/auth/logout", {
-            method: "POST",
-            credentials: "include",
-        });
-        setUser(null);
+        try {
+            const data = await api.post("/auth/login", { email, password });
+            if (data.body?.user) {
+                setUser(data.body.user);
+            }
+            return data;
+        } catch (error) {
+            setUser(null);
+            if (error instanceof ApiError) {
+                return { error: error.message };
+            }
+            return { error: "Network error or invalid response" };
+        }
     }, []);
 
     // Register
     const register = useCallback(async (email: string, password: string) => {
-        console.log("[useAuth] register() called with:", email);
-        const res = await fetch("http://localhost:3000/api/auth/register", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ email, password }),
-        })
-        const data = await res.json();
-        console.log("[useAuth] register() response:", data);
-        if (data.body?.user) setUser(data.body.user);
-        return data;
+        try {
+            const data = await api.post("/auth/register", { email, password });
+            // After registration, you might want to automatically log the user in
+            // or prompt them to log in. Here, we just return the response.
+            return data;
+        } catch (error) {
+            if (error instanceof ApiError) {
+                return { error: error.message };
+            }
+            return { error: "Network error or invalid response" };
+        }
     }, []);
 
-    //  Delete acount
+    // Logout
+    const logout = useCallback(async () => {
+        try {
+            await api.post("/auth/logout", {});
+        } catch (error) {
+            console.error("Logout failed on server", error);
+        } finally {
+            // Always clear user state on logout, even if server call fails
+            setUser(null);
+        }
+    }, []);
 
+    // Delete account
     const deleteAccount = useCallback(async () => {
-        console.log("[useAuth] deleteAccount() called with:", user.email);
         if (!user) return { error: "No user authenticated" };
         try {
-            const res = await fetch(`http://localhost:3000/api/users/delete/${user.id || user._id}`, {
-                method: "DELETE",
-                credentials: "include",
-            });
-            const data = await res.json();
-            setUser(null);
+            // Ensure you are using the correct user ID field (_id for MongoDB)
+            const data = await api.delete(`/users/delete/${user._id || user.id}`);
+            setUser(null); // Clear user state on successful deletion
             return data;
-        } catch (err) {
-            return { error: "Network error: ", err };
+        } catch (error) {
+            // The user state is not cleared on failure, allowing for retry
+            if (error instanceof ApiError) {
+                return { error: error.message };
+            }
+            return { error: "Network error or invalid response" };
         }
     }, [user]);
 
-    return { user, auth, loading, login, logout, register, deleteAccount };
+    return { user, loading, auth, login, register, logout, deleteAccount };
 }
 
 
