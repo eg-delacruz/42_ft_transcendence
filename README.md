@@ -1,14 +1,20 @@
 # 42_ft_transcendence
 
-Organización general del proyecto ft_transcendence
+**Visión general del proyecto**
+
+Hemos quedado en que nuestro transcendence es una página de minijuegos online.
+Los usuarios se registran y son movidos al lobby, dónde estarán con el resto de usuarios conectados en ese momento.
+Los usuarios pueden elegir si participar en los juegos o solo espectar. Los juegos se irán empezando en orden aleatorio y la máquina escogerá aleatoriamente a un par de jugadores para competir entre ellos. Los espectadores tendrán un chat donde hablar y una zona de apuestas para la partida de ese momento.
 
 ## Table of Contents
 - [🚀 Getting Started](#-getting-started)
-- [Documentación de front y back](#documentacion-de-front-y-back)
+- [Gestión centralizada de las tareas](#gestión-centralizada-de-las-tareas)
+- [Documentación de front y back](#documentación-de-front-y-back)
 - [Cosas a Tener en Cuenta](#cosas-a-tener-en-cuenta)
 	- [Uso de pnpm en vez de npm](#uso-de-pnpm-en-vez-de-npm)
-	- [Consideraciones generales del proyecto](#consideraciones-generales-del-proyecto)
 	- [Gestión de la base de datos](#gestión-de-la-base-de-datos)
+	- [Ramas](#ramas)
+	- [Consideraciones generales del proyecto](#consideraciones-generales-del-proyecto)
 - [Commands for Development](#commands-for-development)
 
 ---
@@ -36,9 +42,13 @@ curl http://localhost:3000/api/
 ```
 
 ---
-## Tareas del proyecto
+## Gestión centralizada de las tareas
 
-Las tareas del proyecto están centralizadas en el proyecto vinculado al repo de github:
+Las tareas del proyecto están centralizadas en el proyecto vinculado al repo de github. Cualquier participante puede crear tareas y moverlas entre estados. La idea sería que, cuando alguien quiera empezar a trabajar en alguna tarea, que arrastre la tarea del estado de "Ready" al estado de "In Progress", y de esta manera asegurarse de que solamente una persona está trabajando en ella.
+
+Las tareas deben ser bastante granulares, evitando ser muy generales o que abarquen demasiado.
+
+Enlace al proyecto:
 
 `https://github.com/users/eg-delacruz/projects/2/views/1`
 
@@ -96,9 +106,21 @@ pnpm add <package-name>
 Durante el desarrollo del proyecto, la base de datos será local, lo cual implica que cada desarrollador tendrá su propia copia de los elementos que vaya creando (usuarios, chats, etc...).
 Cuando queramos utilizar una DB central, esta funcionará en la red de 42, para lo cual habrá que modificar el docker-compose.yml
 
-### Consideraciones generales del proyecto
+### Ramas
 
-- **Git Workflow:** Las ramas se harán por feature.
+La rama principal es `origin/master`. Al completar ciertos Milestones, si todos estamos de acuerto, podemos hacer merge de `origin/dev` a esta rama. No debería tocarse nunca hasta no estar seguros de los cambios.
+
+La rama `origin/dev` debe ser el punto central del proyecto, donde todos vamos haciendo merge de las nuevas features que vamos añadiendo.
+
+**Creación de nuevas ramas**
+Las nuevas ramas serán creadas según features.
+La nomenclatura debería ser `feature/NOMBRE_DEL_FEATURE`.
+Si el feature está relacionado con back o front, sería óptimo añadirlo al nombre para mayor claridad de la siguiente manera:
+
+`feature/front/NOMBRE_DEL_FEATURE`
+
+
+### Consideraciones generales del proyecto
 
 - **Controles de Minijuegos:**
   - Los controles estarán limitados a las flechas y dos botones (A y B) asignables.
@@ -108,7 +130,6 @@ Cuando queramos utilizar una DB central, esta funcionará en la red de 42, para 
 
 - **Base de Datos:**
   - Guardar usuarios, sus sesiones, y sus puntuaciones.
-  - Evaluar si la base de datos será local o en la nube.
 
 - **Puntos y Apuestas:**
   - Los puntos ganados en los juegos servirán como moneda en apuestas.
