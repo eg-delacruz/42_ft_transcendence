@@ -71,23 +71,21 @@ Backend: `backend/BACKEND.md`.
 ### Uso de pnpm en vez de npm
 
 Para el proyecto se utilizará `pnpm` en lugar de `npm` para la gestión de paquetes. `pnpm` es un gestor más moderno y su manejo de dependencias mediante enlaces simbólicos mejora la velocidad y organización.
-La mayoria de los comandos se ven casi iguales (solo cambia la herramienta):
+La mayoría de los comandos se ven casi iguales, pero algunos cambian de forma o nombre (por ejemplo, `add` y `remove`).
 
-```bash
-# NPM
-npm install
-# PNPM
-pnpm install
-```
+Tabla rápida de equivalencias:
 
-El unico comando que cambia de forma es el de eliminar paquetes:
+| Acción | npm | pnpm | Descripción |
+| --- | --- | --- | --- |
+| Instalar dependencias del proyecto | `npm install` | `pnpm install` | Lee `package.json` y el lockfile para instalar todo. |
+| Añadir dependencia | `npm install <package-name>` | `pnpm add <package-name>` | Agrega el paquete a `dependencies`. |
+| Añadir dependencia de desarrollo | `npm install -D <package-name>` | `pnpm add -D <package-name>` | Agrega el paquete a `devDependencies`. |
+| Eliminar dependencia | `npm uninstall <package-name>` | `pnpm remove <package-name>` | Elimina el paquete del proyecto. |
+| Ejecutar script | `npm run <script>` | `pnpm <script>` | Ejecuta un script de `package.json`. |
+| Instalar paquete global | `npm install -g <package-name>` | `pnpm add -g <package-name>` | Instala el paquete globalmente. |
 
-```bash
-# NPM
-npm uninstall <package-name>
-# PNPM
-pnpm remove <package-name>
-```
+Nota corta:
+`pnpm add <package-name>` agrega por defecto a `dependencies`. Usa `-D` para `devDependencies` y `-P` si necesitas declararlo como `peerDependencies`.
 
 Para instalar nuevas dependencias, hay que hacerlo dentro del contenedor correspondiente (backend o frontend), no en la maquina host:
 
