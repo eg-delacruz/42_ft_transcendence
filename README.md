@@ -27,7 +27,12 @@ git clone git@github.com:eg-delacruz/42_ft_transcendence.git
 cd 42_ft_transcendence.git
 ```
 
-2. Start the services:
+2. Create your environment file from the example:
+```bash
+cp .env.example .env
+```
+
+3. Start the services:
 ```bash
 make up
 ```
