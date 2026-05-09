@@ -1,7 +1,16 @@
-# BACKEND – Manual Tests
+# Documentacion del Backend
 
-This document describes the **actual state of the backend implementation** dictated in the document `PLAN_DE_TRABAJO.md`, also how to manually test the current authentication flow of the backend API using `curl`
-and lastly, some utils and commands to actually use the mongo db (_monogosh_ command in MAKEFILE).
+Este documento recopila el estado actual del backend y las pruebas manuales disponibles. Usalo para documentar flujos de autenticacion, endpoints administrativos y utilidades relacionadas con MongoDB.
+Para ver las tareas del proyecto, ir a:
+
+`https://github.com/users/eg-delacruz/projects/2/views/1`
+
+## Tabla de Contenidos
+- [Pruebas manuales de autenticacion](#1-register-a-standard-user)
+- [Gestion de usuarios admin](#5-admin-user-management)
+- [Comandos de mongosh](#mongosh-commands)
+
+---
 
 ## 1. Register a Standard User
 
