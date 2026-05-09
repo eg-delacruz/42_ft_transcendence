@@ -44,7 +44,7 @@ curl http://localhost:3000/api/
 ---
 ## Gestión centralizada de las tareas
 
-Las tareas del proyecto están centralizadas en el proyecto vinculado al repo de github. Cualquier participante puede crear tareas y moverlas entre estados. La idea sería que, cuando alguien quiera empezar a trabajar en alguna tarea, que arrastre la tarea del estado de "Ready" al estado de "In Progress", y de esta manera asegurarse de que solamente una persona está trabajando en ella.
+Las tareas del proyecto están centralizadas en el proyecto vinculado al repo de github. Cualquier participante puede crear tareas y moverlas entre estados. La idea sería que, cuando alguien quiera empezar a trabajar en alguna tarea, que arrastre la tarea del estado de "Ready" al estado de "In Progress", y de esta manera asegurarse de que solamente una persona está trabajando en ella. Además, si estás trabajando en una tarea, asígnate a ella para que se sepa quién está trabajando en ella.
 
 Las tareas deben ser bastante granulares, evitando ser muy generales o que abarquen demasiado.
 
