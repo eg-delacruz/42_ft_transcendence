@@ -10,6 +10,7 @@ interface Env {
   JWT_SECRET: string;
   NODE_ENV: string;
   VITE_CLIENT_HEADER_KEY: string;
+  REDIS_URL: string; 
 }
 
 const env: Env = {
@@ -22,6 +23,7 @@ const env: Env = {
   NODE_ENV: process.env.NODE_ENV || 'development',
   VITE_CLIENT_HEADER_KEY:
     process.env.VITE_CLIENT_HEADER_KEY || 'defaultclientkey',
+  REDIS_URL: process.env.REDIS_URL || 'redis://redis:6379'
 };
 
 // Simple check to ensure required variables exist
