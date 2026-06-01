@@ -344,3 +344,97 @@ db.users.deleteMany({})
 ```mongodb
 db.users.countDocuments()
 ```
+
+---
+
+## WebSocket Implementation (Phase 1 - Infrastructure)
+
+### Current Status - What's Implemented
+
+The WebSocket infrastructure is **fully initialized and tested** with the following components:
+
+#### ✅ Core Infrastructure
+- **Socket.IO Server** - Attached to Express HTTP server, allows HTTP and WebSocket on same port
+- **Redis Adapter** - Multi-instance synchronization enabled (configured for horizontal scaling)
+- **JWT Authentication Middleware** - Validates tokens from cookies, headers, or auth object before socket connection
+- **Base Connection Handlers** - Connection, disconnection, and ping/pong test events working
+
+#### ✅ Type Safety & Validation
+- **Socket Types** (`src/types/socket.ts`) - All event interfaces, payloads, responses, and error types defined
+- **Event Validation Middleware** (`src/utils/socket-validation.ts`) - Schema-based payload validation with automatic error handling
+- **Error Standardization** - `SocketErrorCode` enum with structured error responses
+
+#### ✅ Service Layer
+- **Socket Service** (`src/utils/socket.service.ts`) - Abstracted business logic for presence tracking, room management, and broadcasting
+- **Redis Utilities** (`src/utils/redis.ts`) - Helper functions for all Redis operations (presence, rooms, sets, etc.)
+- **Chat Service Foundation** (`src/modules/chat/chat.service.ts`) - Skeleton ready for Phase 2 implementation
+
+#### ✅ Namespace Setup
+- **/chat Namespace** (`src/modules/chat/index.ts`) - Authentication middleware and connection handlers initialized
+- **Chat Handlers Structure** (`src/modules/chat/chat.handlers.ts`) - Event handlers skeleton for join_room, send_message, leave_room
+
+#### ✅ Frontend
+- **useSocket Hook** (`frontend/src/hooks/useSocket.tsx`) - Custom React hook for Socket.IO client with reconnection logic
+- **SocketDebug Page** (`frontend/src/pages/SocketDebug.tsx`) - Testing panel for verifying WebSocket connectivity
+- **Authentication Integration** - HttpOnly cookie support, automatic reconnection, status tracking
+
+#### ✅ Testing & Documentation
+- TypeScript compilation successful (all type errors resolved)
+- End-to-end connectivity tested (login → connect → ping → pong)
+- Reconnection logic verified working
+
+### TODO - Phase 2 Implementation
+
+**High Priority (Core Chat Functionality):**
+- [ ] Implement `join_room` handler - validate room, add user to Redis, notify others
+- [ ] Implement `send_message` handler - validate membership, save to DB, broadcast to room
+- [ ] Implement `leave_room` handler - remove from Redis, notify others, cleanup empty rooms
+- [ ] Create MongoDB models for: `Room`, `Message`, `Membership`
+- [ ] Implement `ChatService` methods in `src/modules/chat/chat.service.ts`
+- [ ] Add presence cleanup on disconnect in `/chat` namespace
+
+**Medium Priority (Features & Enhancement):**
+- [ ] Implement optional `typing` / `stop_typing` handlers for real-time feedback
+- [ ] Create `useSocketRoom` hook for frontend room management
+- [ ] Build Chat UI component with message list, input, user presence
+- [ ] Add message pagination (load history on scroll)
+- [ ] Implement room creation/deletion endpoints
+
+**Low Priority (Polish & Optimization):**
+- [ ] Add rate limiting for message events
+- [ ] Implement read receipts / message status
+- [ ] Add typing indicator visual feedback
+- [ ] Setup logging for all Socket.IO events in production
+- [ ] Create integration tests for WebSocket flows
+
+### Testing Socket Connectivity
+
+**Login first** (required for WebSocket auth):
+```bash
+# Register/Login via REST API
+curl -c cookies.txt -X POST http://localhost:3000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"socket_test@example.com","password":"Test123"}'
+```
+
+**Test WebSocket Connection:**
+1. Navigate to `http://localhost:5173/socket-debug` (after login)
+2. Verify "Socket status" changes to "connected" (green)
+3. Click "Send Ping" button
+4. Confirm "Pong received at" message appears
+5. Try disconnecting/reconnecting backend to verify auto-reconnection
+
+### 6.4. Infrastructure Files Reference
+
+| File | Purpose |
+|------|---------|
+| `src/index.ts` | Main server bootstrap, Socket.IO init, Redis adapter setup |
+| `src/types/socket.ts` | All TypeScript interfaces for events and responses |
+| `src/utils/socket.service.ts` | Business logic for presence, rooms, broadcasting |
+| `src/utils/socket-validation.ts` | Schema validation for event payloads |
+| `src/utils/redis.ts` | Redis operation helpers with error handling |
+| `src/modules/chat/index.ts` | /chat namespace initialization and middleware |
+| `src/modules/chat/chat.handlers.ts` | Event handler structure (ready to implement) |
+| `src/modules/chat/chat.service.ts` | Chat service stubs (ready to implement) |
+| `frontend/src/hooks/useSocket.tsx` | Socket.IO client hook with reconnection |
+| `frontend/src/pages/SocketDebug.tsx` | Testing panel for connectivity verification |

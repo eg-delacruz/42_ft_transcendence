@@ -8,6 +8,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import User from './pages/User';
+import SocketDebug from './pages/SocketDebug';
 
 
 {/* TODO: add protected routes, error routes... etc. */ }
@@ -15,7 +16,8 @@ const routes = [
   { path: "/", element: <Home></Home> },
   { path: "/login", element: <Login></Login> },
   { path: "/register", element: <Register></Register> },
-  { path: "/user", element: <ProtectedRoute><User /></ProtectedRoute> }
+  { path: "/user", element: <ProtectedRoute><User /></ProtectedRoute> },
+  { path: "/socket-debug", element: <ProtectedRoute><SocketDebug /></ProtectedRoute> }
 
 ]
 
@@ -29,7 +31,8 @@ function App() {
           <Link to="/">Home</Link> | {""}
           <Link to="/login">Login</Link> | {""}
           <Link to="/register">Register</Link> | {""}
-          <Link to="/user">User</Link> {""}
+          <Link to="/user">User</Link> | {""}
+          <Link to="/socket-debug">Socket Debug</Link> {""}
         </nav>
 
         {/* Routes */}

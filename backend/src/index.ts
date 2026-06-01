@@ -15,6 +15,7 @@ import app from '@/app.ts';
 import env from '@config/env';
 import { logger } from '@config/logger';
 import { ensureSuperUser } from '@scripts/seed';
+import { initializeChatNamespace } from '@modules/chat';
 
 async function startServer() {
   // Connect to MongoDB before starting the server
@@ -42,6 +43,9 @@ async function startServer() {
     await Promise.all([pubClient.connect(), subClient.connect()]);
     io.adapter(createAdapter(pubClient, subClient));
     logger.info('[✓] Connected to Redis and configured socket.io adapter');
+
+    // Initialize /chat namespace with handlers
+    initializeChatNamespace(io, pubClient);
   } catch (error) {
     logger.error('[✗] Failed to connect to Redis: ' + error);
   }
@@ -55,8 +59,16 @@ async function startServer() {
       const bearerToken = authHeader && authHeader.startsWith('Bearer ')
         ? authHeader.slice(7)
         : null;
+        const cookieHeader = socket.handshake.headers?.cookie;
+        const cookieToken = cookieHeader
+          ? cookieHeader
+              .split(';')
+              .map((part) => part.trim())
+              .find((part) => part.startsWith('access_token='))
+              ?.split('=')[1] ?? null
+          : null;
 
-      const token = socket.handshake.auth?.token || bearerToken;
+        const token = socket.handshake.auth?.token || bearerToken || cookieToken;
 
       // If there is no token, reject the connection
       if (!token) {
