@@ -1,113 +1,169 @@
+@import url("https://fonts.googleapis.com/css2?family=Sixtyfour&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Bitcount+Ink:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Goldman:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Aldrich&family=Press+Start+2P&display=swap');
+
 @import 'tailwindcss';
 
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+@theme {
+	--breakpoint-xs: 20rem;
+	--font-sixtyfour: "Sixtyfour", sans-serif;
+  	--font-bitcount: "Bitcount Ink", sans-serif;
+  	--font-goldman: "Goldman", helvetica;
+	--font-aldrich: "Aldrich";
+	--font-pressstart: "Press Start 2P";
+}
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+@view-transition {
+	navigation: auto;
+	types: slide;
+}
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+::view-transition-group(*) {
+	animation-duration: 3s;
+}
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
+@layer components {
+  .credit-icon {
+    margin: 0 4px;
+    height: 150px;
+    width: 150px;
+    border-radius: 0.5rem;
+    background-color: var(--color-sky-600);
+    background-size: cover;
+    box-shadow: var(--shadow-md);
+    transition: box-shadow 0.2s, transform 0.2s, border 0.2s;
+  }
+
+  .credit-icon:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-10%);
+    border: 2px solid white;
+  }
+
+  .marquee-item {
+	margin: 0 4px;
+	flex: auto;
+	align-items: center;
+	justify-content: center;
+	background-repeat:no-repeat;
+	background-size:cover;
+  }
+
+.arcadeform {
+	padding: 2rem;
+	font-family: var(--font-pressstart);
+	border: solid var(--color-neutral-100) 2px;
+	border-radius: var(--radius-sm);
+	background-color: var(--color-neutral-900);
+  }
+
+.arcadeform:focus {
+	border: solid var(--color-neutral-200) 6px;
+	outline: none;
+	}
+}
+
+img {
+	filter: brightness(0) saturate(100%) invert(94%) sepia(11%) saturate(152%) hue-rotate(176deg) brightness(99%) contrast(90%);
+}
+
+/*********************
+* ANIMATIONS
+*********************/
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+.animate-marquee {
+  animation: marquee 20s linear infinite;
 }
 
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
+@keyframes diagonal {
+	from {
+		background-position:0% 0%;
+	}
+
+	to {
+		background-position:500px 500px;
+	}
 }
 
-body {
-  margin: 0;
+.animate-diagonal {
+	animation: diagonal 10s linear infinite;
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+@keyframes slidein {
+	from {
+		transform: translateX(-100%);
+	}
+	to {
+		transform: translateX(0);
+	}
 }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
+.animate-slidein {
+	animation: slidein 3s ease-out;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+@keyframes slideintop {
+	from {
+		transform: translateY(-300%);
+	}
+	to {
+		transform: translateY(0);
+	}
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+.animate-slideintop {
+	animation: slideintop 3s ease-out;
+}
+
+@keyframes vanish {
+	from {
+		opacity: 100%;
+	}
+	to {
+		opacity: 0;
+	}
+}
+
+.animate-vanish {
+	animation: vanish 1s linear forwards;
+}
+
+@keyframes appear {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 100%;
+	}
+}
+
+.animate-appear {
+	animation: appear 1s linear forwards;
+}
+
+@keyframes sidebounce {
+	from {
+		transform: translateX(0);
+	}
+	50% {
+		transform: translateX(100%);
+	}
+	to {
+		transform: translateX(0);
+	}
+}
+
+.animate-sidebounce {
+	animation: sidebounce 1s ease-out infinite;
 }
