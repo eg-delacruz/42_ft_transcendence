@@ -78,12 +78,12 @@ function User() {
 					</div>
 					{/* These are <a> because they are just links to other pages right now, they can be changed to buttons */}
 					<div className=" flex flex-col lg:flex-row gap-4">
-						<button className="userbutton" 
+						<button className="userbutton" onClick={} 
 							>Join room</button>
-							{error && <div style={{ color: "red" }}>{error}</div>}
-						<a className="userbutton" href="/game">
-							<p>Create room</p>
-						</a>
+						{error && <div style={{ color: "red" }}>{error}</div>}
+						<button className="userbutton" onClick={} 
+							>Create room</button>
+						{error && <div style={{ color: "red" }}>{error}</div>}
 					</div>
 				</div>
 				{/* Account buttons */}
