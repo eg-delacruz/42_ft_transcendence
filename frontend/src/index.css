@@ -62,7 +62,25 @@
 	border: solid var(--color-neutral-200) 6px;
 	outline: none;
 	}
+
+.userbutton {
+	padding:2rem;
+	font-family: var(--font-pressstart);
+	border: solid var(--color-neutral-100) 2px;
+	border-radius: var(--radius-md);
+	background-color: var(--color-neutral-600);
+	text-align: center;
+	font-size: var(--size-3xl);
+	}
+
+.userbutton:hover {
+	background-color: var(--color-neutral-800);
+	transform: var(--scale-110);
+	outline:1rem;
+	}
 }
+
+/*transition duration-300 ease-out hover:bg-slate-400 hover:text-slate-900 hover:scale-110 focus:outline-1*/
 
 img {
 	filter: brightness(0) saturate(100%) invert(94%) sepia(11%) saturate(152%) hue-rotate(176deg) brightness(99%) contrast(90%);

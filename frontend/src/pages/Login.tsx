@@ -23,7 +23,7 @@ function Login() {
         if (res.error) 
 			setError(res.error || "Login failed");
         else 
-			navigate("/game");
+			navigate("/user");
     };
 
     return (

@@ -34,7 +34,7 @@ function Register() {
 		{
 			setError("Registration failed, Please try again.");
         }
-        navigate("/game");
+        navigate("/user");
     }
 	
     return (

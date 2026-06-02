@@ -2,6 +2,9 @@ import { useAuthContext } from "@/context/context";
 import { useUser } from "@/hooks/useUser";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { library, dom } from '@fortawesome/fontawesome-svg-core'
+import { faPenToSquare } from '@fortawesome/free-solid-svg-icons'
 
 
 function User() {
@@ -10,12 +13,6 @@ function User() {
 	const navigate = useNavigate();
 	const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 	const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-	// const handleLogout = () => {
-	// 	if (window.confirm("Are you sure you want to logout?")) {
-	// 		logout();
-	// 		navigate("/");
-	// 	}
-	// };
 
 	const handleLogout = () => setShowLogoutConfirm(true);
 	const handleDelete = () => setShowDeleteConfirm(true);
@@ -27,9 +24,10 @@ function User() {
 	};
 
 	const confirmDelete = () => {
-  		logout();
+  		deleteAccount();
   		navigate("/");
   		setShowConfirm(false);
+		console.log("Deleted");
 	};
 
     if (loading) 
@@ -44,11 +42,14 @@ function User() {
 	//But we should first design it and THEN see if I can actually do that
 
 	//User should have config toggles like changing name, pfp and color
-	//The delete account does not work cause I still can log in
     return (
-        <div className="h-screen w-screen p-16 flex flex-col items-center bg-linear-to-t from-indigo-900 to-purple-900">
-			<div className="h-130 w-2/3 p-16 flex flex-row bg-slate-900/40 shadow-2xs rounded-4xl">
-				<div className="rounded-full aspect-square object-cover outline-4 outline-slate-300 box-shadow-md bg-[url(/game01.jpg)]">
+        <div className="h-screen w-screen p-8 gap-12 flex flex-col lg:flex-row items-center bg-linear-to-t from-indigo-900 to-purple-900">
+			<div className="h-130 w-3/4 p-16 flex flex-row bg-slate-900/40 shadow-2xs rounded-4xl">
+				<div className="relative rounded-full aspect-square object-cover outline-4 outline-slate-300 box-shadow-md bg-[url(/game01.jpg)] items-end justify-end">
+					<div className="absolute h-14 p-2 aspect-square bg-black/50 rounded-sm bottom-5 right-5 text-center align-baseline text-white text-3xl">
+						{/* Button to change pfp. This should be inside a /link tag or whatever is used to execute the function */}
+						<FontAwesomeIcon className="" icon={faPenToSquare}/>
+					</div>
 				</div>
 				<div className="w-auto h-full p-12 flex flex-col text-left font-aldrich text-2xl text-slate-200">
 					<p className="font-bold p-2">ID: </p>
@@ -61,11 +62,33 @@ function User() {
 					<p>{user.exp ? new Date(user.exp * 1000).toLocaleString() : "N/A"}</p>
 				</div>
 			</div>
-			<div className="w-2/3 p-12 gap-8 flex flex-col lg:flex-row items-center justify-center">
-				<a className="p-8 px-12 rounded-md text-center text-3xl font-bold text-slate-800 bg-slate-300 transition duration-300 ease-out hover:bg-slate-400 hover:text-slate-900 hover:scale-110 focus:outline-1" href="/game">
-					<p>Back to game</p>
-				</a>
-				   <button onClick={handleLogout} className="p-8 px-12 rounded-md text-center text-3xl font-bold text-slate-800 bg-slate-300 transition duration-300 ease-out hover:bg-slate-400 hover:text-slate-900 hover:scale-110 focus:outline-1">
+			<div className="w-1/4 p-12 gap-8 flex flex-col items-center justify-center">
+				{/* Room buttons */}
+				<div className="flex flex-col">
+					<div className="p-4">
+						<div className="relative outline-none">
+							<input
+							className="arcadeform"
+							type="code"
+							placeholder="code"
+							//value={code}
+							//onChange={e => setEmail(e.target.value)}
+							/>
+						</div>
+					</div>
+					{/* These are <a> because they are just links to other pages right now, they can be changed to buttons */}
+					<div className=" flex flex-col lg:flex-row gap-4">
+						<button className="userbutton" 
+							>Join room</button>
+							{error && <div style={{ color: "red" }}>{error}</div>}
+						<a className="userbutton" href="/game">
+							<p>Create room</p>
+						</a>
+					</div>
+				</div>
+				{/* Account buttons */}
+				<div className="flex flex-row gap-4">
+				   <button onClick={handleLogout} className="userbutton">
 					   <p>Logout</p>
 				   </button>
 				    {showLogoutConfirm && (
@@ -79,7 +102,7 @@ function User() {
         				</div>
       				</div>
 				    )}
-				<button onClick={handleDelete} className="p-8 px-12 rounded-md text-center text-3xl font-bold text-slate-800 bg-slate-300 transition duration-300 ease-out hover:bg-slate-400 hover:text-slate-900 hover:scale-110 focus:outline-1">
+				<button onClick={handleDelete} className="userbutton">
 					<p>Delete account</p>
 				</button>
 				{showDeleteConfirm && (
@@ -93,27 +116,10 @@ function User() {
         				</div>
       				</div>
 				    )}
+				</div>
 			</div>
 		</div>
     )
 }
 
 export default User;
-
-            // {/* <h2>FT_TRASCENDENCE - USER</h2>
-            
-            //     <b>ID: </b>{user.userId || user.id || user._id}
-            //     <b> Email: </b>{user.email}
-            //     <b> Role: </b>{user.role}
-            //     <b> Valid until:</b> {user.exp ? new Date(user.exp * 1000).toLocaleString() : "N/A"}
-
-            // <ul>
-            //     <button onClick={logout}>Logout </button>
-            //     <button onClick={deleteAccount}>Delete</button>
-            // </ul>
-			
-			// <div className="relative w-400 h-250 overflow-hidden rounded-10 shadow-2xs flex" id="slider">
-    		// 	<div className="absolute w-full h-full flex items-center justify-center text-lg tetx-bold text-white anim-try bg-blue-300 transform-">Panel 1</div>
-    		// 	<div className="absolute w-full h-full flex items-center justify-center text-lg tetx-bold text-white anim-try bg-green-200">Panel 2</div>
-			// </div>
-			// <button onclick="togglePanel()">Toggle Panel</button> */}
