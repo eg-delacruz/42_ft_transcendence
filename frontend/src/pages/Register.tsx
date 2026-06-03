@@ -38,7 +38,7 @@ function Register() {
     }
 	
     return (
-		<div className="h-screen flex flex-row bg-linear-to-t from-neutral-800 to-neutral-900 ">
+		<div className="h-screen flex flex-row bg-linear-to-t from-(--gradient-dark) to-(--gradient-light) ">
 			<div className="absolute inset-0 h-full w-full bg-[url(/tvstatic.gif)] opacity-10 bg-cover bg-no-repeat"></div>
 			<div className="relative grid grid-rows-1 grid-cols-1 md:grid-rows-[200px_minmax(0,1fr)_200px] md:grid-cols-[200px_minmax(0,1fr)_200px] h-screen w-screen overflow-hidden">
 					<div className="md:row-start-1 md:col-start-1 bg-[url(/frame-tl.png)] bg-contain bg-no-repeat"></div>
@@ -46,8 +46,9 @@ function Register() {
 					<div className="md:row-start-1 md:col-start-3 bg-[url(/frame-tr.png)] bg-contain bg-no-repeat"></div>
 					<div className="md:row-start-2 md:col-start-1 bg-[url(/frame-l.png)] bg-contain bg-repeat-y"></div>
 					{/* FORM */}
+					{/* Add another field for display name when done? */}
 					<div className="row-start-1 col-start-1 md:row-start-2 md:col-start-2 h-auto w-auto flex items-center justify-center overflow-auto">
-						<div className="h-full md:h-4/5 w-full md:w-4/5 p-8 rounded-lg shadow-lg flex flex-col items-center justify-start text-neutral-100 bg-neutral-800 overflow-auto">
+						<div className="h-full w-full p-8 rounded-lg shadow-lg flex flex-col items-center justify-start text-neutral-100 bg-neutral-800 overflow-auto">
 							<form onSubmit={handleSummit} className=" p-8 mx-2 flex flex-col items-center justify-start">
 								<h2 className="p-6 text-lg lg:text-4xl font-pressstart uppercase">ft_transcendance</h2>
 								<div className="p-4">

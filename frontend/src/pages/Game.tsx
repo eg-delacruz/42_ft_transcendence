@@ -24,7 +24,7 @@ function Game() {
 	};
 
     return (
-        <div className="w-screen h-screen flex flex-row items-start bg-linear-to-br from-indigo-900 to-purple-900 relative">
+        <div className="w-screen h-screen flex flex-row items-start bg-linear-to-br from-(--gradient-dark) to-(--gradient-light) relative">
 			{/* Game screen */}
 			<div className="w-0 lg:w-2/3 h-full lg:border-r-6 lg:border-amber-100">
 				{/*Game component*/}
@@ -33,7 +33,7 @@ function Game() {
 			<div className="w-full lg:w-1/3 h-full">
 				<div className="h-1/9 w-full grid grid-cols-6 items-center bg-slate-900/70">
 					{/*Color outline should be a variable*/}
-					<div className="col-start-1 h-2/3 ml-4 rounded-full aspect-square object-cover outline-4 outline-slate-300 bg-[url(/game01.jpg)]">
+					<div className="col-start-1 h-2/3 ml-4 rounded-full aspect-square object-fill outline-4 outline-slate-300 bg-[url(/game01.jpg)]">
 					</div>
 					{/*Display name should be a variable*/}
 					<div className="col-start-2 col-end-5 ml-8 text-lg lg:text-2xl font-pressstart text-slate-200">
