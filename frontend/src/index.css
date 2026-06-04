@@ -27,8 +27,8 @@
 @layer components {
 	.credit-icon {
 		margin: 0 4px;
-		height: 12rem;
-		width: 12rem;
+		height: 8rem;
+		width: 8rem;
 		border-radius: 0.5rem;
 		background-color: var(--color-sky-600);
 		background-size: cover;
@@ -103,20 +103,6 @@ img {
 * ANIMATIONS
 *********************/
 
-@keyframes marquee {
-  from {
-    transform: translateX(0);
-  }
-
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-.animate-marquee {
-  animation: marquee 20s linear infinite;
-}
-
 @keyframes diagonal {
 	from {
 		background-position:0% 0%;
@@ -131,18 +117,6 @@ img {
 	animation: diagonal 10s linear infinite;
 }
 
-@keyframes slidein {
-	from {
-		transform: translateX(-100%);
-	}
-	to {
-		transform: translateX(0);
-	}
-}
-
-.animate-slidein {
-	animation: slidein 3s ease-out;
-}
 
 @keyframes slideintop {
 	from {
