@@ -48,11 +48,31 @@ function Home ()
 					<p className="text-lg text-slate-200 opacity-80 font-bold font-aldrich">MADE BY</p>
 					<div className="p-4 gap-2 w-full lg:w-4/5 2xl:w-3/5 flex lg:flex-row flex-wrap justify-around items-center">
 					{/* Change div so it is img + name + role */}
-						<div className="credit-icon bg-[url(/icon01.jpeg)]"></div>
-						<div className="credit-icon bg-[url(/icon02.jpeg)]"></div>
-						<div className="credit-icon bg-[url(/icon03.jpeg)]"></div>
-						<div className="credit-icon bg-[url(/icon04.jpeg)]"></div>
-						<div className="credit-icon bg-[url(/icon05.jpeg)]"></div>
+						<div className="credit-icon">
+							<img src="public/icon01.jpeg" className="aspect-square rounded-sm" alt=""></img>
+							<p className="font-aldrich text-neutral-200 font-bold text-uppercase">NAME</p>
+							<p className="font-aldrich text-neutral-20">role</p>
+						</div>
+						<div className="credit-icon">
+							<img src="public/icon02.jpeg" className="aspect-square rounded-sm" alt=""></img>
+							<p className="font-aldrich text-neutral-200 font-bold text-uppercase">NAME</p>
+							<p className="font-aldrich text-neutral-20">role</p>
+						</div>
+						<div className="credit-icon">
+							<img src="public/icon03.jpeg" className="aspect-square rounded-sm" alt=""></img>
+							<p className="font-aldrich text-neutral-200 font-bold text-uppercase">NAME</p>
+							<p className="font-aldrich text-neutral-20">role</p>
+						</div>
+						<div className="credit-icon">
+							<img src="public/icon04.jpeg" className="aspect-square rounded-sm" alt=""></img>
+							<p className="font-aldrich text-neutral-200 font-bold text-uppercase">NAME</p>
+							<p className="font-aldrich text-neutral-20">role</p>
+						</div>
+						<div className="credit-icon">
+							<img src="public/icon05.jpeg" className="aspect-square rounded-sm" alt=""></img>
+							<p className="font-aldrich text-neutral-200 font-bold text-uppercase">NAME</p>
+							<p className="font-aldrich text-neutral-20">role</p>
+						</div>
 					</div>
 					<Link to="https://github.com/eg-delacruz/42_ft_transcendence">
 						<FontAwesomeIcon icon={faGithub} className="text-white text-4xl"/>

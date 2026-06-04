@@ -27,10 +27,14 @@
 @layer components {
 	.credit-icon {
 		margin: 0 4px;
-		height: 8rem;
+		height: 12rem;
 		width: 8rem;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: between;
+		color: var(--color-neutral-200);
 		border-radius: 0.5rem;
-		background-color: var(--color-sky-600);
 		background-size: cover;
 		box-shadow: var(--shadow-md);
 		transition: box-shadow 0.2s, transform 0.2s, border 0.2s;
