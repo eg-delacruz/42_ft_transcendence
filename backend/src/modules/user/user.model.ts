@@ -14,7 +14,7 @@ const userSchema: Schema<IUser> = new Schema(
     password: { type: String, required: true },
     role: {
       type: String,
-      enum: ['super_user', 'standard_user', 'service_desk_user'],
+      enum: ['user', 'admin', 'super_admin'],
       required: true,
     },
   },

@@ -81,7 +81,7 @@ export const registerUser = async (
     const newUser = new User({
       email,
       password: hashedPassword,
-      role: 'standard_user',
+      role: 'user',
     });
 
     const savedUser = await newUser.save();

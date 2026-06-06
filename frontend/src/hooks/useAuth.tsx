@@ -5,6 +5,7 @@ export interface User {
     _id: string; // Corrected to _id to match MongoDB
     id: string;
     email: string;
+    role: 'user' | 'admin' | 'super_admin';
     // TODO: implement more fields as backend need
 }
 
