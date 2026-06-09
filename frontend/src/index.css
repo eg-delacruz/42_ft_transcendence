@@ -36,14 +36,11 @@
 		color: var(--color-neutral-200);
 		border-radius: 0.5rem;
 		background-size: cover;
-		box-shadow: var(--shadow-md);
 		transition: box-shadow 0.2s, transform 0.2s, border 0.2s;
   }
 
 	.credit-icon:hover {
-		box-shadow: var(--shadow-lg);
 		transform: translateY(-10%);
-		border: 2px solid white;
   }
 
 	.marquee-item {
@@ -72,13 +69,14 @@
 		outline: none;
 	}
 
+	/* transition ease-out-4 bg-linear-to-t from-amber-500 to-amber-300 */
 	.customButton {
 		display: inline-block;
 		position: relative; 
 		box-sizing: border-box;
-		padding:1rem;
-		background-color: var(--color-neutral-600);
-		color: var(--color-neutral-100);
+		padding:1.5rem;
+		background-image: linear-gradient(to top, var(--color-amber-500), var(--color-amber-300));
+		color: var(--color-mauve-800);
 		text-align: center;
 		font-family: var(--font-pressstart);
 		font-size: var(--size-lg);
@@ -95,6 +93,11 @@
 		background-color: var(--color-neutral-800);
 		border-color: var(--color-neutral-100);
 		outline: none;
+	}
+
+	.labelCustom {
+		color: var(--color-neutral-200);
+		font-family: var(--font-aldrich);
 	}
 }
 
@@ -132,7 +135,7 @@ img {
 }
 
 .animate-slideintop {
-	animation: slideintop 3s ease-out;
+	animation: slideintop 1s ease-out;
 }
 
 @keyframes vanish {
@@ -158,7 +161,7 @@ img {
 }
 
 .animate-appear {
-	animation: appear 1s linear forwards;
+	animation: appear 0.8s linear forwards;
 }
 
 @keyframes sidebounce {

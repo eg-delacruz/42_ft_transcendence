@@ -41,6 +41,7 @@ function Login() {
 								<h2 className="p-6 text-lg lg:text-4xl font-pressstart uppercase">ft_transcendance</h2>
 								<div className="p-4">
 									<div className="relative outline-none">
+										<label className="labelCustom">Email
 											<input
 												className="arcadeform"
 												type="email"
@@ -52,7 +53,7 @@ function Login() {
 												onBlur={() => setFocusedField(null)}
 												onMouseEnter={() => setHoveredField("email")}
   												onMouseLeave={() => setHoveredField(null)}
-											/>
+											/></label>
 										{(focusedField === "email" || hoveredField === "email") && (
 											<span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 animate-sidebounce text-3xl">◄</span>
 										)}
@@ -60,6 +61,7 @@ function Login() {
 								</div>
 								<div className="p-4">
 									<div className="relative outline-none">
+										<label className="labelCustom">Password
 											<input
 												className="arcadeform"
 												type="password"
@@ -71,7 +73,7 @@ function Login() {
 												onBlur={() => setFocusedField(null)}
 												onMouseEnter={() => setHoveredField("password")}
   												onMouseLeave={() => setHoveredField(null)}
-											/>
+											/></label>
 										{(focusedField === "password" || hoveredField === "password") && (
 											<span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 animate-sidebounce text-3xl">◄</span>
 										)}
@@ -109,11 +111,3 @@ function Login() {
 }
 
 export default Login;
-
-/**
- * Login - User login page.
- *
- * Renders a form for user login.
- * On submit, calls the login function from the auth context.
- * Shows feedback on success or error.
- */

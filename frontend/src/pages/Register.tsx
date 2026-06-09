@@ -53,6 +53,7 @@ function Register() {
 								<h2 className="p-6 text-lg lg:text-4xl font-pressstart uppercase">ft_transcendance</h2>
 								<div className="p-4">
 									<div className="relative outline-none">
+										<label className="labelCustom">Email
 											<input
 												className="arcadeform"
 												type="email"
@@ -64,7 +65,7 @@ function Register() {
 												onBlur={() => setFocusedField(null)}
 												onMouseEnter={() => setHoveredField("email")}
   												onMouseLeave={() => setHoveredField(null)}
-											/>
+											/></label>
 										{(focusedField === "email" || hoveredField === "email") && (
 											<span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 animate-sidebounce text-3xl">◄</span>
 										)}
@@ -72,6 +73,7 @@ function Register() {
 								</div>
 								<div className="p-4">
 									<div className="relative outline-none">
+										<label className="labelCustom">Password
 											<input
 												className="arcadeform"
 												type="password"
@@ -83,7 +85,7 @@ function Register() {
 												onBlur={() => setFocusedField(null)}
 												onMouseEnter={() => setHoveredField("password")}
   												onMouseLeave={() => setHoveredField(null)}
-											/>
+											/></label>
 										{(focusedField === "password" || hoveredField === "password") && (
 											<span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 animate-sidebounce text-3xl">◄</span>
 										)}
@@ -91,6 +93,7 @@ function Register() {
 								</div>
 								<div className="p-4">
 									<div className="relative outline-none">
+										<label className="labelCustom">Repeat password
 											<input
 												className="arcadeform"
 												type="password"
@@ -102,7 +105,7 @@ function Register() {
 												onBlur={() => setFocusedField(null)}
 												onMouseEnter={() => setHoveredField("repeatpassword")}
   												onMouseLeave={() => setHoveredField(null)}
-											/>
+											/></label>
 										{(focusedField === "repeatpassword" || hoveredField === "repeatpassword") && (
 											<span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 animate-sidebounce text-3xl">◄</span>
 										)}
