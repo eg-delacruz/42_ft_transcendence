@@ -7,7 +7,7 @@ import { faGithub } from '@fortawesome/free-brands-svg-icons'
 function Home ()
 {
     return (
-		<div className="h-screen relative">
+		<div className="h-screen relative flex flex-col">
 				<div className="relative w-full h-1/3 flex items-center justify-center border-b-8 border-b-slate-200 overflow-hidden">
 					{/*Banner*/}
 					<div className="absolute inset-0 overflow-hidden bg-slate-200">
@@ -27,9 +27,9 @@ function Home ()
 					</div>
 				</div>
 			{/* Background and descrition */} {/* In mobile having h-2/3 and h-screen is perfect bu */}
-			<div className="relative w-full h-2/3 bg-linear-to-t from-(--gradient-dark) to-(--gradient-light) overflow-auto">
+			<div className="relative w-full flex-1 bg-linear-to-t from-(--gradient-dark) to-(--gradient-light) overflow-scroll">
 				<div className="absolute h-screen sm:h-full inset-0 bg-[url(/arcadePatternRepeat.png)] bg-auto animate-diagonal opacity-10 pointer-events-none z-0" aria-hidden="true"></div>
-				<div className="relative w-full p-6 lg:p-12 sm:gap-8 flex flex-col items-center justify-center">
+				<div className="relative w-full p-6 lg:p-12 sm:gap-8 flex flex-col items-center justify-center overflow-scroll">
 					<div className=" text-slate-300 text-center text-lg lg:text-3xl font-aldrich wrap-normal">
 						<p>[FT_TRANSCENDENCE] is a multiplayer minigames platform where users can compete against each other in real-time. 
 							This project is part of the 42 curriculum and demonstrates full-stack web development.</p>
@@ -44,33 +44,33 @@ function Home ()
 					</div>
 				</div>
 				{/*Credits*/}
-				<div className="relative sm:absolute w-full py-6 flex flex-col items-center justify-center inset-x-0 bottom-0">
+				<div className="relative w-full py-6 flex flex-col items-center justify-center">
 					<p className="text-lg text-slate-200 opacity-80 font-bold font-aldrich">MADE BY</p>
 					<div className="p-4 gap-2 w-full lg:w-4/5 2xl:w-3/5 flex lg:flex-row flex-wrap justify-around items-center">
 					{/* Change div so it is img + name + role */}
 						<div className="credit-icon">
-							<img src="public/icon01.jpeg" className="aspect-square rounded-sm" alt=""></img>
-							<p className="font-aldrich text-neutral-200 font-bold text-uppercase">NAME</p>
+							<img src="../public/icon01.jpeg" className="aspect-square rounded-sm" alt=""></img>
+							<p className="font-aldrich font-bold text-uppercase">NAME</p>
 							<p className="font-aldrich text-neutral-20">role</p>
 						</div>
 						<div className="credit-icon">
-							<img src="public/icon02.jpeg" className="aspect-square rounded-sm" alt=""></img>
-							<p className="font-aldrich text-neutral-200 font-bold text-uppercase">NAME</p>
+							<img src="/public/icon02.jpeg" className="aspect-square rounded-sm" alt=""></img>
+							<p className="font-aldrich font-bold text-uppercase">NAME</p>
 							<p className="font-aldrich text-neutral-20">role</p>
 						</div>
 						<div className="credit-icon">
-							<img src="public/icon03.jpeg" className="aspect-square rounded-sm" alt=""></img>
-							<p className="font-aldrich text-neutral-200 font-bold text-uppercase">NAME</p>
+							<img src="./public/icon03.jpeg" className="aspect-square rounded-sm" alt=""></img>
+							<p className="font-aldrich font-bold text-uppercase">NAME</p>
 							<p className="font-aldrich text-neutral-20">role</p>
 						</div>
 						<div className="credit-icon">
-							<img src="public/icon04.jpeg" className="aspect-square rounded-sm" alt=""></img>
-							<p className="font-aldrich text-neutral-200 font-bold text-uppercase">NAME</p>
+							<img src="../../public/icon04.jpeg" className="aspect-square rounded-sm" alt="lol"></img>
+							<p className="font-aldrich font-bold text-uppercase">NAME</p>
 							<p className="font-aldrich text-neutral-20">role</p>
 						</div>
 						<div className="credit-icon">
-							<img src="public/icon05.jpeg" className="aspect-square rounded-sm" alt=""></img>
-							<p className="font-aldrich text-neutral-200 font-bold text-uppercase">NAME</p>
+							<img className="aspect-square rounded-sm object-cover" src="public/icon05.jpeg" alt=""></img>
+							<p className="font-aldrich font-bold text-uppercase">NAME</p>
 							<p className="font-aldrich text-neutral-20">role</p>
 						</div>
 					</div>

@@ -65,7 +65,7 @@ function Login() {
 											<input
 												className="arcadeform"
 												type="password"
-												placeholder="PASSWORD"
+												placeholder="password"
 												value={password}
 												onChange={e => setPassword(e.target.value)}
 												required

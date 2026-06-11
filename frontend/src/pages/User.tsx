@@ -88,7 +88,7 @@ function User() {
 					<p>{user.exp ? new Date(user.exp * 1000).toLocaleString() : "N/A"}</p>
 				</div>
 			</div>
-			<div className="w-1/3 p-10 gap-8 flex flex-col items-center justify-center text-2xl">
+			<div className="w-full lg:w-1/3 p-10 gap-8 flex flex-col items-center justify-center text-2xl">
 				{/* Room buttons */}
 					<div className="relative w-full">
 						<label className="labelCustom">Write code to join a room
@@ -119,10 +119,10 @@ function User() {
         				<div className="bg-slate-100 p-8 rounded shadow-lg flex flex-col items-center animate-slideintop">
           					<p className="mb-6 text-3xl font-aldrich font-bold">Are you sure you want to logout?</p>
           					<div className="flex gap-4 text-2xl">
-								<button id="confirmButton" className="px-4 py-2 bg-rose-500 text-white rounded font-aldrich" onClick={confirmLogout}>
+								<button id="confirmButton" className="px-4 py-2 bg-rose-500 text-white rounded font-aldrich" onClick={confirmDelete}>
 									Yes
 								</button>
-								<button id="denyButton" className="px-4 py-2 bg-gray-300 rounded font-aldrich" onClick={() => setShowLogoutConfirm(false)}>
+								<button id="denyButton" className="px-4 py-2 bg-gray-300 rounded font-aldrich" onClick={() => setShowDeleteConfirm(false)}>
 									No
 								</button>
           					</div>

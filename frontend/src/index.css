@@ -107,7 +107,7 @@ img {
 }
 
 /*********************
-* ANIMATIONS
+*     ANIMATIONS     *
 *********************/
 
 @keyframes diagonal {
@@ -178,4 +178,12 @@ img {
 
 .animate-sidebounce {
 	animation: sidebounce 1s ease-out infinite;
+}
+
+/*********************
+*       MEDIA        *
+*********************/
+
+@media(max-height:600px) {
+	
 }

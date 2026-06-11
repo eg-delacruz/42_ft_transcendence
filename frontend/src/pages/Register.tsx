@@ -48,7 +48,7 @@ function Register() {
 					{/* FORM */}
 					{/* Add another field for display name when done? */}
 					<div className="row-start-1 col-start-1 md:row-start-2 md:col-start-2 h-auto w-auto flex items-center justify-center overflow-auto">
-						<div className="h-full w-full p-8 rounded-lg shadow-lg flex flex-col items-center justify-start text-neutral-100 bg-neutral-800 overflow-auto">
+						<div className="h-full w-full p-8 rounded-lg shadow-lg flex flex-col items-center justify-start text-neutral-100 bg-(--gradient-light) overflow-auto">
 							<form onSubmit={handleSummit} className=" p-8 mx-2 flex flex-col items-center justify-start">
 								<h2 className="p-6 text-lg lg:text-4xl font-pressstart uppercase">ft_transcendance</h2>
 								<div className="p-4">
@@ -77,7 +77,7 @@ function Register() {
 											<input
 												className="arcadeform"
 												type="password"
-												placeholder="PASSWORD"
+												placeholder="password"
 												value={password}
 												onChange={e => setPassword(e.target.value)}
 												required
@@ -97,7 +97,7 @@ function Register() {
 											<input
 												className="arcadeform"
 												type="password"
-												placeholder="REPEAT PASSWORD"
+												placeholder="password"
 												value={validPassword}
 												onChange={e => setValidPassword(e.target.value)}
 												required
