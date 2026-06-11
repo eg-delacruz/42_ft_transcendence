@@ -102,10 +102,6 @@
 }
 
 
-img {
-	filter: brightness(0) saturate(100%) invert(94%) sepia(11%) saturate(152%) hue-rotate(176deg) brightness(99%) contrast(90%);
-}
-
 /*********************
 *     ANIMATIONS     *
 *********************/
