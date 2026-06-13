@@ -15,8 +15,7 @@ router.post('/register', registerUser);
 router.post('/login', handleLogin);
 
 // Protected route to get current authenticated user's info
-// If the user is not authenticated, authMiddleware will respond with 401 Unauthorized
-// authMiddleware adds the user info to req.user
+// If the user is authenticated, the authMiddleware will attach the user info to req.user, which can then be accessed in the getCurrentUser controller.
 router.get('/me', authMiddleware, getCurrentUser);
 router.post('/logout', authMiddleware, handleLogout);
 
