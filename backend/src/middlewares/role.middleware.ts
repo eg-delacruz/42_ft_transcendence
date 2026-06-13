@@ -40,7 +40,7 @@ Used like the auth.middleware in routes to protect routes based on user roles (s
 router.post(
   '/users',
   authMiddleware,
-  requireRole('super_user', 'admin'),
+  requireRole('super_admin', 'admin'),
   createUserController
 );
 

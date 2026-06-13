@@ -10,7 +10,6 @@ const router = Router();
 
 router.post('/create', createUser);
 
-// Consider to require the super_user role to access this route, but for now we will leave it open for testing purposes
 router.get('/all', getAllUsers);
 
 router.delete(

@@ -39,7 +39,7 @@ async function seedSuperUser() {
         await User.create({
             email: env.SUPER_EMAIL,
             password: hashedPassword,
-            role: 'super_user',
+            role: 'super_admin',
         });
 
         logger.info('Super user created successfully.');

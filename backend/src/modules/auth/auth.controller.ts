@@ -118,6 +118,7 @@ export const registerUser = async (
 }
 
 // Controller to get current authenticated user's info
+// TODO: Make sure not to expose sensitive information like password or any other sensitive data
 export const getCurrentUser = async (req: AuthRequest, res: Response) => {
   return successResponse(
     res,
