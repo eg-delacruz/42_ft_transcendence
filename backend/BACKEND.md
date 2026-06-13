@@ -347,94 +347,232 @@ db.users.countDocuments()
 
 ---
 
-## WebSocket Implementation (Phase 1 - Infrastructure)
+
+## WebSocket Implementation
 
 ### Current Status - What's Implemented
 
-The WebSocket infrastructure is **fully initialized and tested** with the following components:
+The WebSocket infrastructure is **fully initialized and partially implemented**, with a working real-time foundation and an early-stage chat system.
+
+---
 
 #### ✅ Core Infrastructure
-- **Socket.IO Server** - Attached to Express HTTP server, allows HTTP and WebSocket on same port
-- **Redis Adapter** - Multi-instance synchronization enabled (configured for horizontal scaling)
-- **JWT Authentication Middleware** - Validates tokens from cookies, headers, or auth object before socket connection
-- **Base Connection Handlers** - Connection, disconnection, and ping/pong test events working
+
+- **Socket.IO Server** - Attached to Express HTTP server, sharing the same port (HTTP + WS)
+- **Redis Adapter** - Multi-instance synchronization enabled (ready for horizontal scaling)
+- **JWT Authentication Middleware** - Validates auth via cookies / headers before socket connection
+- **Base Connection Lifecycle** - Connection, disconnection, and ping/pong fully working
+
+---
+
+#### ✅ Chat System (NEW - Phase 1 UI + Transport Layer)
+
+- **/chat namespace fully active**
+- Room-based architecture implemented (join / leave / active room tracking)
+- Message transport working end-to-end (frontend → socket → backend → broadcast)
+- Messages are currently stored in **frontend state (debug mode)**
+
+##### 💬 Frontend Chat Features Implemented
+
+- Room creation
+- Join / leave room
+- Active room tracking
+- Message sending per room
+- Message viewer per room
+- User-based message filtering (email / username)
+- Auto-scroll message view
+- Basic chat debug UI (`SocketDebug`)
+
+⚠️ Important: UI currently expects normalized message shape but backend may send nested objects (see Known Issues below).
+
+---
 
 #### ✅ Type Safety & Validation
-- **Socket Types** (`src/types/socket.ts`) - All event interfaces, payloads, responses, and error types defined
-- **Event Validation Middleware** (`src/utils/socket-validation.ts`) - Schema-based payload validation with automatic error handling
-- **Error Standardization** - `SocketErrorCode` enum with structured error responses
+
+- **Socket Types (`src/types/socket.ts`)**
+  - Strongly typed event interfaces (room, message, auth, errors)
+
+- **Validation Middleware (`src/utils/socket-validation.ts`)**
+  - Schema-based payload validation
+  - Automatic rejection of invalid socket events
+
+- **Standardized Errors**
+  - `SocketErrorCode` enum
+  - Consistent error payload structure across all events
+
+---
 
 #### ✅ Service Layer
-- **Socket Service** (`src/utils/socket.service.ts`) - Abstracted business logic for presence tracking, room management, and broadcasting
-- **Redis Utilities** (`src/utils/redis.ts`) - Helper functions for all Redis operations (presence, rooms, sets, etc.)
-- **Chat Service Foundation** (`src/modules/chat/chat.service.ts`) - Skeleton ready for Phase 2 implementation
+
+- **Socket Service (`src/utils/socket.service.ts`)**
+  - Room management abstraction
+  - Presence tracking
+  - Broadcast utilities
+
+- **Redis Utilities (`src/utils/redis.ts`)**
+  - Helpers for sets, presence, room membership
+
+- **Chat Service (`src/modules/chat/chat.service.ts`)**
+  - Skeleton implemented (Phase 2 logic pending DB persistence)
+
+---
 
 #### ✅ Namespace Setup
-- **/chat Namespace** (`src/modules/chat/index.ts`) - Authentication middleware and connection handlers initialized
-- **Chat Handlers Structure** (`src/modules/chat/chat.handlers.ts`) - Event handlers skeleton for join_room, send_message, leave_room
 
-#### ✅ Frontend
-- **useSocket Hook** (`frontend/src/hooks/useSocket.tsx`) - Custom React hook for Socket.IO client with reconnection logic
-- **SocketDebug Page** (`frontend/src/pages/SocketDebug.tsx`) - Testing panel for verifying WebSocket connectivity
-- **Authentication Integration** - HttpOnly cookie support, automatic reconnection, status tracking
+- **/chat namespace initialized**
+  - Auth middleware applied
+  - Connection lifecycle handled
+  - Event handler structure defined but NOT fully implemented
 
-#### ✅ Testing & Documentation
-- TypeScript compilation successful (all type errors resolved)
-- End-to-end connectivity tested (login → connect → ping → pong)
-- Reconnection logic verified working
+- **Handlers scaffold (`chat.handlers.ts`)**
+  - join_room
+  - send_message
+  - leave_room
+  (currently partial / placeholder logic)
 
-### TODO - Phase 2 Implementation
+---
 
-**High Priority (Core Chat Functionality):**
-- [ ] Implement `join_room` handler - validate room, add user to Redis, notify others
-- [ ] Implement `send_message` handler - validate membership, save to DB, broadcast to room
-- [ ] Implement `leave_room` handler - remove from Redis, notify others, cleanup empty rooms
-- [ ] Create MongoDB models for: `Room`, `Message`, `Membership`
-- [ ] Implement `ChatService` methods in `src/modules/chat/chat.service.ts`
-- [ ] Add presence cleanup on disconnect in `/chat` namespace
+#### ⚠️ Known Issues / Current Limitations
 
-**Medium Priority (Features & Enhancement):**
-- [ ] Implement optional `typing` / `stop_typing` handlers for real-time feedback
-- [ ] Create `useSocketRoom` hook for frontend room management
-- [ ] Build Chat UI component with message list, input, user presence
-- [ ] Add message pagination (load history on scroll)
-- [ ] Implement room creation/deletion endpoints
+### 1. Message Shape Inconsistency (Frontend issue)
 
-**Low Priority (Polish & Optimization):**
-- [ ] Add rate limiting for message events
-- [ ] Implement read receipts / message status
-- [ ] Add typing indicator visual feedback
-- [ ] Setup logging for all Socket.IO events in production
-- [ ] Create integration tests for WebSocket flows
+Messages may arrive in different formats:
 
-### Testing Socket Connectivity
+```ts
+// Case A
+user: {
+  userId,
+  email,
+  role
+}
 
-**Login first** (required for WebSocket auth):
+// Case B
+sender: {
+  userId,
+  email,
+  role
+}
+````
+
+👉 This caused React rendering errors when objects were rendered directly instead of strings.
+
+✔ Fix required: always normalize before render:
+
+```ts
+const sender =
+  msg.user?.email ??
+  msg.sender?.email ??
+  msg.username ??
+  'Unknown';
+```
+
+---
+
+### 2. No Backend Persistence Yet
+
+* Messages are NOT stored in MongoDB yet
+* No `Message` or `Room` collections implemented
+* Current system is real-time only (ephemeral)
+
+---
+
+### 3. Global Message State (Frontend)
+
+* All messages are stored in a single array:
+
+```ts
+messages: Message[]
+```
+
+* Filtering is done client-side:
+
+```ts
+messages.filter(m => m.roomId === activeRoomId)
+```
+
+👉 This is fine for debug, but not scalable for production.
+
+---
+
+### 4. Room State is not persisted server-side
+
+* Room existence depends on runtime memory / Redis sets
+* No database-backed room model yet
+
+---
+
+### 🔴 Core Chat Backend (HIGH PRIORITY)
+
+* [ ] Implement `join_room` handler fully
+* [ ] Implement `leave_room` cleanup logic
+
+---
+
+### 🟠 Real-time Enhancements
+
+* [ ] Typing indicators (`typing`, `stop_typing`)
+* [ ] Presence per room (online users)
+* [ ] Room creation endpoint (server-authoritative)
+
+---
+
+### 🟡 Frontend Improvements
+
+* [ ] Replace global message array with `messagesByRoom`
+* [ ] Create `useSocketRoom` hook
+* [ ] Chat UI component extraction (out of debug panel)
+* [ ] Add message status (sent / delivered / read)
+
+---
+
+### 🟢 Infra / Production Readiness
+
+* [ ] Rate limiting per socket event
+* [ ] Logging of all socket events
+* [ ] Integration tests for chat flows
+* [ ] Redis cleanup on disconnect (robust presence system)
+
+---
+
+## 🧪 Testing Socket Connectivity
+
+Same flow as REST authentication is required before connecting sockets.
+
+### 1. Authenticate first
+
 ```bash
-# Register/Login via REST API
-curl -c cookies.txt -X POST http://localhost:3000/api/auth/register \
+curl -c cookies.txt -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"socket_test@example.com","password":"Test123"}'
 ```
 
-**Test WebSocket Connection:**
-1. Navigate to `http://localhost:5173/socket-debug` (after login)
-2. Verify "Socket status" changes to "connected" (green)
-3. Click "Send Ping" button
-4. Confirm "Pong received at" message appears
-5. Try disconnecting/reconnecting backend to verify auto-reconnection
+---
 
-### 6.4. Infrastructure Files Reference
+### 2. Verify connection
 
-| File | Purpose |
-|------|---------|
-| `src/index.ts` | Main server bootstrap, Socket.IO init, Redis adapter setup |
-| `src/types/socket.ts` | All TypeScript interfaces for events and responses |
-| `src/utils/socket.service.ts` | Business logic for presence, rooms, broadcasting |
-| `src/utils/socket-validation.ts` | Schema validation for event payloads |
-| `src/utils/redis.ts` | Redis operation helpers with error handling |
-| `src/modules/chat/index.ts` | /chat namespace initialization and middleware |
-| `src/modules/chat/chat.handlers.ts` | Event handler structure (ready to implement) |
-| `src/modules/chat/chat.service.ts` | Chat service stubs (ready to implement) |
-| `frontend/src/hooks/useSocket.tsx` | Socket.IO client hook with reconnection |
-| `frontend/src/pages/SocketDebug.tsx` | Testing panel for connectivity verification |
+1. Open: `http://localhost:5173/socket-debug`
+2. Ensure status → `connected`
+3. Click **Ping**
+4. Verify **Pong received**
+5. Join room → send message → verify broadcast
+
+---
+
+## 📁 Infrastructure Files Reference
+
+| File                                   | Purpose                                      |
+| -------------------------------------- | -------------------------------------------- |
+| `src/index.ts`                         | Server bootstrap + Socket.IO + Redis adapter |
+| `src/types/socket.ts`                  | Full socket type system                      |
+| `src/utils/socket.service.ts`          | Room + presence + broadcast logic            |
+| `src/utils/socket-validation.ts`       | Payload validation layer                     |
+| `src/utils/redis.ts`                   | Redis helpers                                |
+| `src/modules/chat/index.ts`            | Namespace initialization                     |
+| `src/modules/chat/chat.handlers.ts`    | Event handlers (partial)                     |
+| `src/modules/chat/chat.service.ts`     | Business logic (skeleton)                    |
+| `frontend/src/hooks/useSocket.tsx`     | Socket client hook                           |
+| `frontend/src/hooks/useChatSocket.tsx` | Chat abstraction layer                       |
+| `frontend/src/pages/SocketDebug.tsx`   | Debug + chat playground UI                   |
+
+```
+---

@@ -1,61 +1,72 @@
 /**
- * Chat Namespace
- * Configures /chat namespace with handlers and middleware
+ * /chat namespace
+ * Registers auth middleware, connection handler, and event handlers.
  */
 
 import { Server, Namespace } from 'socket.io';
 import { Redis } from 'ioredis';
+
+import { jwtSocketMiddleware } from '@utils/socket-auth';
+import { SocketService } from '@utils/socket.service';
+import { logger } from '@config/logger';
+import { SocketUser } from '@interfaces/socket';
 import { setupChatHandlers } from './chat.handlers';
 import { ChatService } from './chat.service';
-import { SocketService } from '@/utils/socket.service';
-import { logger } from '@/config/logger';
 
 export function initializeChatNamespace(io: Server, redis: Redis): Namespace {
     const chatNamespace = io.of('/chat');
-    const socketService = new SocketService(io, redis);
-    const chatService = new ChatService();
+    const socketService = new SocketService(chatNamespace, redis);
+    const chatService = new ChatService(redis, socketService);
 
-    logger.info('Initializing /chat namespace');
+    logger.info('[/chat] Initializing namespace');
 
-    /**
-     * Middleware - validates authentication for /chat namespace
-     */
-    chatNamespace.use((socket, next) => {
-        const user = socket.data.user;
+    // ── Auth middleware ────────────────────────────────────────────────────
+    // IMPORTANT: Socket.IO 4.x does NOT inherit io.use() in custom namespaces.
+    // Each namespace must register its own middleware chain.
+    chatNamespace.use(jwtSocketMiddleware);
 
-        if (!user) {
-            logger.warn(`Unauthorized connection attempt to /chat from ${socket.id}`);
-            return next(new Error('Unauthorized'));
+    // ── Connection handler ─────────────────────────────────────────────────
+    chatNamespace.on('connection', async (socket) => {
+        const user = socket.data.user as SocketUser | undefined;
+        const userId = user?.userId;
+
+        logger.info(`[/chat] connected socket=${socket.id} user=${userId}`);
+
+        // Initialize per-socket room tracking
+        socket.data.rooms = new Set<string>();
+
+        // Join a personal room so we can target this user from any replica
+        if (userId) {
+            socket.join(`user:${userId}`);
         }
 
-        logger.info(`User ${user.id} connected to /chat namespace`);
-        next();
-    });
+        // Register presence in Redis
+        if (user) {
+            await socketService.addUserPresence(user, []);
+        }
 
-    /**
-     * Connection handler
-     */
-    chatNamespace.on('connection', (socket) => {
-        const userId = socket.data.user?.id;
-
-        logger.info(`[/chat] User ${userId} connected with socket ${socket.id}`);
-
-        // Setup event handlers
+        // Register all event handlers for this socket
         setupChatHandlers(socket, socketService, chatService);
 
-        /**
-         * Disconnect handler
-         */
+        // ── Disconnect ─────────────────────────────────────────────────────
         socket.on('disconnect', (reason) => {
-            logger.info(`[/chat] User ${userId} disconnected. Reason: ${reason}`);
-            // TODO: Cleanup presence from rooms in Phase 2
+            logger.info(`[/chat] disconnected socket=${socket.id} user=${userId} reason=${reason}`);
+
+            if (!userId) return;
+
+            // Clean up room memberships in Redis
+            const joinedRooms = Array.from(socket.data.rooms ?? []) as string[];
+            for (const roomId of joinedRooms) {
+                void socketService.removeUserFromRoom(userId, roomId);
+            }
+
+            // Remove presence entry
+            void socketService.removeUserPresence(userId);
         });
 
-        /**
-         * Error handler
-         */
+        // ── Socket-level error ─────────────────────────────────────────────
         socket.on('error', (error) => {
-            logger.error(`[/chat] Socket error for user ${userId}:`, error);
+            logger.error(`[/chat] socket error socket=${socket.id} user=${userId}:`, error);
         });
     });
 

@@ -4,7 +4,7 @@
  * Abstracts Redis operations and Socket.IO instance interactions
  */
 
-import { Server, Socket } from 'socket.io';
+import { Namespace, Server, Socket } from 'socket.io';
 import { Redis } from 'ioredis';
 import { UserPresence, SocketUser, SocketErrorCode, SocketErrorResponse } from '@/types/socket';
 import { logger } from '@/config/logger';
@@ -14,10 +14,10 @@ const ROOM_USERS_PREFIX = 'room_users:';
 const PRESENCE_TTL = 3600; // 1 hour
 
 export class SocketService {
-    private io: Server;
+    private io: Server | Namespace;
     private redis: Redis;
 
-    constructor(io: Server, redis: Redis) {
+    constructor(io: Server | Namespace, redis: Redis) {
         this.io = io;
         this.redis = redis;
     }
@@ -89,20 +89,20 @@ export class SocketService {
     async addUserPresence(user: SocketUser, rooms: string[] = []): Promise<void> {
         try {
             const presence: UserPresence = {
-                userId: user.id,
+                userId: user.userId,
                 email: user.email,
-                username: user.username,
+                username: user.email,
                 rooms,
                 connectedAt: new Date(),
                 lastSeen: new Date(),
             };
 
-            const key = `${PRESENCE_PREFIX}${user.id}`;
+            const key = `${PRESENCE_PREFIX}${user.userId}`;
             await this.redis.setex(key, PRESENCE_TTL, JSON.stringify(presence));
 
-            logger.debug(`User presence added: ${user.id} in rooms ${rooms.join(', ')}`);
+            logger.debug(`User presence added: ${user.userId} in rooms ${rooms.join(', ')}`);
         } catch (error) {
-            logger.error(`Error adding user presence for ${user.id}:`, error);
+            logger.error(`Error adding user presence for ${user.userId}:`, error);
         }
     }
 
@@ -126,20 +126,20 @@ export class SocketService {
     async updateUserPresence(user: SocketUser, rooms: string[]): Promise<void> {
         try {
             const presence: UserPresence = {
-                userId: user.id,
+                userId: user.userId,
                 email: user.email,
-                username: user.username,
+                username: user.email,
                 rooms,
                 connectedAt: new Date(),
                 lastSeen: new Date(),
             };
 
-            const key = `${PRESENCE_PREFIX}${user.id}`;
+            const key = `${PRESENCE_PREFIX}${user.userId}`;
             await this.redis.setex(key, PRESENCE_TTL, JSON.stringify(presence));
 
-            logger.debug(`User presence updated: ${user.id} in rooms ${rooms.join(', ')}`);
+            logger.debug(`User presence updated: ${user.userId} in rooms ${rooms.join(', ')}`);
         } catch (error) {
-            logger.error(`Error updating user presence for ${user.id}:`, error);
+            logger.error(`Error updating user presence for ${user.userId}:`, error);
         }
     }
 

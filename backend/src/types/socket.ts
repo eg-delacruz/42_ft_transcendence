@@ -3,10 +3,12 @@
  * Centralized TypeScript interfaces for all Socket.IO events, responses, and data structures
  */
 
+import type { UserRole } from '@interfaces/roles';
+
 export interface SocketUser {
-    id: string;
+    userId: string;
     email: string;
-    username: string;
+    role: UserRole;
 }
 
 export interface SocketData {
@@ -25,11 +27,42 @@ export interface SendMessagePayload {
     createdAt?: Date;
 }
 
+export interface CreateRoomPayload {
+    name: string;
+    description?: string;
+}
+
+export interface GetRoomPayload {
+    roomId: string;
+}
+
+export interface GetRoomMessagesPayload {
+    roomId: string;
+    limit?: number;
+    offset?: number;
+}
+
 export interface MessageResponse {
-    id: string;
+    messageId: string;
     sender: SocketUser;
     text: string;
     roomId: string;
+    createdAt: Date;
+}
+
+export interface RoomInfo {
+    roomId: string;
+    name: string;
+    description?: string;
+    createdAt: Date;
+    memberCount: number;
+}
+
+export interface ChatMessage {
+    messageId: string;
+    roomId: string;
+    sender: SocketUser;
+    text: string;
     createdAt: Date;
 }
 
@@ -50,12 +83,24 @@ export interface RoomJoinedResponse {
     roomId: string;
     userId: string;
     timestamp: Date;
+    room?: RoomInfo;
 }
 
 export interface RoomLeftResponse {
     roomId: string;
     userId: string;
     timestamp: Date;
+}
+
+export interface RoomCreatedResponse {
+    room: RoomInfo;
+    timestamp: Date;
+}
+
+export interface RoomMessagesResponse {
+    roomId: string;
+    messages: ChatMessage[];
+    total: number;
 }
 
 /**

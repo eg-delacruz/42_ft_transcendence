@@ -1,119 +1,90 @@
-// This is the main entry point of the backend.
-// Here we initialize MongoDB, the HTTP server, and Socket.IO.
+// Main entry point of the backend.
+// Initializes MongoDB, HTTP server, Socket.IO, and Redis adapter.
 
 import dotenv from 'dotenv';
 dotenv.config();
 
 import http from 'http';
-import jwt from 'jsonwebtoken';
 import Redis from 'ioredis';
 import { createAdapter } from '@socket.io/redis-adapter';
 import { Server, type Socket } from 'socket.io';
 
 import { connectDB } from '@config/db';
-import app from '@/app.ts';
 import env from '@config/env';
 import { logger } from '@config/logger';
-import { ensureSuperUser } from '@scripts/seed';
+import app from '@/app.ts';
 import { initializeChatNamespace } from '@modules/chat';
+import { ensureSuperUser } from '@scripts/seed';
+import { jwtSocketMiddleware } from '@utils/socket-auth';
+import { SocketUser } from '@interfaces/socket';
 
 async function startServer() {
-  // Connect to MongoDB before starting the server
-  await connectDB();
+    await connectDB();
 
-  // Create an HTTP server from Express
-  // This allows us to use the same port for HTTP and WebSockets
-  const httpServer = http.createServer(app);
+    const httpServer = http.createServer(app);
 
-  // Initialize Socket.IO on the same HTTP server
-  // credentials: true allows cookies and credentials to be sent from the frontend
-  const io = new Server(httpServer, {
-    cors: {
-      origin: `http://localhost:${env.FRONT_PORT}`,
-      credentials: true,
-    },
-  });
+    const io = new Server(httpServer, {
+        cors: {
+            origin: `http://localhost:${env.FRONT_PORT}`,
+            credentials: true,
+        },
+    });
 
-  // Redis adapter to synchronize events between multiple backend instances
-  // If the project scales horizontally, Redis will propagate the messages
-  try {
-    const pubClient = new Redis(env.REDIS_URL, { lazyConnect: true });
-    const subClient = pubClient.duplicate();
+    // ── Redis adapter ──────────────────────────────────────────────────────
+    // Declared outside try so it's accessible for initializeChatNamespace.
+    let pubClient: Redis | null = null;
 
-    await Promise.all([pubClient.connect(), subClient.connect()]);
-    io.adapter(createAdapter(pubClient, subClient));
-    logger.info('[✓] Connected to Redis and configured socket.io adapter');
-
-    // Initialize /chat namespace with handlers
-    initializeChatNamespace(io, pubClient);
-  } catch (error) {
-    logger.error('[✗] Failed to connect to Redis: ' + error);
-  }
-
-  // Authentication middleware for the Socket.IO handshake
-  // Here we validate the JWT before allowing the socket connection
-  io.use((socket: Socket, next) => {
     try {
-      // The token can come from auth.token or from the Authorization header
-      const authHeader = socket.handshake.headers?.authorization;
-      const bearerToken = authHeader && authHeader.startsWith('Bearer ')
-        ? authHeader.slice(7)
-        : null;
-        const cookieHeader = socket.handshake.headers?.cookie;
-        const cookieToken = cookieHeader
-          ? cookieHeader
-              .split(';')
-              .map((part) => part.trim())
-              .find((part) => part.startsWith('access_token='))
-              ?.split('=')[1] ?? null
-          : null;
+        pubClient = new Redis(env.REDIS_URL, { lazyConnect: true });
+        const subClient = pubClient.duplicate();
 
-        const token = socket.handshake.auth?.token || bearerToken || cookieToken;
-
-      // If there is no token, reject the connection
-      if (!token) {
-        return next(new Error('[✗] Authentication error: No token provided'));
-      }
-
-      // If the token is valid, store the decoded user in the socket
-      const decoded = jwt.verify(token, env.JWT_SECRET);
-      socket.data.user = decoded;
-      next();
-    } catch {
-      // If the token fails, do not allow the socket to connect
-      next(new Error('[✗] Authentication error: Invalid token'));
+        await Promise.all([pubClient.connect(), subClient.connect()]);
+        io.adapter(createAdapter(pubClient, subClient));
+        logger.info('[✓] Redis connected and socket.io adapter configured');
+    } catch (error) {
+        logger.error('[✗] Failed to connect to Redis:', error);
+        // pubClient stays null; chat namespace will not be initialized
     }
-  });
 
-  // Base Socket.IO listener
-  // For now we only check connection, ping, and disconnect
-  io.on('connection', (socket) => {
-    const user = socket.data.user as { id?: string } | undefined;
+    // ── Global auth middleware (root namespace /) ──────────────────────────
+    // Each namespace also registers jwtSocketMiddleware independently
+    // because Socket.IO 4.x does NOT propagate io.use() to custom namespaces.
+    io.use(jwtSocketMiddleware);
 
-    logger.info(`[ws] connected socket=${socket.id} user=${user?.id ?? 'unknown'}`);
+    // ── /chat namespace ────────────────────────────────────────────────────
+    if (pubClient) {
+        initializeChatNamespace(io, pubClient);
+    } else {
+        logger.error('[✗] Chat namespace not initialized: Redis unavailable');
+    }
 
-    // Minimal test event to verify that the connection responds
-    socket.on('ping', () => {
-      socket.emit('pong', { ok: true, timestamp: Date.now() });
+    // ── Root namespace connection handler ──────────────────────────────────
+    io.on('connection', (socket: Socket) => {
+        const user = socket.data.user as SocketUser | undefined;
+        logger.info(`[ws:/] connected socket=${socket.id} user=${user?.userId ?? 'unknown'}`);
+
+        // Minimal ping/pong for health checks
+        socket.on('ping', () => {
+            socket.emit('pong', { ok: true, timestamp: Date.now() });
+        });
+
+        socket.on('disconnect', (reason) => {
+            logger.info(`[ws:/] disconnected socket=${socket.id} reason=${reason}`);
+        });
     });
 
-    // Cleanup / logs when the socket disconnects
-    socket.on('disconnect', (reason) => {
-      logger.info(`[ws] disconnected socket=${socket.id} reason=${reason}`);
+    // ── HTTP server ────────────────────────────────────────────────────────
+    httpServer.listen(env.PORT, () => {
+        logger.info(`Server running on port ${env.PORT} in ${env.NODE_ENV} mode`);
+        logger.info(
+            `Socket.IO ready — CORS origin: http://localhost:${env.FRONT_PORT}`,
+        );
     });
-  });
 
-  // Start the server listening on the configured port
-  httpServer.listen(env.PORT, () => {
-    logger.info(`Server running on port ${env.PORT} in ${env.NODE_ENV} mode`);
-    logger.info(`Socket.IO ready at ws://localhost:${env.PORT} with CORS from http://localhost:${env.FRONT_PORT}`);
-  });
-
-  // Create the initial super user in the database
-  ensureSuperUser();
+    ensureSuperUser();
 }
 
 startServer().catch((error) => {
-  logger.error('Failed to start server: ' + error);
-  process.exit(1);
+    logger.error('Failed to start server:', error);
+    process.exit(1);
 });
