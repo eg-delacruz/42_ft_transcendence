@@ -12,7 +12,7 @@ const router = Router();
  * @swagger
  * /users/create:
  *   post:
- *     summary: Create a new user (admin)
+ *     summary: Create a new user
  *     tags: [Users]
  *     requestBody:
  *       required: true
