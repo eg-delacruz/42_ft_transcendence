@@ -6,9 +6,27 @@ Para ver las tareas del proyecto, ir a:
 `https://github.com/users/eg-delacruz/projects/2/views/1`
 
 ## Tabla de Contenidos
+- [Documentacion Swagger](#swagger-api-docs)
 - [Pruebas manuales de autenticacion](#1-register-a-standard-user)
 - [Gestion de usuarios admin](#5-admin-user-management)
 - [Comandos de mongosh](#mongosh-commands)
+
+---
+
+## Swagger API Docs
+
+The API is documented with Swagger/OpenAPI. While the backend is running in development mode, you can access the interactive UI at:
+
+```
+http://localhost:3000/api-docs
+```
+
+From the UI you can:
+- Browse all endpoints with their HTTP methods, parameters, and responses.
+- Use the **Authorize** button to authenticate with the `access_token` cookie.
+- Test any endpoint with **Try it out** — no curl needed.
+
+> **Note:** `/api-docs` is only available when `NODE_ENV` is not `production`. The route is not served in production.
 
 ---
 
