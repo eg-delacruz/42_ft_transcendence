@@ -1,10 +1,10 @@
-import { Router } from 'express';
+import { Router } from "express";
 
-import { authMiddleware } from '@middlewares/auth.middleware';
-import { requireRole } from '@middlewares/role.middleware';
+import { authMiddleware } from "@middlewares/auth.middleware";
+import { requireRole } from "@middlewares/role.middleware";
 
 // Controller
-import { createUser, getAllUsers, deleteUserById } from './user.controller';
+import { createUser, getAllUsers, deleteUserById } from "./user.controller";
 
 const router = Router();
 
@@ -12,7 +12,7 @@ const router = Router();
  * @swagger
  * /users/create:
  *   post:
- *     summary: Create a new user
+ *     summary: Create a new user. Only accessible by super_admin and admin roles.
  *     tags: [Users]
  *     requestBody:
  *       required: true
@@ -44,13 +44,18 @@ const router = Router();
  *       400:
  *         description: Missing fields or email already exists
  */
-router.post('/create', createUser);
+router.post(
+  "/create",
+  authMiddleware,
+  requireRole("super_admin", "admin"),
+  createUser,
+);
 
 /**
  * @swagger
  * /users/all:
  *   get:
- *     summary: Get all users (excludes super_admin)
+ *     summary: Get all users (excludes super_admin). Only accessible by super_admin and admin roles.
  *     tags: [Users]
  *     responses:
  *       200:
@@ -71,13 +76,18 @@ router.post('/create', createUser);
  *                       role: { type: string }
  *                 message: { type: string, example: "Users retrieved successfully" }
  */
-router.get('/all', getAllUsers);
+router.get(
+  "/all",
+  authMiddleware,
+  requireRole("super_admin", "admin"),
+  getAllUsers,
+);
 
 /**
  * @swagger
  * /users/delete/{id}:
  *   delete:
- *     summary: Delete a user by ID
+ *     summary: Delete a user by ID. Only accessible by super_admin and admin roles.
  *     tags: [Users]
  *     security:
  *       - cookieAuth: []
@@ -108,9 +118,10 @@ router.get('/all', getAllUsers);
  *         description: User not found
  */
 router.delete(
-  '/delete/:id',
+  "/delete/:id",
   authMiddleware,
-  deleteUserById
+  requireRole("super_admin", "admin"),
+  deleteUserById,
 );
 
 export default router;

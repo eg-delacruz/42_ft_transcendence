@@ -1,32 +1,32 @@
-import { Response, NextFunction } from 'express';
-import { AuthRequest } from './auth.middleware';
-import { errorResponse } from '@utils/response';
+import { Response, NextFunction } from "express";
+import { AuthRequest } from "./auth.middleware";
+import { errorResponse } from "@utils/response";
 
 //Types
-import { UserRole } from '@interfaces/roles';
+import { UserRole } from "@interfaces/roles";
 
 // Params mean: get all the passed roles and put them in an array called roles
 export const requireRole = (...roles: UserRole[]) => {
   if (roles.length === 0) {
-    throw new Error('At least one role must be specified');
+    throw new Error("At least one role must be specified");
   }
 
   return (req: AuthRequest, res: Response, next: NextFunction) => {
     if (!req.user) {
       return errorResponse(
         res,
-        'Not authenticated',
+        "Not authenticated",
         401,
-        'Authentication required'
+        "Authentication required",
       );
     }
 
     if (!roles.includes(req.user.role as UserRole)) {
       return errorResponse(
         res,
-        'Forbidden',
+        "Forbidden",
         403,
-        'User does not have the required role'
+        "User does not have the required role",
       );
     }
 
