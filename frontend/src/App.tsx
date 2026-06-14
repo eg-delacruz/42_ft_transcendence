@@ -9,14 +9,19 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import User from './pages/User';
 
+/* Terto 20260614 - Import temporal para poder acceder a la página general de minijuegos. */
+import { MinigamesDevPage } from './minigames/MinigamesDevPage';
+
 
 {/* TODO: add protected routes, error routes... etc. */ }
 const routes = [
   { path: "/", element: <Home></Home> },
   { path: "/login", element: <Login></Login> },
   { path: "/register", element: <Register></Register> },
-  { path: "/user", element: <ProtectedRoute><User /></ProtectedRoute> }
+  { path: "/user", element: <ProtectedRoute><User /></ProtectedRoute> },
 
+  /* Terto 20260614 - Ruta temporal para acceder al menú general de minijuegos.*/
+  { path: "/minigames", element: <MinigamesDevPage /> }
 ]
 
 function App() {
