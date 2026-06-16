@@ -47,12 +47,12 @@ function User() {
 
 	//User should have config toggles like changing name, pfp and color
     return (
-        <div className="h-screen w-screen p-8 gap-12 flex flex-col items-center bg-linear-to-t from-(--gradient-dark) to-(--gradient-light)">
+        <div id="userPageContainer" className="h-screen w-screen p-8 gap-12 flex flex-col items-center bg-linear-to-t from-(--gradient-dark) to-(--gradient-light)">
 			<div className="absolute inset-0 bg-[url(/arcadePatternRepeat.png)] bg-auto animate-diagonal opacity-10 pointer-events-none z-0" aria-hidden="true"></div>
 			{/* Top part / banner */}
-			<div className="relative h-1/3 w-full grid grid-cols-4 bg-(--gradient-light) shadow-2xs rounded-4xl overflow-auto">
-				<div className="col-start-1 flex items-center justify-center p-4">
-					<div className="relative h-full aspect-square rounded-full bg-[url(/game01.jpg)] bg-cover bg-center outline-4 outline-slate-300 shadow-md flex items-end justify-end">
+			<div id="userBanner" className="relative min-h-1/3 h-fit w-full flex flex-row bg-(--gradient-light) shadow-2xs rounded-4xl items-center justify-center overflow-auto">
+				<div className="w-1/4 flex items-center justify-center p-4">
+					<div className="relative h-50 md:h-full aspect-square rounded-full bg-[url(/game01.jpg)] bg-cover bg-center outline-4 outline-slate-300 shadow-md flex items-end justify-end">
 						{/* Button to change pfp. This should be inside a /link tag or whatever is used to execute the function */}
 						<button id="changeProfilePic" onClick={buttonTest} className="absolute h-12 w-12 bg-black/50 rounded-sm bottom-2 right-2 flex items-center justify-center text-white text-xl">
 							<FontAwesomeIcon icon={faPenToSquare}/>
@@ -61,31 +61,32 @@ function User() {
 						
 					</div>
 				</div>
-				<div className="col-start-2 col-end-3 w-full p-6 flex items-center gap-4 text-left font-aldrich text-md text-slate-200">
-					<div className="outline-none w-full">
-						<label className="labelCustom"> Display name 
-						<input
-							className="w-full p-4 arcadeform flex-1"
-							type="text"
-							placeholder="display"
-						/></label>
+				<div className="w-auto flex flex-col lg:flex-row">
+					<div className="w-full p-6 flex items-center gap-4 text-left font-aldrich text-md text-slate-200">
+						<div className="outline-none w-full">
+							<label className="labelCustom"> Display name 
+							<input
+								className="w-full p-4 arcadeform flex-1"
+								type="text"
+								placeholder="display"
+							/></label>
+						</div>
+						{/* Button to change display name. */}
+						<button id="changeDisplayName" onClick={buttonTest} className="h-14 w-14 flex items-center justify-center bg-black/50 rounded-sm text-white text-2xl">
+							<FontAwesomeIcon className="" icon={faArrowsRotate}/>
+						</button>
+						<label htmlFor="changeDisplayName" className="labelCustom">Change name</label>
 					</div>
-					{/* Button to change display name. */}
-					<button id="changeDisplayName" onClick={buttonTest} className="h-14 w-14 flex items-center justify-center bg-black/50 rounded-sm text-white text-2xl">
-						<FontAwesomeIcon className="" icon={faArrowsRotate}/>
-					</button>
-					<label htmlFor="changeDisplayName" className="labelCustom">Change pfp</label>
-					
-				</div>
-				<div className="w-auto h-full p-12 col-start-4 flex flex-col text-left font-aldrich text-2xl text-slate-200">
-					{/* <p className="font-bold p-2">ID: </p>
-					<p className="tab-2">{user.userId || user.id || user._id}</p> */}
-                	<p className="font-bold p-2">Email: </p>
-					<p>{user.email}</p>
-                	<p className="font-bold p-2"> Role: </p>
-					<p>{user.role}</p>
-                	<p className="font-bold p-2"> Valid until:</p> 
-					<p>{user.exp ? new Date(user.exp * 1000).toLocaleString() : "N/A"}</p>
+					<div className="hidden lg:flex lg:p-12 flex-col text-left font-aldrich text-2xl text-slate-200">
+						{/* <p className="font-bold p-2">ID: </p>
+						<p className="tab-2">{user.userId || user.id || user._id}</p> */}
+						<p className="font-bold p-2">Email: </p>
+						<p>{user.email}</p>
+						<p className="font-bold p-2"> Role: </p>
+						<p>{user.role}</p>
+						<p className="font-bold p-2"> Valid until:</p> 
+						<p>{user.exp ? new Date(user.exp * 1000).toLocaleString() : "N/A"}</p>
+					</div>
 				</div>
 			</div>
 			<div className="w-full lg:w-1/3 p-10 gap-8 flex flex-col items-center justify-center text-2xl">
