@@ -71,7 +71,7 @@ router.get("/:game_name", authMiddleware, getGameByName);
  *               user_id: { type: string }
  *     responses:
  *       200:
- *         description: Scores updated successfully
+ *         description: Scores updated successfully — returns the updated game leaderboard
  *         content:
  *           application/json:
  *             schema:
@@ -81,9 +81,19 @@ router.get("/:game_name", authMiddleware, getGameByName);
  *                 body:
  *                   type: object
  *                   properties:
- *                     message: { type: string, example: "Scores updated successfully" }
+ *                     name: { type: string, example: "fight_fight" }
+ *                     top_1_id: { type: string, example: "user_id_1" }
+ *                     top_1_score: { type: number, example: 100 }
+ *                     top_2_id: { type: string, example: "user_id_2" }
+ *                     top_2_score: { type: number, example: 80 }
+ *                     top_3_id: { type: string, example: "user_id_3" }
+ *                     top_3_score: { type: number, example: 60 }
+ *                     createdAt: { type: string, format: date-time, example: "2024-01-01T00:00:00Z" }
+ *                     updatedAt: { type: string, format: date-time, example: "2024-01-02T00:00:00Z" }
  *       400:
  *         description: Missing fields or invalid data
+ *       404:
+ *         description: Game not found
  */
 router.patch("/:game_name", authMiddleware, updateGameScores);
 
