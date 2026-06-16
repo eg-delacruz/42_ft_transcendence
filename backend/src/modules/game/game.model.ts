@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 import { GameName } from "@interfaces/games";
 
-// TODO: check if match_id, winner_id are actually needed. Discuss with Terto
+// TODO: check if match_id, winner_id are actually needed. Discuss with Terto. For now, they are not included
 export interface IGame extends Document {
   name: GameName;
   top_1_id: string;

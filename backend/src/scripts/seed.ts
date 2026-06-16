@@ -1,13 +1,14 @@
+// Models
+import { User } from "@modules/user/user.model";
+import { Game } from "@modules/game/game.model";
+
 import "dotenv/config";
-import { connectDB } from "@config/db";
 import env from "@config/env";
 import { logger } from "@config/logger";
-import { User } from "@modules/user/user.model";
 import { hash } from "bcrypt";
 
 export async function ensureSuperUser() {
   try {
-    // await connectDB();
     logger.info("Running ensureSuperUser script...");
 
     // Checks if super user / exisiting user is already created
@@ -38,6 +39,43 @@ async function seedSuperUser() {
     });
 
     logger.info("Super user created successfully.");
+  } catch (error) {
+    logger.error("Seed failed: " + error);
+    process.exitCode = 1;
+  }
+}
+
+export async function ensureGames() {
+  try {
+    logger.info("Running ensureGames script...");
+
+    // Check if games with name fight_fight, the_race and deep_&_dark already exist
+    const existingGames = await Game.find({
+      name: { $in: ["fight_fight", "the_race", "deep_&_dark"] },
+    });
+
+    if (existingGames.length === 3) {
+      logger.warn("Games already exist, skipping.");
+      return;
+    } else seedGames();
+  } catch (error) {
+    logger.error("Seed failed: " + error);
+    process.exitCode = 1;
+  }
+}
+
+async function seedGames() {
+  try {
+    logger.info("Running seed script...");
+
+    // Create the games in mongo db
+    await Game.create([
+      { name: "fight_fight" },
+      { name: "the_race" },
+      { name: "deep_&_dark" },
+    ]);
+
+    logger.info("Games created successfully.");
   } catch (error) {
     logger.error("Seed failed: " + error);
     process.exitCode = 1;

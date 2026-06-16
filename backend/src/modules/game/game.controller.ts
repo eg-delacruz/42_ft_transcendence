@@ -4,6 +4,26 @@ import { Game } from "@modules/game/game.model";
 
 import { successResponse, errorResponse } from "@utils/response";
 
+export const getGameByName = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const game_name = req.params.game_name;
+
+  try {
+    const game = await Game.findOne({ name: game_name });
+
+    if (!game) {
+      return errorResponse(res, "Game not found", 404);
+    }
+
+    return successResponse(res, game, "Game retrieved successfully");
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const updateGameScores = async (
   req: Request,
   res: Response,

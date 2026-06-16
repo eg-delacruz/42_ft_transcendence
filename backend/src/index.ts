@@ -11,7 +11,7 @@ import app from "@/app.ts";
 import env from "@config/env";
 
 import { logger } from "@config/logger";
-import { ensureSuperUser } from "@scripts/seed";
+import { ensureSuperUser, ensureGames } from "@scripts/seed";
 
 async function startServer() {
   // Connect to MongoDB
@@ -22,9 +22,9 @@ async function startServer() {
     logger.info(`Server running in ${env.NODE_ENV} on port ${env.PORT}`);
   });
 
-  // Init a super user in the DB
+  // Initial seeding of the db
   ensureSuperUser();
-
+  ensureGames();
   try {
   } catch (error) {
     logger.error("Failed to start server:" + error);

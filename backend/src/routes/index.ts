@@ -4,7 +4,9 @@ import authRoutes from "@modules/auth/auth.routes";
 import userRoutes from "@modules/user/user.routes";
 import gameRoutes from "@modules/game/game.routes";
 
-import { User } from "@modules/user/user.model"; //TODO: remove this import when project is ready
+// TODO: remove this when project is ready, since only used to clear the DB
+import { User } from "@modules/user/user.model";
+import { Game } from "@modules/game/game.model";
 
 export const router = Router();
 
@@ -18,6 +20,7 @@ router.use("/games", gameRoutes);
 router.delete("/clear-db", async (req, res) => {
   try {
     await User.deleteMany({});
+    await Game.deleteMany({});
     res.json({ message: "Database cleared successfully" });
   } catch (error) {
     res.status(500).json({ message: "Error clearing database" });
