@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Request, Response, NextFunction } from "express";
 
 import { Game } from "@modules/game/game.model";
@@ -12,7 +13,11 @@ export const getGameByName = async (
   const game_name = req.params.game_name;
 
   try {
-    const game = await Game.findOne({ name: game_name });
+    const game = await Game.findOne({ name: game_name })
+      .populate({
+        path: "top_1_user top_2_user top_3_user",
+        select: "email display_name avatar_url points",
+      });
 
     if (!game) {
       return errorResponse(res, "Game not found", 404);
@@ -49,9 +54,12 @@ export const updateGameScores = async (
 
     // Build current leaderboard entries (filter out empty slots)
     const entries: { id: string; score: number }[] = [];
-    if (game.top_1_id) entries.push({ id: game.top_1_id, score: game.top_1_score });
-    if (game.top_2_id) entries.push({ id: game.top_2_id, score: game.top_2_score });
-    if (game.top_3_id) entries.push({ id: game.top_3_id, score: game.top_3_score });
+    if (game.top_1_user)
+      entries.push({ id: game.top_1_user.toString(), score: game.top_1_score });
+    if (game.top_2_user)
+      entries.push({ id: game.top_2_user.toString(), score: game.top_2_score });
+    if (game.top_3_user)
+      entries.push({ id: game.top_3_user.toString(), score: game.top_3_score });
 
     // Check if this user already has an entry
     const existingIndex = entries.findIndex((e) => e.id === user_id);
@@ -78,20 +86,23 @@ export const updateGameScores = async (
     const top3 = entries.slice(0, 3);
 
     // Map back to model fields. Pad with null/0 for empty slots.
-    game.top_1_id = top3[0]?.id ?? null;
+    game.top_1_user = top3[0]?.id ? new mongoose.Types.ObjectId(top3[0].id) : null;
     game.top_1_score = top3[0]?.score ?? 0;
-    game.top_2_id = top3[1]?.id ?? null;
+    game.top_2_user = top3[1]?.id ? new mongoose.Types.ObjectId(top3[1].id) : null;
     game.top_2_score = top3[1]?.score ?? 0;
-    game.top_3_id = top3[2]?.id ?? null;
+    game.top_3_user = top3[2]?.id ? new mongoose.Types.ObjectId(top3[2].id) : null;
     game.top_3_score = top3[2]?.score ?? 0;
 
     await game.save();
 
-    return successResponse(
-      res,
-      game,
-      "Scores updated successfully",
-    );
+    // Re-fetch with populated users for the response
+    const populated = await Game.findById(game._id)
+      .populate({
+        path: "top_1_user top_2_user top_3_user",
+        select: "email display_name avatar_url points",
+      });
+
+    return successResponse(res, populated, "Scores updated successfully");
   } catch (error) {
     next(error);
   }
