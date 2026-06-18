@@ -33,11 +33,35 @@ const router = Router();
  *                   type: object
  *                   properties:
  *                     name: { type: string, example: "fight_fight" }
- *                     top_1_id: { type: string, example: "user_id_1" }
+ *                     top_1_user:
+ *                       type: object
+ *                       nullable: true
+ *                       properties:
+ *                         _id: { type: string, example: "507f1f77bcf86cd799439011" }
+ *                         email: { type: string, example: "player@example.com" }
+ *                         display_name: { type: string, example: "PlayerOne" }
+ *                         avatar_url: { type: string, example: "https://..." }
+ *                         points: { type: number, example: 1500 }
  *                     top_1_score: { type: number, example: 100 }
- *                     top_2_id: { type: string, example: "user_id_2" }
+ *                     top_2_user:
+ *                       type: object
+ *                       nullable: true
+ *                       properties:
+ *                         _id: { type: string, example: "507f1f77bcf86cd799439012" }
+ *                         email: { type: string, example: "player2@example.com" }
+ *                         display_name: { type: string, example: "PlayerTwo" }
+ *                         avatar_url: { type: string, example: "https://..." }
+ *                         points: { type: number, example: 1200 }
  *                     top_2_score: { type: number, example: 80 }
- *                     top_3_id: { type: string, example: "user_id_3" }
+ *                     top_3_user:
+ *                       type: object
+ *                       nullable: true
+ *                       properties:
+ *                         _id: { type: string, example: "507f1f77bcf86cd799439013" }
+ *                         email: { type: string, example: "player3@example.com" }
+ *                         display_name: { type: string, example: "PlayerThree" }
+ *                         avatar_url: { type: string, example: "https://..." }
+ *                         points: { type: number, example: 900 }
  *                     top_3_score: { type: number, example: 60 }
  *                     createdAt: { type: string, format: date-time, example: "2024-01-01T00:00:00Z" }
  *                     updatedAt: { type: string, format: date-time, example: "2024-01-02T00:00:00Z" }
@@ -48,7 +72,7 @@ router.get("/:game_name", authMiddleware, getGameByName);
 
 /**
  * @swagger
- * /games/{game_name}/scores:
+ * /games/{game_name}:
  *   patch:
  *     summary: Update the scores of a specific game. Only accessible by authenticated users.
  *     tags: [Games]
@@ -82,11 +106,35 @@ router.get("/:game_name", authMiddleware, getGameByName);
  *                   type: object
  *                   properties:
  *                     name: { type: string, example: "fight_fight" }
- *                     top_1_id: { type: string, example: "user_id_1" }
+ *                     top_1_user:
+ *                       type: object
+ *                       nullable: true
+ *                       properties:
+ *                         _id: { type: string, example: "507f1f77bcf86cd799439011" }
+ *                         email: { type: string, example: "player@example.com" }
+ *                         display_name: { type: string, example: "PlayerOne" }
+ *                         avatar_url: { type: string, example: "https://..." }
+ *                         points: { type: number, example: 1500 }
  *                     top_1_score: { type: number, example: 100 }
- *                     top_2_id: { type: string, example: "user_id_2" }
+ *                     top_2_user:
+ *                       type: object
+ *                       nullable: true
+ *                       properties:
+ *                         _id: { type: string, example: "507f1f77bcf86cd799439012" }
+ *                         email: { type: string, example: "player2@example.com" }
+ *                         display_name: { type: string, example: "PlayerTwo" }
+ *                         avatar_url: { type: string, example: "https://..." }
+ *                         points: { type: number, example: 1200 }
  *                     top_2_score: { type: number, example: 80 }
- *                     top_3_id: { type: string, example: "user_id_3" }
+ *                     top_3_user:
+ *                       type: object
+ *                       nullable: true
+ *                       properties:
+ *                         _id: { type: string, example: "507f1f77bcf86cd799439013" }
+ *                         email: { type: string, example: "player3@example.com" }
+ *                         display_name: { type: string, example: "PlayerThree" }
+ *                         avatar_url: { type: string, example: "https://..." }
+ *                         points: { type: number, example: 900 }
  *                     top_3_score: { type: number, example: 60 }
  *                     createdAt: { type: string, format: date-time, example: "2024-01-01T00:00:00Z" }
  *                     updatedAt: { type: string, format: date-time, example: "2024-01-02T00:00:00Z" }
