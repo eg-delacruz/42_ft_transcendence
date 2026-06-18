@@ -88,7 +88,7 @@ export const DUNGEON_ROOMS: DungeonRoom[] = [
   {
     type: 'combat',
     name: 'Combate',
-    probability: 33,
+    probability: 50,
     icon: '⚔️',
   },
   {
@@ -100,7 +100,7 @@ export const DUNGEON_ROOMS: DungeonRoom[] = [
   {
     type: 'empty',
     name: 'Sala vacía',
-    probability: 33,
+    probability: 17,
     icon: '🚪',
   },
 ];
@@ -110,7 +110,7 @@ export const DUNGEON_DECKS: Record<DungeonClass, DungeonCard[]> = {
     {
       id: 'mague-fireball',
       name: 'Bola de fuego',
-      probability: 50,
+      probability: 60,
       effects: ['clearCombat'],
       icon: '🔥',
     },
@@ -124,7 +124,7 @@ export const DUNGEON_DECKS: Record<DungeonClass, DungeonCard[]> = {
     {
       id: 'mague-invisibility',
       name: 'Invisibilidad',
-      probability: 20,
+      probability: 10,
       effects: ['clearTrap'],
       icon: '👻',
     },
@@ -133,7 +133,7 @@ export const DUNGEON_DECKS: Record<DungeonClass, DungeonCard[]> = {
     {
       id: 'warrior-fight',
       name: 'Luchar',
-      probability: 50,
+      probability: 60,
       effects: ['clearCombat', 'selfDamage'],
       icon: '🗡️',
     },
@@ -147,7 +147,7 @@ export const DUNGEON_DECKS: Record<DungeonClass, DungeonCard[]> = {
     {
       id: 'warrior-healing-potion',
       name: 'Poción',
-      probability: 20,
+      probability: 10,
       effects: ['heal'],
       icon: '❤️',
     },
@@ -156,7 +156,7 @@ export const DUNGEON_DECKS: Record<DungeonClass, DungeonCard[]> = {
     {
       id: 'rogue-fight',
       name: 'Luchar',
-      probability: 50,
+      probability: 60,
       effects: ['clearCombat', 'selfDamage'],
       icon: '🗡️',
     },
@@ -170,7 +170,7 @@ export const DUNGEON_DECKS: Record<DungeonClass, DungeonCard[]> = {
     {
       id: 'rogue-loot',
       name: 'Saquear',
-      probability: 20,
+      probability: 10,
       effects: ['clearAll', 'bonusScore'],
       icon: '💰',
     },
@@ -187,6 +187,12 @@ export const DUNGEON_CLASS_ICONS: Record<DungeonClass, string> = {
   mague: '🧙',
   rogue: '🥷',
   warrior: '🛡️',
+};
+
+export const DUNGEON_CLASS_CONTROL_LABELS: Record<DungeonClass, string> = {
+  mague: '←',
+  warrior: '↑',
+  rogue: '→',
 };
 
 export const DUNGEON_EFFECT_ICONS: Record<DungeonCardEffect, string> = {
@@ -208,3 +214,13 @@ export const DUNGEON_EFFECT_LABELS: Record<DungeonCardEffect, string> = {
   bonusScore: 'Bonus',
   selfDamage: 'Daño propio',
 };
+
+export const DUNGEON_CLASS_CONTROL_TEXT =
+  '← Mague | ↑ Warrior | → Rogue';
+
+export const DUNGEON_CARD_CONTROL_TEXT =
+  '← Carta 1 | ↑ Carta 3 | → Carta 2 | ↓ Abandonar';
+
+export const DUNGEON_CARD_1_LABEL = '← Carta 1';
+export const DUNGEON_CARD_2_LABEL = '→ Carta 2';
+export const DUNGEON_CARD_3_LABEL = '↑ Carta 3';

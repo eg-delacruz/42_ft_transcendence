@@ -116,3 +116,8 @@ export const FIGHT_ACTION_DESCRIPTIONS: Record<FightAction, string> = {
   dodge: 'Evita daño',
 };
 
+export const FIGHT_PLAYER_1_CONTROLS_TEXT =
+  '← 👊 | → 🦵 | ↑ 🤼 | ↓ 💨';
+
+export const FIGHT_PLAYER_2_CONTROLS_TEXT =
+  'A 👊 | D 🦵 | W 🤼 | S 💨';

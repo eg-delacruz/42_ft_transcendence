@@ -1,54 +1,39 @@
 import { useEffect, useState } from 'react';
 
+import { TopScores } from '../components/TopScores';
+
 import {
-  DUNGEON_BETTING_COUNTDOWN_SECONDS,
+  chooseClass,
+  createInitialDungeonState,
+  finishAsDead,
+  getVisualCardSlots,
+  handleDungeonKey,
+  resolveCardChoice,
+  startNewRoom,
+} from './DDD.logic';
+
+import {
+  DUNGEON_CARD_CONTROL_TEXT,
   DUNGEON_CARD_SELECTION_SECONDS,
+  DUNGEON_CLASS_CONTROL_LABELS,
+  DUNGEON_CLASS_CONTROL_TEXT,
   DUNGEON_CLASS_ICONS,
   DUNGEON_CLASS_LABELS,
   DUNGEON_CLASS_SELECTION_SECONDS,
-  DUNGEON_DEATH_SCORE_PENALTY,
-  DUNGEON_DECKS,
   DUNGEON_EFFECT_ICONS,
   DUNGEON_EFFECT_LABELS,
-  DUNGEON_HAND_SIZE,
   DUNGEON_INITIAL_HEALTH,
   DUNGEON_RESOLVE_SECONDS,
   DUNGEON_RESULTS_COUNTDOWN_SECONDS,
-  DUNGEON_ROOM_SCORE,
-  DUNGEON_ROOMS,
-  DUNGEON_STREAK_SCORE,
-  type DungeonCard,
   type DungeonClass,
-  type DungeonPlayer,
-  type DungeonRoom,
   type DungeonState,
-  type DungeonTurnResult,
-} from './dungeonTypes';
+} from './DDD.types';
+
+import { styles } from './DDD.styles';
 
 type DeepDarkDungeonProps = {
   onExitToMenu?: () => void;
 };
-
-function createInitialDungeonState(): DungeonState {
-  return {
-    phase: 'bettingCountdown',
-    bettingCountdown: DUNGEON_BETTING_COUNTDOWN_SECONDS,
-    classSelectionCountdown: DUNGEON_CLASS_SELECTION_SECONDS,
-    cardSelectionCountdown: DUNGEON_CARD_SELECTION_SECONDS,
-    resolveCountdown: DUNGEON_RESOLVE_SECONDS,
-    resultsCountdown: DUNGEON_RESULTS_COUNTDOWN_SECONDS,
-    player: {
-      class: undefined,
-      health: DUNGEON_INITIAL_HEALTH,
-      score: 0,
-      streak: 0,
-      roundsSurvived: 0,
-    },
-    currentRoom: undefined,
-    hand: [],
-    lastTurnResult: undefined,
-  };
-}
 
 export function DeepDarkDungeon({ onExitToMenu }: DeepDarkDungeonProps) {
   const [dungeonState, setDungeonState] = useState<DungeonState>(
@@ -260,6 +245,8 @@ export function DeepDarkDungeon({ onExitToMenu }: DeepDarkDungeonProps) {
 
   return (
     <main style={styles.page}>
+      <TopScores minigameId="deep-dark-dungeon" />
+
       <section style={styles.panel}>
         <header style={styles.header}>
           <p style={styles.kicker}>Minigame</p>
@@ -288,26 +275,12 @@ export function DeepDarkDungeon({ onExitToMenu }: DeepDarkDungeonProps) {
               </p>
 
               <section style={styles.classOptions}>
-                <article style={styles.classCard}>
-                  <p style={styles.classKey}>←</p>
-                  <p style={styles.classIcon}>{DUNGEON_CLASS_ICONS.mague}</p>
-                  <p style={styles.className}>{DUNGEON_CLASS_LABELS.mague}</p>
-                </article>
-
-                <article style={styles.classCard}>
-                  <p style={styles.classKey}>↑</p>
-                  <p style={styles.classIcon}>{DUNGEON_CLASS_ICONS.warrior}</p>
-                  <p style={styles.className}>{DUNGEON_CLASS_LABELS.warrior}</p>
-                </article>
-
-                <article style={styles.classCard}>
-                  <p style={styles.classKey}>→</p>
-                  <p style={styles.classIcon}>{DUNGEON_CLASS_ICONS.rogue}</p>
-                  <p style={styles.className}>{DUNGEON_CLASS_LABELS.rogue}</p>
-                </article>
+                <ClassOption dungeonClass="mague" />
+                <ClassOption dungeonClass="warrior" />
+                <ClassOption dungeonClass="rogue" />
               </section>
 
-              <p style={styles.text}>← Mague | ↑ Warrior | → Rogue</p>
+              <p style={styles.text}>{DUNGEON_CLASS_CONTROL_TEXT}</p>
               <p style={styles.text}>
                 Si no eliges, se seleccionará Warrior.
               </p>
@@ -327,9 +300,7 @@ export function DeepDarkDungeon({ onExitToMenu }: DeepDarkDungeonProps) {
               <p style={styles.bigNumber}>
                 {dungeonState.cardSelectionCountdown}
               </p>
-              <p style={styles.text}>
-                ← Carta 1 | ↑ Carta 3 | → Carta 2 | ↓ Abandonar
-              </p>
+              <p style={styles.text}>{DUNGEON_CARD_CONTROL_TEXT}</p>
             </>
           )}
 
@@ -431,458 +402,14 @@ export function DeepDarkDungeon({ onExitToMenu }: DeepDarkDungeonProps) {
   );
 }
 
-function handleDungeonKey(
-  state: DungeonState,
-  code: string,
-): DungeonState | null {
-  if (state.phase === 'choosingClass') {
-    if (code === 'ArrowLeft') {
-      return chooseClass(state, 'mague');
-    }
-
-    if (code === 'ArrowRight') {
-      return chooseClass(state, 'rogue');
-    }
-
-    if (code === 'ArrowUp') {
-      return chooseClass(state, 'warrior');
-    }
-
-    return null;
-  }
-
-  if (state.phase === 'choosingCard') {
-    if (code === 'ArrowLeft') {
-      return resolveCardChoice(state, 0);
-    }
-
-    if (code === 'ArrowRight') {
-      return resolveCardChoice(state, 1);
-    }
-
-    if (code === 'ArrowUp') {
-      return resolveCardChoice(state, 2);
-    }
-
-    if (code === 'ArrowDown') {
-      return escapeDungeon(state);
-    }
-
-    return null;
-  }
-
-  return null;
-}
-
-function chooseClass(
-  state: DungeonState,
-  dungeonClass: DungeonClass,
-): DungeonState {
-  return {
-    ...state,
-    phase: 'drawingCards',
-    player: {
-      ...state.player,
-      class: dungeonClass,
-    },
-  };
-}
-
-function startNewRoom(state: DungeonState): DungeonState {
-  if (!state.player.class) {
-    return chooseClass(state, 'warrior');
-  }
-
-  return {
-    ...state,
-    phase: 'choosingCard',
-    currentRoom: drawRoom(),
-    hand: drawCards(state.player.class, DUNGEON_HAND_SIZE),
-    cardSelectionCountdown: DUNGEON_CARD_SELECTION_SECONDS,
-    lastTurnResult: undefined,
-  };
-}
-
-function resolveCardChoice(
-  state: DungeonState,
-  cardIndex: number,
-): DungeonState {
-  if (
-    state.phase !== 'choosingCard' ||
-    !state.currentRoom ||
-    !state.player.class
-  ) {
-    return state;
-  }
-
-  const selectedCard = state.hand[cardIndex] ?? state.hand[0];
-
-  const turnResult = resolveTurn(
-    state.player,
-    state.currentRoom,
-    selectedCard,
+function ClassOption({ dungeonClass }: { dungeonClass: DungeonClass }) {
+  return (
+    <article style={styles.classCard}>
+      <p style={styles.classKey}>
+        {DUNGEON_CLASS_CONTROL_LABELS[dungeonClass]}
+      </p>
+      <p style={styles.classIcon}>{DUNGEON_CLASS_ICONS[dungeonClass]}</p>
+      <p style={styles.className}>{DUNGEON_CLASS_LABELS[dungeonClass]}</p>
+    </article>
   );
-
-  const nextScore = state.player.score + turnResult.scoreGained;
-
-  const nextHealth = Math.max(
-    Math.min(
-      state.player.health - turnResult.damageTaken + turnResult.healingReceived,
-      DUNGEON_INITIAL_HEALTH,
-    ),
-    0,
-  );
-
-  return {
-    ...state,
-    phase: 'resolvingRoom',
-    resolveCountdown: DUNGEON_RESOLVE_SECONDS,
-    player: {
-      ...state.player,
-      health: nextHealth,
-      score: nextScore,
-      streak: turnResult.roomCleared ? state.player.streak + 1 : 0,
-      roundsSurvived: turnResult.roomCleared
-        ? state.player.roundsSurvived + 1
-        : state.player.roundsSurvived,
-    },
-    lastTurnResult: turnResult,
-  };
 }
-
-function resolveTurn(
-  player: DungeonPlayer,
-  room: DungeonRoom,
-  card: DungeonCard,
-): DungeonTurnResult {
-  if (room.type === 'empty') {
-    const scoreGained = getRoomScore(player.streak) + getBonusScore(card);
-
-    return {
-      roomCleared: true,
-      damageTaken: getSelfDamage(card),
-      healingReceived: getHealing(card),
-      scoreGained,
-      message: `🚪 Sala vacía. ${card.icon} ${card.name}. Sala superada.`,
-    };
-  }
-
-  const roomCleared =
-    card.effects.includes('clearAll') ||
-    (room.type === 'combat' && card.effects.includes('clearCombat')) ||
-    (room.type === 'trap' && card.effects.includes('clearTrap'));
-
-  const preventedDamage = card.effects.includes('preventDamage');
-
-  const baseDamage = roomCleared || preventedDamage ? 0 : 1;
-  const damageTaken = baseDamage + getSelfDamage(card);
-  const healingReceived = getHealing(card);
-
-  const scoreGained = roomCleared
-    ? getRoomScore(player.streak) + getBonusScore(card)
-    : getBonusScore(card);
-
-  return {
-    roomCleared,
-    damageTaken,
-    healingReceived,
-    scoreGained,
-    message: buildTurnMessage(
-      room,
-      card,
-      roomCleared,
-      damageTaken,
-      healingReceived,
-      scoreGained,
-    ),
-  };
-}
-
-function buildTurnMessage(
-  room: DungeonRoom,
-  card: DungeonCard,
-  roomCleared: boolean,
-  damageTaken: number,
-  healingReceived: number,
-  scoreGained: number,
-): string {
-  const resultText = roomCleared ? 'Superada' : 'Fallida';
-
-  return `${room.icon} ${room.name} | ${card.icon} ${card.name} | ${resultText} | Daño ${damageTaken} | Cura ${healingReceived} | +${scoreGained}`;
-}
-
-function escapeDungeon(state: DungeonState): DungeonState {
-  return {
-    ...state,
-    phase: 'escaped',
-    resultsCountdown: DUNGEON_RESULTS_COUNTDOWN_SECONDS,
-    lastTurnResult: {
-      roomCleared: false,
-      damageTaken: 0,
-      healingReceived: 0,
-      scoreGained: 0,
-      message: '🏃 Has abandonado la mazmorra con vida.',
-    },
-  };
-}
-
-function finishAsDead(state: DungeonState): DungeonState {
-  const penalizedScore = Math.floor(
-    state.player.score * (1 - DUNGEON_DEATH_SCORE_PENALTY),
-  );
-
-  return {
-    ...state,
-    phase: 'dead',
-    resultsCountdown: DUNGEON_RESULTS_COUNTDOWN_SECONDS,
-    player: {
-      ...state.player,
-      score: penalizedScore,
-    },
-    lastTurnResult: {
-      roomCleared: false,
-      damageTaken: 0,
-      healingReceived: 0,
-      scoreGained: 0,
-      message: '☠️ Has muerto. Pierdes el 25% del score acumulado.',
-    },
-  };
-}
-
-function drawRoom(): DungeonRoom {
-  const randomValue = Math.random() * 100;
-  let cumulative = 0;
-
-  for (const room of DUNGEON_ROOMS) {
-    cumulative += room.probability;
-
-    if (randomValue < cumulative) {
-      return room;
-    }
-  }
-
-  return DUNGEON_ROOMS[DUNGEON_ROOMS.length - 1];
-}
-
-function drawCards(dungeonClass: DungeonClass, amount: number): DungeonCard[] {
-  return Array.from({ length: amount }, () => drawCard(dungeonClass));
-}
-
-function drawCard(dungeonClass: DungeonClass): DungeonCard {
-  const deck = DUNGEON_DECKS[dungeonClass];
-  const randomValue = Math.random() * 100;
-  let cumulative = 0;
-
-  for (const card of deck) {
-    cumulative += card.probability;
-
-    if (randomValue < cumulative) {
-      return card;
-    }
-  }
-
-  return deck[deck.length - 1];
-}
-
-function getRoomScore(currentStreak: number): number {
-  if (currentStreak > 0) {
-    return DUNGEON_STREAK_SCORE;
-  }
-
-  return DUNGEON_ROOM_SCORE;
-}
-
-function getBonusScore(card: DungeonCard): number {
-  return card.effects.includes('bonusScore') ? 5 : 0;
-}
-
-function getSelfDamage(card: DungeonCard): number {
-  return card.effects.includes('selfDamage') ? 1 : 0;
-}
-
-function getHealing(card: DungeonCard): number {
-  return card.effects.includes('heal') ? 4 : 0;
-}
-
-function getVisualCardSlots(hand: DungeonCard[]) {
-  return [
-    {
-      card: hand[0],
-      originalIndex: 0,
-      label: '← Carta 1',
-    },
-    {
-      card: hand[2],
-      originalIndex: 2,
-      label: '↑ Carta 3',
-    },
-    {
-      card: hand[1],
-      originalIndex: 1,
-      label: '→ Carta 2',
-    },
-  ].filter((slot) => slot.card);
-}
-
-const styles: Record<string, React.CSSProperties> = {
-  page: {
-    width: '100%',
-    height: '100%',
-    minHeight: '100vh',
-    background: '#101018',
-    color: '#f4f4f5',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontFamily: 'monospace',
-    padding: '32px',
-    boxSizing: 'border-box',
-  },
-  panel: {
-    width: 'min(1100px, 95vw)',
-    display: 'grid',
-    gap: '18px',
-  },
-  header: {
-    textAlign: 'center',
-  },
-  kicker: {
-    margin: 0,
-    color: '#a1a1aa',
-    textTransform: 'uppercase',
-    letterSpacing: '0.16em',
-  },
-  title: {
-    margin: '8px 0',
-    fontSize: '44px',
-  },
-  subtitle: {
-    margin: 0,
-    color: '#d4d4d8',
-  },
-  statusBox: {
-    minHeight: '160px',
-    border: '2px solid #3f3f46',
-    borderRadius: '16px',
-    background: '#18181f',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '10px',
-    padding: '20px',
-    textAlign: 'center',
-  },
-  phaseTitle: {
-    margin: 0,
-    fontSize: '28px',
-  },
-  bigNumber: {
-    margin: 0,
-    fontSize: '56px',
-    fontWeight: 700,
-  },
-  text: {
-    margin: 0,
-    color: '#d4d4d8',
-  },
-  winnerText: {
-    margin: 0,
-    fontSize: '28px',
-    fontWeight: 700,
-  },
-  sectionTitle: {
-    margin: '0 0 8px',
-    fontSize: '22px',
-  },
-  classOptions: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-    gap: '12px',
-    width: '100%',
-    maxWidth: '520px',
-  },
-  classCard: {
-    border: '1px solid #3f3f46',
-    borderRadius: '12px',
-    background: '#101018',
-    padding: '12px',
-    textAlign: 'center',
-  },
-  classKey: {
-    margin: 0,
-    color: '#a1a1aa',
-    fontSize: '16px',
-  },
-  classIcon: {
-    margin: '6px 0',
-    fontSize: '36px',
-  },
-  className: {
-    margin: 0,
-    fontSize: '18px',
-    fontWeight: 700,
-  },
-  playerBox: {
-    border: '2px solid #3f3f46',
-    borderRadius: '16px',
-    background: '#18181f',
-    padding: '18px',
-  },
-  roomBox: {
-    border: '2px solid #3f3f46',
-    borderRadius: '16px',
-    background: '#18181f',
-    padding: '18px',
-    textAlign: 'center',
-  },
-  roomIcon: {
-    margin: 0,
-    fontSize: '56px',
-  },
-  roomName: {
-    margin: '8px 0 0',
-    fontSize: '30px',
-    fontWeight: 700,
-  },
-  cards: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-    gap: '16px',
-  },
-  card: {
-    border: '2px solid #3f3f46',
-    borderRadius: '16px',
-    background: '#18181f',
-    padding: '18px',
-    minHeight: '140px',
-    textAlign: 'center',
-  },
-  cardKey: {
-    margin: 0,
-    color: '#a1a1aa',
-    fontSize: '14px',
-  },
-  cardIcon: {
-    margin: '8px 0',
-    fontSize: '56px',
-  },
-  cardTitle: {
-    margin: '0 0 8px',
-    fontSize: '20px',
-  },
-  effectIcons: {
-    display: 'flex',
-    justifyContent: 'center',
-    gap: '10px',
-    fontSize: '28px',
-    marginTop: '12px',
-  },
-  resultBox: {
-    border: '2px solid #3f3f46',
-    borderRadius: '16px',
-    background: '#18181f',
-    padding: '18px',
-    textAlign: 'center',
-  },
-};
