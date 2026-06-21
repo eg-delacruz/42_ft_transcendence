@@ -1,11 +1,15 @@
 import { useState } from 'react';
 
-import { TheRace } from './the-race/TheRace';
-import { FightFight } from './fight-fight/Fight';
 import { DeepDarkDungeon } from './deep-dark-dungeon/DeepDarkDungeon';
+import { FightFight } from './fight-fight/Fight';
+import { MinigamesScoresList } from './MinigamesScoresList';
+import { TheRace } from './the-race/TheRace';
+
+import { styles } from './MinigamesDevPage.styles';
 
 type DevMinigame =
   | 'menu'
+  | 'scores'
   | 'the-race'
   | 'fight-fight'
   | 'deep-dark-dungeon';
@@ -15,6 +19,10 @@ export function MinigamesDevPage() {
 
   function handleExitToMenu() {
     setActiveGame('menu');
+  }
+
+  if (activeGame === 'scores') {
+    return <MinigamesScoresList onExitToMenu={handleExitToMenu} />;
   }
 
   return (
@@ -51,6 +59,14 @@ export function MinigamesDevPage() {
             >
               Deep & Dark Dungeon
             </button>
+
+            <button
+              type="button"
+              style={styles.secondaryButton}
+              onClick={() => setActiveGame('scores')}
+            >
+              Ver scores
+            </button>
           </div>
         </section>
       )}
@@ -83,68 +99,3 @@ export function MinigamesDevPage() {
     </main>
   );
 }
-
-const styles: Record<string, React.CSSProperties> = {
-  page: {
-    width: '100vw',
-    height: '100vh',
-    minHeight: '100vh',
-    background: '#101018',
-    color: '#f4f4f5',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontFamily: 'monospace',
-    overflow: 'hidden',
-  },
-  menu: {
-    width: 'min(720px, 90vw)',
-    padding: '32px',
-    border: '2px solid #3f3f46',
-    borderRadius: '16px',
-    background: '#18181f',
-    textAlign: 'center',
-  },
-  title: {
-    margin: '0 0 12px',
-    fontSize: '32px',
-  },
-  subtitle: {
-    margin: '0 0 32px',
-    color: '#a1a1aa',
-  },
-  buttons: {
-    display: 'grid',
-    gap: '16px',
-  },
-  button: {
-    padding: '16px 24px',
-    borderRadius: '12px',
-    border: '1px solid #71717a',
-    background: '#27272f',
-    color: '#f4f4f5',
-    fontSize: '20px',
-    cursor: 'pointer',
-  },
-  gameWrapper: {
-    position: 'relative',
-    width: '100%',
-    height: '100%',
-  },
-  backButton: {
-    position: 'absolute',
-    top: '16px',
-    left: '16px',
-    zIndex: 10,
-    padding: '10px 14px',
-    borderRadius: '8px',
-    border: '1px solid #71717a',
-    background: '#27272f',
-    color: '#f4f4f5',
-    cursor: 'pointer',
-  },
-  gameArea: {
-    width: '100%',
-    height: '100%',
-  },
-};

@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
 import { TopScores } from '../components/TopScores';
-import { styles } from './Race.styles';
+import { updateMinigameTopScore } from '../components/TopScores.api';
+
 import {
   advancePlayer,
   createInitialRaceState,
@@ -8,6 +10,8 @@ import {
   getProgressPercentage,
   getRaceWinnerName,
 } from './Race.logic';
+
+import { styles } from './Race.styles';
 
 import {
   RACE_GAME_COUNTDOWN_SECONDS,
@@ -18,6 +22,7 @@ import {
   type RaceState,
 } from './Race.types';
 
+import { getRaceUserId } from './Race.users';
 
 type TheRaceProps = {
   onExitToMenu?: () => void;
@@ -27,6 +32,8 @@ export function TheRace({ onExitToMenu }: TheRaceProps) {
   const [raceState, setRaceState] = useState<RaceState>(
     createInitialRaceState,
   );
+
+  const hasSubmittedScore = useRef(false);
 
   useEffect(() => {
     if (raceState.phase !== 'bettingCountdown') {
@@ -86,6 +93,38 @@ export function TheRace({ onExitToMenu }: TheRaceProps) {
 
     return () => window.clearInterval(intervalId);
   }, [raceState.phase]);
+
+  useEffect(() => {
+    if (raceState.phase !== 'finished') {
+      return;
+    }
+
+    if (!raceState.winnerId) {
+      return;
+    }
+
+    if (hasSubmittedScore.current) {
+      return;
+    }
+
+    const winner = raceState.players.find(
+      (player) => player.id === raceState.winnerId,
+    );
+
+    if (!winner) {
+      return;
+    }
+
+    hasSubmittedScore.current = true;
+
+    const winnerUserId = getRaceUserId(raceState.winnerId);
+
+    updateMinigameTopScore('the-race', winner.progress, winnerUserId).catch(
+      (error) => {
+        console.error('Error updating The Race top score:', error);
+      },
+    );
+  }, [raceState.phase, raceState.winnerId, raceState.players]);
 
   useEffect(() => {
     if (raceState.phase !== 'finished') {

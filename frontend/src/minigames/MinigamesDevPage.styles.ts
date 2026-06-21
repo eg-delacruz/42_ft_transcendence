@@ -1,0 +1,197 @@
+import type { CSSProperties } from 'react';
+
+export const styles: Record<string, CSSProperties> = {
+  // =========================
+  // MinigamesDevPage
+  // =========================
+
+  page: {
+    width: '100%',
+    minHeight: 'calc(100vh - 32px)',
+    background: '#101018',
+    color: '#f4f4f5',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontFamily: 'monospace',
+    padding: '32px',
+    boxSizing: 'border-box',
+    overflowX: 'hidden',
+  },
+  menu: {
+    width: '100%',
+    maxWidth: '720px',
+    padding: '32px',
+    border: '2px solid #3f3f46',
+    borderRadius: '16px',
+    background: '#18181f',
+    textAlign: 'center',
+    boxSizing: 'border-box',
+  },
+  title: {
+    margin: '0 0 12px',
+    fontSize: '32px',
+  },
+  subtitle: {
+    margin: '0 0 32px',
+    color: '#a1a1aa',
+  },
+  buttons: {
+    display: 'grid',
+    gap: '16px',
+  },
+  button: {
+    padding: '16px 24px',
+    borderRadius: '12px',
+    border: '1px solid #71717a',
+    background: '#27272f',
+    color: '#f4f4f5',
+    fontSize: '20px',
+    cursor: 'pointer',
+  },
+  secondaryButton: {
+    padding: '16px 24px',
+    borderRadius: '12px',
+    border: '1px solid #52525b',
+    background: '#101018',
+    color: '#d4d4d8',
+    fontSize: '20px',
+    cursor: 'pointer',
+  },
+  gameWrapper: {
+    position: 'relative',
+    width: '100%',
+    minHeight: 'calc(100vh - 32px)',
+  },
+  backButton: {
+    position: 'absolute',
+    top: '16px',
+    left: '16px',
+    zIndex: 10,
+    padding: '10px 14px',
+    borderRadius: '8px',
+    border: '1px solid #71717a',
+    background: '#27272f',
+    color: '#f4f4f5',
+    cursor: 'pointer',
+  },
+  gameArea: {
+    width: '100%',
+    minHeight: 'calc(100vh - 32px)',
+  },
+
+  // =========================
+  // MinigamesScoresList
+  // =========================
+
+  scoresPage: {
+    width: '100%',
+    minHeight: 'calc(100vh - 32px)',
+    background: '#101018',
+    color: '#f4f4f5',
+    fontFamily: 'monospace',
+    padding: '32px',
+    boxSizing: 'border-box',
+    overflowX: 'hidden',
+    overflowY: 'auto',
+  },
+  scoresPanel: {
+    width: '100%',
+    maxWidth: '1100px',
+    margin: '0 auto',
+    display: 'grid',
+    gap: '24px',
+  },
+  scoresHeader: {
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '24px',
+    border: '2px solid #3f3f46',
+    borderRadius: '16px',
+    background: '#18181f',
+    padding: '24px',
+    textAlign: 'center',
+    boxSizing: 'border-box',
+  },
+  scoresSection: {
+    border: '2px solid #3f3f46',
+    borderRadius: '16px',
+    background: '#18181f',
+    padding: '24px',
+    boxSizing: 'border-box',
+  },
+  scoresGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+    gap: '16px',
+  },
+  scoreCard: {
+    border: '1px solid #3f3f46',
+    borderRadius: '12px',
+    background: '#101018',
+    padding: '16px',
+    minWidth: 0,
+    boxSizing: 'border-box',
+  },
+  scoreCardTitle: {
+    margin: '0 0 12px',
+    fontSize: '20px',
+    textAlign: 'center',
+  },
+  scoreRow: {
+    margin: '0 0 8px',
+    color: '#d4d4d8',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
+  firstScoreRow: {
+    color: '#facc15',
+    fontWeight: 700,
+  },
+  usersTable: {
+    display: 'grid',
+    gap: '8px',
+    overflowX: 'auto',
+    width: '100%',
+  },
+  usersHeader: {
+    display: 'grid',
+    gridTemplateColumns: '1.3fr 1fr 0.7fr 0.7fr 1.8fr',
+    gap: '12px',
+    padding: '10px 12px',
+    borderRadius: '8px',
+    background: '#27272f',
+    color: '#f4f4f5',
+    fontWeight: 700,
+    minWidth: '760px',
+    boxSizing: 'border-box',
+  },
+  userRow: {
+    display: 'grid',
+    gridTemplateColumns: '1.3fr 1fr 0.7fr 0.7fr 1.8fr',
+    gap: '12px',
+    padding: '10px 12px',
+    borderRadius: '8px',
+    background: '#101018',
+    color: '#d4d4d8',
+    minWidth: '760px',
+    boxSizing: 'border-box',
+  },
+  userId: {
+    color: '#a1a1aa',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
+  text: {
+    margin: 0,
+    color: '#d4d4d8',
+  },
+  errorText: {
+    margin: 0,
+    color: '#fca5a5',
+  },
+};

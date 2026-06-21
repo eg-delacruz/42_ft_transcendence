@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { TopScores } from '../components/TopScores';
+import { updateMinigameTopScore } from '../components/TopScores.api';
 
 import {
   chooseClass,
@@ -12,9 +13,10 @@ import {
   startNewRoom,
 } from './DDD.logic';
 
+import { styles } from './DDD.styles';
+
 import {
   DUNGEON_CARD_CONTROL_TEXT,
-  DUNGEON_CARD_SELECTION_SECONDS,
   DUNGEON_CLASS_CONTROL_LABELS,
   DUNGEON_CLASS_CONTROL_TEXT,
   DUNGEON_CLASS_ICONS,
@@ -24,12 +26,11 @@ import {
   DUNGEON_EFFECT_LABELS,
   DUNGEON_INITIAL_HEALTH,
   DUNGEON_RESOLVE_SECONDS,
-  DUNGEON_RESULTS_COUNTDOWN_SECONDS,
   type DungeonClass,
   type DungeonState,
 } from './DDD.types';
 
-import { styles } from './DDD.styles';
+import { getDungeonUserId } from './DDD.users';
 
 type DeepDarkDungeonProps = {
   onExitToMenu?: () => void;
@@ -39,6 +40,8 @@ export function DeepDarkDungeon({ onExitToMenu }: DeepDarkDungeonProps) {
   const [dungeonState, setDungeonState] = useState<DungeonState>(
     createInitialDungeonState,
   );
+
+  const hasSubmittedScore = useRef(false);
 
   useEffect(() => {
     if (dungeonState.phase !== 'bettingCountdown') {
@@ -170,6 +173,31 @@ export function DeepDarkDungeon({ onExitToMenu }: DeepDarkDungeonProps) {
 
     return () => window.clearTimeout(timeoutId);
   }, [dungeonState.phase, dungeonState.resolveCountdown]);
+
+  useEffect(() => {
+    const shouldSubmitScore =
+      dungeonState.phase === 'escaped' ||
+      dungeonState.phase === 'dead' ||
+      dungeonState.phase === 'finished';
+
+    if (!shouldSubmitScore) {
+      return;
+    }
+
+    if (hasSubmittedScore.current) {
+      return;
+    }
+
+    hasSubmittedScore.current = true;
+
+    updateMinigameTopScore(
+      'deep-dark-dungeon',
+      dungeonState.player.score,
+      getDungeonUserId(),
+    ).catch((error) => {
+      console.error('Error updating Deep & Dark Dungeon top score:', error);
+    });
+  }, [dungeonState.phase, dungeonState.player.score]);
 
   useEffect(() => {
     const shouldCountResults =

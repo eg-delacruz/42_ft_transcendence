@@ -1,15 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
 import { TopScores } from '../components/TopScores';
-import { styles } from './Fight.styles';
+import { updateMinigameTopScore } from '../components/TopScores.api';
+
 import {
+  checkFinished,
   createInitialFightState,
   getSelectionFromKey,
-  selectAction,
-  resolveRound,
-  checkFinished,
-  startNextRound,
   getWinnerName,
+  resolveRound,
+  selectAction,
+  startNextRound,
 } from './Fight.logic';
+
+import { styles } from './Fight.styles';
 
 import {
   FIGHT_ACTION_ICONS,
@@ -22,6 +26,8 @@ import {
   type FightState,
 } from './Fight.types';
 
+import { getFightUserId } from './Fight.users';
+
 type FightFightProps = {
   onExitToMenu?: () => void;
 };
@@ -30,6 +36,8 @@ export function FightFight({ onExitToMenu }: FightFightProps) {
   const [fightState, setFightState] = useState<FightState>(
     createInitialFightState,
   );
+
+  const hasSubmittedScore = useRef(false);
 
   useEffect(() => {
     if (fightState.phase !== 'bettingCountdown') {
@@ -122,6 +130,40 @@ export function FightFight({ onExitToMenu }: FightFightProps) {
       return;
     }
 
+    if (!fightState.winnerId) {
+      return;
+    }
+
+    if (hasSubmittedScore.current) {
+      return;
+    }
+
+    hasSubmittedScore.current = true;
+
+    const winner =
+      fightState.winnerId === 'player1'
+        ? fightState.player1
+        : fightState.player2;
+
+    const winnerUserId = getFightUserId(fightState.winnerId);
+
+    updateMinigameTopScore('fight-fight', winner.score, winnerUserId).catch(
+      (error) => {
+        console.error('Error updating Fight Fight top score:', error);
+      },
+    );
+  }, [
+    fightState.phase,
+    fightState.winnerId,
+    fightState.player1,
+    fightState.player2,
+  ]);
+
+  useEffect(() => {
+    if (fightState.phase !== 'finished') {
+      return;
+    }
+
     if (fightState.resultsCountdown <= 0) {
       return;
     }
@@ -176,6 +218,8 @@ export function FightFight({ onExitToMenu }: FightFightProps) {
 
   return (
     <main style={styles.page}>
+      <TopScores minigameId="fight-fight" />
+
       <section style={styles.panel}>
         <header style={styles.header}>
           <p style={styles.kicker}>Minigame</p>
@@ -243,8 +287,6 @@ export function FightFight({ onExitToMenu }: FightFightProps) {
             </p>
           </section>
         )}
-
-        <TopScores minigameId="fight-fight" />
       </section>
     </main>
   );

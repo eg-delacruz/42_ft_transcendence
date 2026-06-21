@@ -5,6 +5,8 @@ import {
   type MinigameTopScore,
 } from '../types';
 
+const API_BASE_URL = 'http://localhost:3000/api';
+
 type ApiGameResponse = {
   error?: string;
   body: MinigameGameResponse;
@@ -20,7 +22,7 @@ export async function getMinigameTopScores(
 ): Promise<MinigameTopScore[]> {
   const gameName = MINIGAME_API_NAMES[minigameId];
 
-  const response = await fetch(`/api/games/${gameName}`, {
+  const response = await fetch(`${API_BASE_URL}/games/${gameName}`, {
     method: 'GET',
     credentials: 'include',
   });
@@ -46,7 +48,7 @@ export async function updateMinigameTopScore(
     user_id: userId,
   };
 
-  const response = await fetch(`/api/games/${gameName}`, {
+  const response = await fetch(`${API_BASE_URL}/games/${gameName}`, {
     method: 'PATCH',
     credentials: 'include',
     headers: {
