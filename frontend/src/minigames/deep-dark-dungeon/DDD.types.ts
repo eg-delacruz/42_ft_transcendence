@@ -94,13 +94,13 @@ export const DUNGEON_ROOMS: DungeonRoom[] = [
   {
     type: 'trap',
     name: 'Trampa',
-    probability: 33,
+    probability: 40,
     icon: '🪤',
   },
   {
     type: 'empty',
     name: 'Sala vacía',
-    probability: 17,
+    probability: 10,
     icon: '🚪',
   },
 ];

@@ -95,3 +95,30 @@ export function getRaceWinnerName(state: RaceState): string {
 export function getProgressPercentage(progress: number): number {
   return Math.min((progress / RACE_TARGET_SCORE) * 100, 100);
 }
+
+export function calculateRaceFinalScore(
+  state: RaceState,
+  durationSeconds: number,
+): number {
+  if (state.phase !== 'finished') {
+    return 0;
+  }
+
+  if (!state.winnerId) {
+    return 0;
+  }
+
+  const winner = state.players.find((player) => player.id === state.winnerId);
+
+  const loser = state.players.find((player) => player.id !== state.winnerId);
+
+  if (!winner || !loser) {
+    return 0;
+  }
+
+  const pointsDifference = Math.max(0, winner.progress - loser.progress);
+  const baseScore = pointsDifference * 3;
+  const timeMultiplier = Math.max(0, 100 - durationSeconds);
+
+  return baseScore * timeMultiplier;
+}

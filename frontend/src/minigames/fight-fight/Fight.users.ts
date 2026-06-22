@@ -1,4 +1,3 @@
-// Fight.users.ts
 import type { FightPlayerId } from './Fight.types';
 
 export type FightGameUser = {
@@ -22,4 +21,8 @@ export const FIGHT_DEV_USERS: Record<FightPlayerId, FightGameUser> = {
 
 export function getFightUserId(playerId: FightPlayerId): string {
   return FIGHT_DEV_USERS[playerId].userId;
+}
+
+export function getFightDisplayName(playerId: FightPlayerId): string {
+  return FIGHT_DEV_USERS[playerId].displayName;
 }

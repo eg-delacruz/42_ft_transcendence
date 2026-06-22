@@ -1,4 +1,3 @@
-// Race.users.ts
 import type { RacePlayerId } from './Race.types';
 
 export type RaceGameUser = {
@@ -22,4 +21,8 @@ export const RACE_DEV_USERS: Record<RacePlayerId, RaceGameUser> = {
 
 export function getRaceUserId(playerId: RacePlayerId): string {
   return RACE_DEV_USERS[playerId].userId;
+}
+
+export function getRaceDisplayName(playerId: RacePlayerId): string {
+  return RACE_DEV_USERS[playerId].displayName;
 }

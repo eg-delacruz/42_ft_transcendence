@@ -53,7 +53,7 @@ export type FightState = {
 export const FIGHT_INITIAL_HEALTH = 100;
 
 export const FIGHT_BETTING_COUNTDOWN_SECONDS = 3;
-export const FIGHT_SELECTION_SECONDS = 1;
+export const FIGHT_SELECTION_SECONDS = 3;
 export const FIGHT_RESOLUTION_SECONDS = 1;
 export const FIGHT_RESULTS_COUNTDOWN_SECONDS = 3;
 
@@ -63,9 +63,9 @@ export const FIGHT_CONSECUTIVE_WIN_BONUS_DAMAGE = 2;
 export const FIGHT_LOW_HEALTH_RESISTANCE = 1;
 
 export const FIGHT_WIN_SCORE = 2;
-export const FIGHT_CONSECUTIVE_WIN_SCORE = 5;
+export const FIGHT_CONSECUTIVE_WIN_SCORE = 10;
 export const FIGHT_DRAW_SCORE = 1;
-export const FIGHT_ROUND_SCORE = 3;
+export const FIGHT_ROUND_SCORE = 5;
 
 export const FIGHT_ACTION_LABELS: Record<FightAction, string> = {
   punch: 'Puñetazo',

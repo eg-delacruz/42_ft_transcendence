@@ -21,7 +21,7 @@ export type RaceState = {
   winnerId?: RacePlayerId;
 };
 
-export const RACE_TARGET_SCORE = 50;
+export const RACE_TARGET_SCORE = 150;
 
 export const RACE_BETTING_COUNTDOWN_SECONDS = 3;
 export const RACE_GAME_COUNTDOWN_SECONDS = 3;

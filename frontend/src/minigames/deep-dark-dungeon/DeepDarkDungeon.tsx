@@ -271,11 +271,17 @@ export function DeepDarkDungeon({ onExitToMenu }: DeepDarkDungeonProps) {
     };
   }, [dungeonState]);
 
+  const shouldShowClassSelection = dungeonState.phase === 'choosingClass';
+
+  const shouldShowHand =
+    dungeonState.phase === 'choosingCard' ||
+    dungeonState.phase === 'resolvingRoom';
+
   return (
     <main style={styles.page}>
       <TopScores minigameId="deep-dark-dungeon" />
 
-      <section style={styles.panel}>
+      <section style={styles.board}>
         <header style={styles.header}>
           <p style={styles.kicker}>Minigame</p>
           <h1 style={styles.title}>Deep & Dark Dungeon</h1>
@@ -284,23 +290,26 @@ export function DeepDarkDungeon({ onExitToMenu }: DeepDarkDungeonProps) {
           </p>
         </header>
 
-        <section style={styles.statusBox}>
+        <section style={styles.topGameArea}>
+          <PlayerHud dungeonState={dungeonState} />
+          <ActiveChallenge dungeonState={dungeonState} />
+        </section>
+
+        <div style={styles.boardDivider} />
+
+        <section style={styles.bottomGameArea}>
           {dungeonState.phase === 'bettingCountdown' && (
-            <>
-              <h2 style={styles.phaseTitle}>Tiempo para apuestas</h2>
-              <p style={styles.bigNumber}>{dungeonState.bettingCountdown}</p>
+            <section style={styles.bottomMessageBox}>
+              <h2 style={styles.phaseTitle}>Preparando expedición</h2>
               <p style={styles.text}>
-                La exploración empezará automáticamente.
+                La exploración empezará cuando termine el tiempo de apuestas.
               </p>
-            </>
+            </section>
           )}
 
-          {dungeonState.phase === 'choosingClass' && (
-            <>
-              <h2 style={styles.phaseTitle}>Elige clase</h2>
-              <p style={styles.bigNumber}>
-                {dungeonState.classSelectionCountdown}
-              </p>
+          {shouldShowClassSelection && (
+            <section style={styles.classSelectionArea}>
+              <p style={styles.handSideLabel}>Clases disponibles</p>
 
               <section style={styles.classOptions}>
                 <ClassOption dungeonClass="mague" />
@@ -308,125 +317,261 @@ export function DeepDarkDungeon({ onExitToMenu }: DeepDarkDungeonProps) {
                 <ClassOption dungeonClass="rogue" />
               </section>
 
-              <p style={styles.text}>{DUNGEON_CLASS_CONTROL_TEXT}</p>
-              <p style={styles.text}>
-                Si no eliges, se seleccionará Warrior.
-              </p>
-            </>
+              <p style={styles.controlsHint}>{DUNGEON_CLASS_CONTROL_TEXT}</p>
+              <p style={styles.text}>Si no eliges, se seleccionará Warrior.</p>
+            </section>
           )}
 
           {dungeonState.phase === 'drawingCards' && (
-            <>
-              <h2 style={styles.phaseTitle}>Entrando en una sala...</h2>
-              <p style={styles.text}>Robando 3 cartas.</p>
-            </>
+            <section style={styles.bottomMessageBox}>
+              <h2 style={styles.phaseTitle}>Robando cartas...</h2>
+              <p style={styles.text}>Preparando la siguiente sala.</p>
+            </section>
           )}
 
-          {dungeonState.phase === 'choosingCard' && (
-            <>
-              <h2 style={styles.phaseTitle}>Elige una carta</h2>
-              <p style={styles.bigNumber}>
-                {dungeonState.cardSelectionCountdown}
+          {shouldShowHand && (
+            <section style={styles.handArea}>
+              <div style={styles.handHeader}>
+                <p style={styles.handSideLabel}>Cartas del jugador</p>
+                <span style={styles.handArrow}>→</span>
+              </div>
+
+              <section style={styles.cards}>
+                {getVisualCardSlots(dungeonState.hand).map(
+                  ({ card, originalIndex, label }) => (
+                    <article
+                      key={`${card.id}-${originalIndex}`}
+                      style={styles.card}
+                    >
+                      <p style={styles.cardKey}>{label}</p>
+                      <h3 style={styles.cardTitle}>{card.name}</h3>
+                      <p style={styles.cardIcon}>{card.icon}</p>
+
+                      <div style={styles.effectList}>
+                        {card.effects.map((effect) => (
+                          <p key={effect} style={styles.effectText}>
+                            <span style={styles.effectIcon}>
+                              {DUNGEON_EFFECT_ICONS[effect]}
+                            </span>{' '}
+                            {DUNGEON_EFFECT_LABELS[effect]}
+                          </p>
+                        ))}
+                      </div>
+                    </article>
+                  ),
+                )}
+              </section>
+
+              <p style={styles.controlsHint}>{DUNGEON_CARD_CONTROL_TEXT}</p>
+            </section>
+          )}
+
+          {(dungeonState.phase === 'escaped' ||
+            dungeonState.phase === 'dead' ||
+            dungeonState.phase === 'finished') && (
+            <section style={styles.bottomMessageBox}>
+              <h2 style={styles.phaseTitle}>
+                {getResultTitle(dungeonState)}
+              </h2>
+
+              <p style={styles.winnerText}>
+                Score final: {dungeonState.player.score}
               </p>
-              <p style={styles.text}>{DUNGEON_CARD_CONTROL_TEXT}</p>
-            </>
+
+              <p style={styles.text}>
+                Volviendo al menú en {dungeonState.resultsCountdown}...
+              </p>
+            </section>
+          )}
+        </section>
+      </section>
+    </main>
+  );
+}
+
+function PlayerHud({ dungeonState }: { dungeonState: DungeonState }) {
+  const selectedClass = dungeonState.player.class;
+
+  return (
+    <aside style={styles.playerHud}>
+      <HudRow
+        label="Clase"
+        value={
+          selectedClass
+            ? `${DUNGEON_CLASS_ICONS[selectedClass]} ${
+                DUNGEON_CLASS_LABELS[selectedClass]
+              }`
+            : 'Sin elegir'
+        }
+      />
+
+      <div style={styles.hudRow}>
+        <span style={styles.hudLabel}>Vida:</span>
+        <span style={styles.hearts}>
+          {renderHearts(dungeonState.player.health)}
+        </span>
+      </div>
+
+      <HudRow label="Puntos" value={String(dungeonState.player.score)} />
+
+      <HudRow
+        label="Racha"
+        value={`${dungeonState.player.streak} ${
+          dungeonState.player.streak > 0 ? '🔥' : ''
+        }`}
+      />
+
+      <HudRow label="Tiempo" value={getDungeonTimeText(dungeonState)} />
+
+      <HudRow
+        label="Salas"
+        value={String(dungeonState.player.roundsSurvived)}
+      />
+    </aside>
+  );
+}
+
+function HudRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={styles.hudRow}>
+      <span style={styles.hudLabel}>{label}:</span>
+      <span style={styles.hudValue}>{value}</span>
+    </div>
+  );
+}
+
+function ActiveChallenge({ dungeonState }: { dungeonState: DungeonState }) {
+  if (dungeonState.phase === 'bettingCountdown') {
+    return (
+      <section style={styles.challengeArea}>
+        <p style={styles.challengeLabel}>Reto activo</p>
+
+        <article style={styles.challengeCard}>
+          <h2 style={styles.challengeTitle}>Apuestas</h2>
+          <p style={styles.bigNumber}>{dungeonState.bettingCountdown}</p>
+          <p style={styles.challengeDescription}>
+            Esperando antes de entrar en la mazmorra.
+          </p>
+        </article>
+      </section>
+    );
+  }
+
+  if (dungeonState.phase === 'choosingClass') {
+    return (
+      <section style={styles.challengeArea}>
+        <p style={styles.challengeLabel}>Reto activo</p>
+
+        <article style={styles.challengeCard}>
+          <h2 style={styles.challengeTitle}>Elige clase</h2>
+          <p style={styles.bigNumber}>
+            {dungeonState.classSelectionCountdown}
+          </p>
+          <p style={styles.challengeDescription}>
+            Selecciona una clase para empezar la expedición.
+          </p>
+        </article>
+      </section>
+    );
+  }
+
+  if (dungeonState.phase === 'drawingCards') {
+    return (
+      <section style={styles.challengeArea}>
+        <p style={styles.challengeLabel}>Reto activo</p>
+
+        <article style={styles.challengeCard}>
+          <h2 style={styles.challengeTitle}>Nueva sala</h2>
+          <p style={styles.roomIcon}>🃏</p>
+          <p style={styles.challengeDescription}>
+            Robando cartas y preparando el siguiente reto.
+          </p>
+        </article>
+      </section>
+    );
+  }
+
+  if (
+    (dungeonState.phase === 'choosingCard' ||
+      dungeonState.phase === 'resolvingRoom') &&
+    dungeonState.currentRoom
+  ) {
+    return (
+      <section style={styles.challengeArea}>
+        <p style={styles.challengeLabel}>Reto activo</p>
+
+        <article style={styles.challengeCard}>
+          <h2 style={styles.challengeTitle}>
+            {dungeonState.currentRoom.name}
+          </h2>
+
+          <p style={styles.roomIcon}>{dungeonState.currentRoom.icon}</p>
+
+          <p style={styles.challengeDescription}>
+            {getRoomDescription(dungeonState.currentRoom.name)}
+          </p>
+
+          {dungeonState.phase === 'choosingCard' && (
+            <p style={styles.challengeTimer}>
+              {dungeonState.cardSelectionCountdown}s para elegir carta
+            </p>
           )}
 
           {dungeonState.phase === 'resolvingRoom' && (
             <>
-              <h2 style={styles.phaseTitle}>Resolviendo sala...</h2>
-              <p style={styles.bigNumber}>{dungeonState.resolveCountdown}</p>
-              <p style={styles.text}>
-                {dungeonState.lastTurnResult?.message}
+              <p style={styles.challengeTimer}>
+                {dungeonState.resolveCountdown}s resolviendo
               </p>
+
+              {dungeonState.lastTurnResult && (
+                <p style={styles.resultText}>
+                  {dungeonState.lastTurnResult.message}
+                </p>
+              )}
             </>
           )}
-
-          {dungeonState.phase === 'escaped' && (
-            <>
-              <h2 style={styles.phaseTitle}>Has escapado</h2>
-              <p style={styles.winnerText}>
-                Score final: {dungeonState.player.score}
-              </p>
-              <p style={styles.text}>
-                Volviendo al menú en {dungeonState.resultsCountdown}...
-              </p>
-            </>
-          )}
-
-          {dungeonState.phase === 'dead' && (
-            <>
-              <h2 style={styles.phaseTitle}>Has muerto</h2>
-              <p style={styles.winnerText}>
-                Score final: {dungeonState.player.score}
-              </p>
-              <p style={styles.text}>
-                Volviendo al menú en {dungeonState.resultsCountdown}...
-              </p>
-            </>
-          )}
-        </section>
-
-        <section style={styles.playerBox}>
-          <h2 style={styles.sectionTitle}>Jugador</h2>
-
-          <p style={styles.text}>
-            Clase:{' '}
-            {dungeonState.player.class
-              ? `${DUNGEON_CLASS_ICONS[dungeonState.player.class]} ${
-                  DUNGEON_CLASS_LABELS[dungeonState.player.class]
-                }`
-              : 'Sin elegir'}
-          </p>
-
-          <p style={styles.text}>
-            Vida: {dungeonState.player.health} / {DUNGEON_INITIAL_HEALTH}
-          </p>
-
-          <p style={styles.text}>Score: {dungeonState.player.score}</p>
-          <p style={styles.text}>Racha: {dungeonState.player.streak}</p>
-          <p style={styles.text}>
-            Salas superadas: {dungeonState.player.roundsSurvived}
-          </p>
-        </section>
-
-        {dungeonState.phase === 'choosingCard' && dungeonState.currentRoom && (
-          <section style={styles.roomBox}>
-            <h2 style={styles.sectionTitle}>Sala actual</h2>
-            <p style={styles.roomIcon}>{dungeonState.currentRoom.icon}</p>
-            <p style={styles.roomName}>{dungeonState.currentRoom.name}</p>
-          </section>
-        )}
-
-        {dungeonState.phase === 'choosingCard' && (
-          <section style={styles.cards}>
-            {getVisualCardSlots(dungeonState.hand).map(
-              ({ card, originalIndex, label }) => (
-                <article key={`${card.id}-${originalIndex}`} style={styles.card}>
-                  <p style={styles.cardKey}>{label}</p>
-                  <p style={styles.cardIcon}>{card.icon}</p>
-                  <h3 style={styles.cardTitle}>{card.name}</h3>
-
-                  <div style={styles.effectIcons}>
-                    {card.effects.map((effect) => (
-                      <span key={effect} title={DUNGEON_EFFECT_LABELS[effect]}>
-                        {DUNGEON_EFFECT_ICONS[effect]}
-                      </span>
-                    ))}
-                  </div>
-                </article>
-              ),
-            )}
-          </section>
-        )}
-
-        {dungeonState.lastTurnResult && (
-          <section style={styles.resultBox}>
-            <p style={styles.text}>{dungeonState.lastTurnResult.message}</p>
-          </section>
-        )}
+        </article>
       </section>
-    </main>
+    );
+  }
+
+  if (
+    dungeonState.phase === 'escaped' ||
+    dungeonState.phase === 'dead' ||
+    dungeonState.phase === 'finished'
+  ) {
+    return (
+      <section style={styles.challengeArea}>
+        <p style={styles.challengeLabel}>Reto activo</p>
+
+        <article style={styles.challengeCard}>
+          <h2 style={styles.challengeTitle}>
+            {getResultTitle(dungeonState)}
+          </h2>
+
+          <p style={styles.roomIcon}>
+            {dungeonState.phase === 'escaped' ? '🚪' : '💀'}
+          </p>
+
+          <p style={styles.challengeDescription}>
+            Score final: {dungeonState.player.score}
+          </p>
+        </article>
+      </section>
+    );
+  }
+
+  return (
+    <section style={styles.challengeArea}>
+      <p style={styles.challengeLabel}>Reto activo</p>
+
+      <article style={styles.challengeCard}>
+        <h2 style={styles.challengeTitle}>Mazmorra</h2>
+        <p style={styles.challengeDescription}>
+          Preparando la expedición.
+        </p>
+      </article>
+    </section>
   );
 }
 
@@ -436,8 +581,79 @@ function ClassOption({ dungeonClass }: { dungeonClass: DungeonClass }) {
       <p style={styles.classKey}>
         {DUNGEON_CLASS_CONTROL_LABELS[dungeonClass]}
       </p>
+
       <p style={styles.classIcon}>{DUNGEON_CLASS_ICONS[dungeonClass]}</p>
+
       <p style={styles.className}>{DUNGEON_CLASS_LABELS[dungeonClass]}</p>
     </article>
   );
+}
+
+function renderHearts(health: number) {
+  const safeHealth = Math.max(0, health);
+  const visibleSlots = Math.max(DUNGEON_INITIAL_HEALTH, safeHealth);
+
+  return Array.from({ length: visibleSlots }, (_, index) =>
+    index < safeHealth ? '♥' : '♡',
+  ).join(' ');
+}
+
+function getDungeonTimeText(dungeonState: DungeonState): string {
+  switch (dungeonState.phase) {
+    case 'bettingCountdown':
+      return `${dungeonState.bettingCountdown}s apuestas`;
+
+    case 'choosingClass':
+      return `${dungeonState.classSelectionCountdown}s clase`;
+
+    case 'drawingCards':
+      return 'Robando cartas';
+
+    case 'choosingCard':
+      return `${dungeonState.cardSelectionCountdown}s carta`;
+
+    case 'resolvingRoom':
+      return `${dungeonState.resolveCountdown}s resolver`;
+
+    case 'escaped':
+    case 'dead':
+    case 'finished':
+      return `${dungeonState.resultsCountdown}s menú`;
+
+    default:
+      return '-';
+  }
+}
+
+function getRoomDescription(roomName: string): string {
+  const normalizedRoomName = roomName.toLowerCase();
+
+  if (normalizedRoomName.includes('combate')) {
+    return 'Si no superas esta sala pierdes 1 punto de vida al final del turno.';
+  }
+
+  if (normalizedRoomName.includes('trampa')) {
+    return 'Si no superas esta sala pierdes 1 punto de vida al final del turno.';
+  }
+
+  if (
+    normalizedRoomName.includes('vacía') ||
+    normalizedRoomName.includes('vacia')
+  ) {
+    return 'Esta sala se supera automáticamente. No se puede perder vida aquí.';
+  }
+
+  return 'Supera el reto usando una de tus cartas.';
+}
+
+function getResultTitle(dungeonState: DungeonState): string {
+  if (dungeonState.phase === 'escaped') {
+    return 'Has escapado';
+  }
+
+  if (dungeonState.phase === 'dead') {
+    return 'Has muerto';
+  }
+
+  return 'Partida finalizada';
 }
