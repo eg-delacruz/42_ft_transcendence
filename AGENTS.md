@@ -32,3 +32,5 @@ Frequently-used commands (equivalent `docker compose` in parentheses):
    ```bash
    pnpm dev   # 0.0.0 bound/LAN
    vite preview.
+   ```
+

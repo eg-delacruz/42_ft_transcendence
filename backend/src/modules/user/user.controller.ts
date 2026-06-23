@@ -51,8 +51,8 @@ export const getAllUsers = async (
   try {
     const users = await User.find({}, '_id email role');
 
-    // Eliminate the user with super_user role from the list
-    const filteredUsers = users.filter((user) => user.role !== 'super_user');
+    // Eliminate the user with super_admin role from the list
+    const filteredUsers = users.filter((user) => user.role !== 'super_admin');
 
     return successResponse(res, filteredUsers, 'Users retrieved successfully');
   } catch (error) {

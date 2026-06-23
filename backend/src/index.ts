@@ -1,7 +1,7 @@
 // Main entry point of the backend.
 // Initializes MongoDB, HTTP server, Socket.IO, and Redis adapter.
 
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 dotenv.config();
 
 import http from 'http';
