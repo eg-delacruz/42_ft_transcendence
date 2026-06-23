@@ -38,7 +38,7 @@ export function jwtSocketMiddleware(socket: Socket, next: (err?: Error) => void)
         }
 
         const decoded = jwt.verify(token, env.JWT_SECRET) as jwt.JwtPayload;
-        const userId = typeof decoded.userId === 'string' ? decoded.userId : null;
+        const userId = typeof decoded.id === 'string' ? decoded.id : null;
         const email  = typeof decoded.email  === 'string' ? decoded.email  : null;
         const role   = typeof decoded.role   === 'string' ? decoded.role   : null;
 

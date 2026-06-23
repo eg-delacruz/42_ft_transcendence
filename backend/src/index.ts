@@ -1,20 +1,19 @@
 // Main entry point of the backend.
 // Initializes MongoDB, HTTP server, Socket.IO, and Redis adapter.
 
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 dotenv.config();
 
 import http from 'http';
 import Redis from 'ioredis';
 import { createAdapter } from '@socket.io/redis-adapter';
 import { Server, type Socket } from 'socket.io';
-
+import app from "@/app.ts";
+import env from "@config/env";
+import { logger } from "@config/logger";
+import { ensureSuperUser, ensureGames } from "@scripts/seed";
 import { connectDB } from '@config/db';
-import env from '@config/env';
-import { logger } from '@config/logger';
-import app from '@/app.ts';
 import { initializeChatNamespace } from '@modules/chat';
-import { ensureSuperUser } from '@scripts/seed';
 import { jwtSocketMiddleware } from '@utils/socket-auth';
 import { SocketUser } from '@interfaces/socket';
 
@@ -82,6 +81,7 @@ async function startServer() {
     });
 
     ensureSuperUser();
+    ensureGames();
 }
 
 startServer().catch((error) => {

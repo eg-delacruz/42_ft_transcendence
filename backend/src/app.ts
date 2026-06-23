@@ -4,7 +4,8 @@ import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import path from 'path';
 import env from '@config/env';
-
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from '@config/swagger';
 
 import { router } from '@routes/index';
 
@@ -38,6 +39,11 @@ app.use(cookieParser());
 // HTTP request logger -> displays the requests in the console
 // It takes 'dev' as an argument, which is a predefined format string that tells morgan to log requests in a concise format that includes the method, URL, status code, response time, and other relevant information. This is useful for development and debugging purposes.
 app.use(morgan('dev'));
+
+// Swagger API docs (dev-only)
+if (env.NODE_ENV !== 'production') {
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+}
 
 // Routes
 app.use('/api', router);

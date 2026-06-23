@@ -1,0 +1,18 @@
+project: 42_ft_transcendence
+context: |
+  Node/Express backend, React/Vite frontend. Containerized with Docker.
+  Using pnpm and Makefile for management. No test runners configured.
+strict_tdd: false
+persistence:
+  mode: openspec
+testing:
+  runner: null
+  layers:
+    unit: false
+    integration: false
+    e2e: false
+  coverage: false
+  quality:
+    linter: "pnpm -C frontend lint"
+    type_checker: "pnpm -C frontend build && pnpm -C backend build"
+    formatter: null

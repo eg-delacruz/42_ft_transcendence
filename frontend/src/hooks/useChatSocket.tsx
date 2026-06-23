@@ -11,7 +11,7 @@ type SocketStatus =
   | "disconnected"
   | "error";
 
-type SocketRole = "super_user" | "standard_user" | "service_desk_user";
+type SocketRole = "user" | "admin" | "super_admin";
 
 export type ChatSocketUser = {
   userId: string;
