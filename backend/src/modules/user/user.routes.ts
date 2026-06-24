@@ -74,6 +74,10 @@ router.post(
  *                       _id: { type: string }
  *                       email: { type: string }
  *                       role: { type: string }
+ *                       avatar_url: { type: string }
+ *                       display_name: { type: string }
+ *                       points: { type: number }
+ *
  *                 message: { type: string, example: "Users retrieved successfully" }
  */
 router.get(
