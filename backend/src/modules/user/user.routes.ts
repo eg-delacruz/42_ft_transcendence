@@ -87,7 +87,7 @@ router.get(
  * @swagger
  * /users/delete/{id}:
  *   delete:
- *     summary: Delete a user by ID. Only accessible by super_admin and admin roles.
+ *     summary: Delete a user by ID. Only accessible by super_admin, admin, and user roles. Users can delete their own account, while super_admin and admin can delete any user.
  *     tags: [Users]
  *     security:
  *       - cookieAuth: []
@@ -120,7 +120,7 @@ router.get(
 router.delete(
   "/delete/:id",
   authMiddleware,
-  requireRole("super_admin", "admin"),
+  requireRole("super_admin", "admin", "user"),
   deleteUserById,
 );
 

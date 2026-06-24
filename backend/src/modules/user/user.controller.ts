@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import { User } from '@modules/user/user.model';
 
 import { successResponse, errorResponse } from '@utils/response';
+import { AuthRequest } from '@middlewares/auth.middleware';
 
 import { hash } from 'bcrypt';
 
@@ -61,11 +62,27 @@ export const getAllUsers = async (
 };
 
 export const deleteUserById = async (
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
   const { id } = req.params;
+
+  // Authorization: regular users can only delete themselves
+  if (!req.user) {
+    return errorResponse(res, 'Not authenticated', 401);
+  }
+
+  if (req.user.role === 'user' && req.user.userId !== id) {
+    return errorResponse(
+      res,
+      'You can only delete your own account',
+      403
+    );
+  }
+
+  // super_admin and admin can delete any user
+
   try {
     const deletedUser = await User.findByIdAndDelete(id);
     if (!deletedUser) {
