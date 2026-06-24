@@ -4,7 +4,12 @@ import { authMiddleware } from "@middlewares/auth.middleware";
 import { requireRole } from "@middlewares/role.middleware";
 
 // Controller
-import { createUser, getAllUsers, deleteUserById } from "./user.controller";
+import {
+  createUser,
+  getAllUsers,
+  deleteUserById,
+  updateUserById,
+} from "./user.controller";
 
 const router = Router();
 
@@ -126,6 +131,79 @@ router.delete(
   authMiddleware,
   requireRole("super_admin", "admin", "user"),
   deleteUserById,
+);
+
+/**
+ * @swagger
+ * /users/update/{id}:
+ *   patch:
+ *     summary: Partially update a user by ID. Only accessible by super_admin, admin, and user roles. Users can only update their own account; super_admin and admin can update any user.
+ *     description: >
+ *       Send only the fields you want to change — all body fields are optional.
+ *       Missing or omitted fields are left unchanged. An empty body or a body
+ *       without any allowed field returns 400.
+ *     tags: [Users]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               avatar_url: { type: string, description: "New avatar URL (optional)" }
+ *               display_name: { type: string, description: "New display name (optional)" }
+ *               points: { type: number, description: "New points value (optional)" }
+ *             minProperties: 1
+ *     responses:
+ *       200:
+ *         description: User updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error: { type: string, example: "" }
+ *                 body:
+ *                   type: object
+ *                   properties:
+ *                     _id: { type: string }
+ *                     email: { type: string }
+ *                     role: { type: string }
+ *                     avatar_url: { type: string }
+ *                     display_name: { type: string }
+ *                     points: { type: number }
+ *                 message: { type: string, example: "User updated successfully" }
+ *       400:
+ *         description: No valid fields to update (empty body or no allowed fields)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error: { type: string, example: "No valid fields to update" }
+ *                 body: { type: string, example: "" }
+ *                 message: { type: string, example: "" }
+ *       401:
+ *         description: Not authenticated
+ *       403:
+ *         description: Forbidden — user trying to update another user's account
+ *       404:
+ *         description: User not found
+ */
+router.patch(
+  "/update/:id",
+  authMiddleware,
+  requireRole("super_admin", "admin", "user"),
+  updateUserById,
 );
 
 export default router;

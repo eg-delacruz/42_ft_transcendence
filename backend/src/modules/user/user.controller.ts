@@ -76,7 +76,7 @@ export const deleteUserById = async (
     return errorResponse(res, "Not authenticated", 401);
   }
 
-  if (req.user.role === "user" && req.user.userId !== id) {
+  if (req.user.role === "user" && req.user.id !== id) {
     return errorResponse(res, "You can only delete your own account", 403);
   }
 
@@ -95,6 +95,63 @@ export const deleteUserById = async (
         role: deletedUser.role,
       },
       "User deleted successfully",
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateUserById = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { id } = req.params;
+
+  // Authorization: regular users can only update themselves
+  if (!req.user) {
+    return errorResponse(res, "Not authenticated", 401);
+  }
+
+  if (req.user.role === "user" && req.user.id !== id) {
+    return errorResponse(res, "You can only update your own account", 403);
+  }
+
+  // super_admin and admin can update any user
+
+  // Build update object only with fields present in the request body.
+  // This prevents overwriting absent fields with undefined.
+  const allowedFields = ["avatar_url", "display_name", "points"] as const;
+  const update: Record<string, unknown> = {};
+
+  for (const field of allowedFields) {
+    if (req.body[field] !== undefined) {
+      update[field] = req.body[field];
+    }
+  }
+
+  if (Object.keys(update).length === 0) {
+    return errorResponse(res, "No valid fields to update", 400);
+  }
+
+  try {
+    const updatedUser = await User.findByIdAndUpdate(id, update, { new: true });
+
+    if (!updatedUser) {
+      return errorResponse(res, "User not found", 404);
+    }
+
+    return successResponse(
+      res,
+      {
+        _id: updatedUser._id,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        avatar_url: updatedUser.avatar_url,
+        display_name: updatedUser.display_name,
+        points: updatedUser.points,
+      },
+      "User updated successfully",
     );
   } catch (error) {
     next(error);
