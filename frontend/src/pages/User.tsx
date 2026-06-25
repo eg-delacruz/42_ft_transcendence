@@ -34,6 +34,11 @@ function User() {
 		console.log("LOL");
 	};
 
+	const createRoom = () => {
+		navigate("/game");
+		//create a code when a room is created
+	};
+
     if (loading) 
 		return <div>Loading User...</div>;
     if (error) 
@@ -107,7 +112,7 @@ function User() {
 							Join room
 						</button>
 						{error && <div style={{ color: "red" }}>{error}</div>}
-						<button onClick={buttonTest} className="customButton w-full">
+						<button onClick={createRoom} className="customButton w-full">
 							Create room
 						</button>
 						{error && <div style={{ color: "red" }}>{error}</div>}
@@ -120,10 +125,10 @@ function User() {
         				<div className="bg-slate-100 p-8 rounded shadow-lg flex flex-col items-center animate-slideintop">
           					<p className="mb-6 text-3xl font-aldrich font-bold">Are you sure you want to logout?</p>
           					<div className="flex gap-4 text-2xl">
-								<button id="confirmButton" className="px-4 py-2 bg-rose-500 text-white rounded font-aldrich" onClick={confirmDelete}>
+								<button id="confirmButton" className="px-4 py-2 bg-rose-500 text-white rounded font-aldrich" onClick={confirmLogout}>
 									Yes
 								</button>
-								<button id="denyButton" className="px-4 py-2 bg-gray-300 rounded font-aldrich" onClick={() => setShowDeleteConfirm(false)}>
+								<button id="denyButton" className="px-4 py-2 bg-gray-300 rounded font-aldrich" onClick={() => setShowLogoutConfirm(false)}>
 									No
 								</button>
           					</div>
@@ -138,10 +143,10 @@ function User() {
         				<div className="bg-slate-100 p-8 rounded shadow-lg flex flex-col items-center animate-slideintop">
           					<p className="mb-6 text-3xl font-aldrich font-bold">Are you sure you want to delete your account?</p>
           					<div className="flex gap-4 text-2xl">
-								<button id="confirmButton" className="px-4 py-2 bg-rose-500 text-white rounded font-aldrich" onClick={confirmLogout}>
+								<button id="confirmButton" className="px-4 py-2 bg-rose-500 text-white rounded font-aldrich" onClick={confirmDelete}>
 									Yes
 								</button>
-								<button id="denyButton" className="px-4 py-2 bg-gray-300 rounded font-aldrich" onClick={() => setShowLogoutConfirm(false)}>
+								<button id="denyButton" className="px-4 py-2 bg-gray-300 rounded font-aldrich" onClick={() => setShowDeleteConfirm(false)}>
 									No
 								</button>
           					</div>

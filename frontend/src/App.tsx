@@ -20,7 +20,7 @@ const routes = [
   { path: "/login", element: <Login></Login> },
   { path: "/register", element: <Register></Register> },
   { path: "/user", element: <ProtectedRoute><User /></ProtectedRoute> },
-  { path: "/socket-debug", element: <ProtectedRoute><SocketDebug /></ProtectedRoute> }
+  { path: "/socket-debug", element: <ProtectedRoute><SocketDebug /></ProtectedRoute> },
   { path: "/user", element: <ProtectedRoute><User /></ProtectedRoute> },
   { path: "/game", element: <ProtectedRoute><Game /></ProtectedRoute>},
 

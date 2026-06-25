@@ -2,6 +2,7 @@ import { useAuthContext } from "@/context/context";
 import { useUser } from "@/hooks/useUser";
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { useNavigate } from "react-router-dom";
+// import { MinigamesDevPage } from "../minigames/MinigamesDevPage"
 
 //Using the user page conf here because it is related I guess
 
@@ -28,6 +29,7 @@ function Game() {
 			{/* Game screen */}
 			<div className="w-0 lg:w-2/3 h-full lg:border-r-6 lg:border-amber-100">
 				{/*Game component*/}
+				{/* <MinigamesDevPage ></MinigamesDevPage> */}
 			</div>
 			{/* Bets and chat column */}
 			<div className="w-full lg:w-1/3 h-full">
