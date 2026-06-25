@@ -1,10 +1,10 @@
-import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import env from '@config/env';
-import { errorResponse } from '@utils/response';
+import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
+import env from "@config/env";
+import { errorResponse } from "@utils/response";
 
 export interface AuthPayload {
-  userId: string;
+  id: string;
   email: string;
   role: string;
 }
@@ -21,7 +21,7 @@ export const authMiddleware = (
   const token = req.cookies?.access_token;
 
   if (!token) {
-    return errorResponse(res, 'Not authenticated', 401);
+    return errorResponse(res, "Not authenticated", 401);
   }
 
   try {
@@ -29,6 +29,6 @@ export const authMiddleware = (
     req.user = decoded;
     next();
   } catch (err) {
-    return errorResponse(res, 'Invalid or expired token', 401);
+    return errorResponse(res, "Invalid or expired token", 401);
   }
 };

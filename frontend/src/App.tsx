@@ -9,6 +9,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import User from './pages/User';
+import SocketDebug from './pages/SocketDebug';
 import Game from './pages/Game';
 import React, { useState } from "react";
 
@@ -18,6 +19,8 @@ const routes = [
   { path: "/", element: <Home></Home> },
   { path: "/login", element: <Login></Login> },
   { path: "/register", element: <Register></Register> },
+  { path: "/user", element: <ProtectedRoute><User /></ProtectedRoute> },
+  { path: "/socket-debug", element: <ProtectedRoute><SocketDebug /></ProtectedRoute> }
   { path: "/user", element: <ProtectedRoute><User /></ProtectedRoute> },
   { path: "/game", element: <ProtectedRoute><Game /></ProtectedRoute>},
 
