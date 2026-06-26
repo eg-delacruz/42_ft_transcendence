@@ -9,6 +9,7 @@ up:
 	@echo "Proyecto on-line:"
 	@echo "Frontend: http://localhost:5173"
 	@echo "Backend: http://localhost:3000"
+	@echo "Documentación API: http://localhost:3000/api-docs"
 
 down:
 	docker-compose down
