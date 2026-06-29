@@ -20,6 +20,11 @@ export function initializeChatNamespace(io: Server, redis: Redis): Namespace {
 
     logger.info('[/chat] Initializing namespace');
 
+    // Ensure the global room exists before any connection
+    chatService.ensureGlobalRoom().catch((error) => {
+        logger.error('[/chat] Failed to ensure global room:', error);
+    });
+
     // ── Auth middleware ────────────────────────────────────────────────────
     // IMPORTANT: Socket.IO 4.x does NOT inherit io.use() in custom namespaces.
     // Each namespace must register its own middleware chain.
@@ -45,6 +50,21 @@ export function initializeChatNamespace(io: Server, redis: Redis): Namespace {
             await socketService.addUserPresence(user, []);
         }
 
+        // Ensure global room exists and auto-join every authenticated user
+        if (user) {
+            await chatService.ensureGlobalRoom();
+            socket.join(ChatService.GLOBAL_ROOM_ID);
+            socket.data.rooms.add(ChatService.GLOBAL_ROOM_ID);
+            await socketService.addUserToRoom(user.userId, ChatService.GLOBAL_ROOM_ID);
+            await chatService.updateRoomMemberCount(ChatService.GLOBAL_ROOM_ID);
+
+            socketService.broadcastToRoom(ChatService.GLOBAL_ROOM_ID, 'room:user_joined', {
+                roomId: ChatService.GLOBAL_ROOM_ID,
+                user,
+                timestamp: new Date(),
+            });
+        }
+
         // Register all event handlers for this socket
         setupChatHandlers(socket, socketService, chatService);
 
@@ -58,6 +78,9 @@ export function initializeChatNamespace(io: Server, redis: Redis): Namespace {
             const joinedRooms = Array.from(socket.data.rooms ?? []) as string[];
             for (const roomId of joinedRooms) {
                 void socketService.removeUserFromRoom(userId, roomId);
+                if (roomId === ChatService.GLOBAL_ROOM_ID) {
+                    void chatService.updateRoomMemberCount(ChatService.GLOBAL_ROOM_ID);
+                }
             }
 
             // Remove presence entry

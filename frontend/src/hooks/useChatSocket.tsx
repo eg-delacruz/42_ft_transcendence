@@ -66,7 +66,7 @@ type LeaveRoomPayload = {
 };
 
 type SendMessagePayload = {
-  roomId: string;
+  roomId?: string;
   text: string;
 };
 
@@ -77,6 +77,7 @@ type GetRoomMessagesPayload = {
 };
 
 const SOCKET_URL = "http://localhost:3000/chat";
+const GLOBAL_ROOM_ID = "global";
 
 function emitWithAck<TPayload, TResponse>(
   socket: Socket,
@@ -149,14 +150,29 @@ export function useChatSocket() {
         setStatus("connected");
         setError(null);
         pushEvent("connect", { socketId: socket.id });
-        // Cargar rooms al conectar
+        // Activar sala global por defecto inmediatamente
+        setActiveRoomId(GLOBAL_ROOM_ID);
+        // Cargar rooms y mensajes previos (no bloquean el chat)
         try {
           const res = await emitWithAck<object, { rooms: ChatRoomInfo[] }>(
             socket,
             "get_rooms",
             {},
           );
+          pushEvent("get_rooms", res);
           if (res.success && res.data?.rooms) setRooms(res.data.rooms);
+        } catch {
+          /* silencioso */
+        }
+        try {
+          const msgRes = await emitWithAck<
+            GetRoomMessagesPayload,
+            { roomId: string; messages: ChatMessage[]; total: number }
+          >(socket, "get_room_messages", { roomId: GLOBAL_ROOM_ID });
+          pushEvent("get_room_messages", msgRes);
+          if (msgRes.success && msgRes.data?.messages) {
+            setMessages(msgRes.data.messages);
+          }
         } catch {
           /* silencioso */
         }
@@ -336,7 +352,10 @@ export function useChatSocket() {
     const response = await emitWithAck<SendMessagePayload, ChatMessage>(
       socketRef.current,
       "send_message",
-      payload,
+      {
+        roomId: payload.roomId || GLOBAL_ROOM_ID,
+        text: payload.text,
+      },
     );
     pushEvent("send_message", response);
 
