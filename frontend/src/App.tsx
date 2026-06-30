@@ -8,6 +8,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import User from './pages/User';
+import SocketDebug from './pages/SocketDebug';
 
 /* Terto 20260614 - Import temporal para poder acceder a la página general de minijuegos. */
 import { MinigamesDevPage } from './minigames/MinigamesDevPage';
@@ -19,6 +20,7 @@ const routes = [
   { path: "/login", element: <Login></Login> },
   { path: "/register", element: <Register></Register> },
   { path: "/user", element: <ProtectedRoute><User /></ProtectedRoute> },
+  { path: "/socket-debug", element: <ProtectedRoute><SocketDebug /></ProtectedRoute> }
 
   /* Terto 20260614 - Ruta temporal para acceder al menú general de minijuegos.*/
   { path: "/minigames", element: <MinigamesDevPage /> }
@@ -34,7 +36,8 @@ function App() {
           <Link to="/">Home</Link> | {""}
           <Link to="/login">Login</Link> | {""}
           <Link to="/register">Register</Link> | {""}
-          <Link to="/user">User</Link> {""}
+          <Link to="/user">User</Link> | {""}
+          <Link to="/socket-debug">Socket Debug</Link> {""}
         </nav>
 
         {/* Routes */}

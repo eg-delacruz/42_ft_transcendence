@@ -1,16 +1,22 @@
-// TODO: Landing page
+import { useAuthContext } from '@/context/context';
 
-function Home ()
-{
+/**
+ * Home - Landing page
+ * Welcome to Transcendence
+ */
+
+function Home() {
+    const { user } = useAuthContext();
+
     return (
         <>
-            <h2>FT_TRASCENDENCE - LANDING PAGE</h2>
+            <h1>Welcome to Transcendence</h1>
+            <p>This is the home page.</p>
+
+            {user && <p>Logged in as: {user.email}</p>}
+
         </>
-    )
+    );
 }
 
 export default Home;
-
-/**
- *  Home page
- */

@@ -1,26 +1,27 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from "express";
 
-import { User } from '@modules/user/user.model';
+import { User } from "@modules/user/user.model";
 
-import { successResponse, errorResponse } from '@utils/response';
+import { successResponse, errorResponse } from "@utils/response";
+import { AuthRequest } from "@middlewares/auth.middleware";
 
-import { hash } from 'bcrypt';
+import { hash } from "bcrypt";
 
 export const createUser = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const { email, password, role } = req.body;
 
   if (!email || !password || !role) {
-    return errorResponse(res, 'Email, password, and role are required', 400);
+    return errorResponse(res, "Email, password, and role are required", 400);
   }
 
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return errorResponse(res, 'User with this email already exists', 400);
+      return errorResponse(res, "User with this email already exists", 400);
     }
 
     const hashedPassword = await hash(password, 10);
@@ -35,8 +36,8 @@ export const createUser = async (
     return successResponse(
       res,
       { _id: savedUser._id, email: savedUser.email, role: savedUser.role },
-      'User created successfully',
-      201
+      "User created successfully",
+      201,
     );
   } catch (error) {
     next(error);
@@ -46,30 +47,45 @@ export const createUser = async (
 export const getAllUsers = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
-    const users = await User.find({}, '_id email role');
+    const users = await User.find(
+      {},
+      "_id email role avatar_url display_name points createdAt updatedAt",
+    ).lean(); //lean() returns plain JavaScript objects instead of Mongoose documents, which can be more efficient for read operations
 
     // Eliminate the user with super_admin role from the list
-    const filteredUsers = users.filter((user) => user.role !== 'super_admin');
+    const filteredUsers = users.filter((user) => user.role !== "super_admin");
 
-    return successResponse(res, filteredUsers, 'Users retrieved successfully');
+    return successResponse(res, filteredUsers, "Users retrieved successfully");
   } catch (error) {
     next(error);
   }
 };
 
 export const deleteUserById = async (
-  req: Request,
+  req: AuthRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const { id } = req.params;
+
+  // Authorization: regular users can only delete themselves
+  if (!req.user) {
+    return errorResponse(res, "Not authenticated", 401);
+  }
+
+  if (req.user.role === "user" && req.user.id !== id) {
+    return errorResponse(res, "You can only delete your own account", 403);
+  }
+
+  // super_admin and admin can delete any user
+
   try {
     const deletedUser = await User.findByIdAndDelete(id);
     if (!deletedUser) {
-      return errorResponse(res, 'User not found', 404);
+      return errorResponse(res, "User not found", 404);
     }
     return successResponse(
       res,
@@ -78,7 +94,64 @@ export const deleteUserById = async (
         email: deletedUser.email,
         role: deletedUser.role,
       },
-      'User deleted successfully'
+      "User deleted successfully",
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateUserById = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { id } = req.params;
+
+  // Authorization: regular users can only update themselves
+  if (!req.user) {
+    return errorResponse(res, "Not authenticated", 401);
+  }
+
+  if (req.user.role === "user" && req.user.id !== id) {
+    return errorResponse(res, "You can only update your own account", 403);
+  }
+
+  // super_admin and admin can update any user
+
+  // Build update object only with fields present in the request body.
+  // This prevents overwriting absent fields with undefined.
+  const allowedFields = ["avatar_url", "display_name", "points"] as const;
+  const update: Record<string, unknown> = {};
+
+  for (const field of allowedFields) {
+    if (req.body[field] !== undefined) {
+      update[field] = req.body[field];
+    }
+  }
+
+  if (Object.keys(update).length === 0) {
+    return errorResponse(res, "No valid fields to update", 400);
+  }
+
+  try {
+    const updatedUser = await User.findByIdAndUpdate(id, update, { new: true });
+
+    if (!updatedUser) {
+      return errorResponse(res, "User not found", 404);
+    }
+
+    return successResponse(
+      res,
+      {
+        _id: updatedUser._id,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        avatar_url: updatedUser.avatar_url,
+        display_name: updatedUser.display_name,
+        points: updatedUser.points,
+      },
+      "User updated successfully",
     );
   } catch (error) {
     next(error);

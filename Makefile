@@ -10,8 +10,8 @@ up:
 	@echo "Frontend: http://localhost:5173"
 	@echo "Minigames: http://localhost:5173/minigames"
 	@echo "Backend: http://localhost:3000"
-	@echo "Backend: http://localhost:3000/api-docs/"
-	
+	@echo "Documentación API: http://localhost:3000/api-docs"
+
 down:
 	docker-compose down
 
