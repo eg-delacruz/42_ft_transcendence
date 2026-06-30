@@ -50,7 +50,7 @@ export const styles: Record<string, CSSProperties> = {
 
   topGameArea: {
     display: 'grid',
-    gridTemplateColumns: '360px 1fr 160px',
+    gridTemplateColumns: '360px minmax(520px, 1fr)',
     alignItems: 'start',
     gap: '32px',
     width: '100%',
@@ -103,6 +103,7 @@ export const styles: Record<string, CSSProperties> = {
   },
 
   challengeArea: {
+    width: '100%',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -116,12 +117,12 @@ export const styles: Record<string, CSSProperties> = {
   },
 
   challengeCard: {
-    width: '320px',
+    width: '560px',
     minHeight: '320px',
     border: '2px solid #d4d4d8',
     borderRadius: '8px',
     background: 'rgba(24, 24, 31, 0.92)',
-    padding: '22px',
+    padding: '10px',
     boxSizing: 'border-box',
     textAlign: 'center',
     display: 'flex',
@@ -130,6 +131,64 @@ export const styles: Record<string, CSSProperties> = {
     justifyContent: 'center',
     gap: '14px',
     boxShadow: '0 0 0 1px rgba(255, 255, 255, 0.04)',
+  },
+
+  bettingChallengeCard: {
+    width: 'min(780px, 100%)',
+    minHeight: '320px',
+    border: '2px solid #d4d4d8',
+    borderRadius: '8px',
+    background: 'rgba(24, 24, 31, 0.92)',
+    padding: '24px 32px',
+    boxSizing: 'border-box',
+    textAlign: 'center',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    justifyContent: 'center',
+    gap: '18px',
+    boxShadow: '0 0 0 1px rgba(255, 255, 255, 0.04)',
+  },
+
+  bettingContent: {
+    display: 'grid',
+    gridTemplateColumns: '140px 1fr',
+    alignItems: 'center',
+    gap: '30px',
+    width: '100%',
+  },
+
+  bettingCountdownBox: {
+    minHeight: '190px',
+    paddingRight: '26px',
+    borderRight: '1px solid rgba(255, 255, 255, 0.25)',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '10px',
+  },
+
+  bettingCountdownLabel: {
+    margin: 0,
+    color: '#a1a1aa',
+    textTransform: 'uppercase',
+    letterSpacing: '0.16em',
+    fontSize: '13px',
+    fontWeight: 700,
+  },
+
+  bettingDescriptionBox: {
+    width: '100%',
+    textAlign: 'left',
+  },
+
+  bettingDescription: {
+    margin: 0,
+    color: '#f4f4f5',
+    fontSize: '16px',
+    lineHeight: 1.55,
+    textAlign: 'left',
   },
 
   challengeTitle: {
@@ -150,11 +209,13 @@ export const styles: Record<string, CSSProperties> = {
   },
 
   challengeDescription: {
-    margin: 0,
+    width: '100%',
+    maxWidth: '500px',
+    margin: '0 auto',
     color: '#f4f4f5',
-    fontSize: '17px',
-    lineHeight: 1.45,
-    maxWidth: '250px',
+    fontSize: '12px',
+    lineHeight: 1.5,
+    textAlign: 'center',
   },
 
   challengeTimer: {
