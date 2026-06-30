@@ -8,6 +8,7 @@ up:
 	docker-compose up --build -d
 	@echo "Proyecto on-line:"
 	@echo "Frontend: http://localhost:5173"
+	@echo "Minigames: http://localhost:5173/minigames"
 	@echo "Backend: http://localhost:3000"
 	@echo "Documentación API: http://localhost:3000/api-docs"
 
