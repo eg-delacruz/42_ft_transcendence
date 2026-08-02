@@ -8,6 +8,7 @@ import { successResponse, errorResponse } from '@utils/response';
 
 import { AuthRequest } from '@middlewares/auth.middleware';
 
+// Login user
 export const handleLogin = async (
   req: Request,
   res: Response,
@@ -30,6 +31,10 @@ export const handleLogin = async (
       return errorResponse(res, 'Invalid credentials', 401);
     }
 
+    // Actualizar estado a 'online'
+    user.state = 'online';
+    await user.save();
+
     const token = jwt.sign(
       { userId: user._id, role: user.role, email: user.email },
       env.JWT_SECRET,
@@ -46,7 +51,12 @@ export const handleLogin = async (
     const body = {
       user: {
         id: user._id,
+        username: user.username,
         email: user.email,
+        avatarUrl: user.avatarUrl,
+        points: user.points,
+        state: user.state,
+        stats: user.stats,
         role: user.role,
       },
     };
@@ -64,29 +74,38 @@ export const registerUser = async (
   next: NextFunction
 ) => {
   try {
+    const { username, email, password } = req.body;
 
-    //  Checks for email and password availability in the petition
-    const { email, password } = req.body;
-    if (!email || !password)
-      return errorResponse(res, 'Email and password are required', 400);
+    if (!username || !email || !password) {
+      return errorResponse(res, 'Username, email, and password are required', 400);
+    }
 
-    //  Checks for user already exists in the db
-    const existingUser = await User.findOne({ email });
-    if (existingUser)
-      return errorResponse(res, 'User with this email already exists', 400);
+    // Checks for username or email availability in the DB
+    const existingUser = await User.findOne({ 
+      $or: [{ email }, { username }] 
+    });
 
-    //  Hash password and create user with default role
+    if (existingUser) {
+      if (existingUser.email === email) {
+        return errorResponse(res, 'User with this email already exists', 400);
+      }
+      return errorResponse(res, 'Username is already taken', 400);
+    }
+
+    // Hash password and create user
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new User({
+      username,
       email,
       password: hashedPassword,
       role: 'standard_user',
+      state: 'online', // Conectado por defecto al registrarse
     });
 
     const savedUser = await newUser.save();
 
-    //  Generates token/cookie and adapt to savedUser
+    // Generates token/cookie
     const token = jwt.sign(
       { userId: savedUser._id, role: savedUser.role, email: savedUser.email },
       env.JWT_SECRET,
@@ -97,25 +116,27 @@ export const registerUser = async (
       httpOnly: true,
       secure: env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 24 * 60 * 60 * 1000, // 1 day of duration
+      maxAge: 24 * 60 * 60 * 1000,
     });
 
     const body = {
       user: {
         id: savedUser._id,
+        username: savedUser.username,
         email: savedUser.email,
+        avatarUrl: savedUser.avatarUrl,
+        points: savedUser.points,
+        state: savedUser.state,
+        stats: savedUser.stats,
         role: savedUser.role,
       },
     };
 
     return successResponse(res, body, 'User registered successfully', 201);
-
-  }
-
-  catch (error) {
+  } catch (error) {
     next(error);
   }
-}
+};
 
 // Controller to get current authenticated user's info
 export const getCurrentUser = async (req: AuthRequest, res: Response) => {
@@ -128,12 +149,26 @@ export const getCurrentUser = async (req: AuthRequest, res: Response) => {
   );
 };
 
-export const handleLogout = (req: Request, res: Response) => {
-  res.clearCookie('access_token', {
-    httpOnly: true, // Ensures the cookie is only accessible via HTTP(S), not JavaScript
-    secure: env.NODE_ENV === 'production', // Ensures the cookie is only sent over HTTPS in production
-    sameSite: 'strict', // Helps prevent CSRF attacks
-  });
+// Logout user
+export const handleLogout = async (
+  req: AuthRequest, 
+  res: Response, 
+  next: NextFunction
+) => {
+  try {
+    if (req.user?.userId) {
+      // Cambiar estado a 'offline' al cerrar sesión
+      await User.findByIdAndUpdate(req.user.userId, { state: 'offline' });
+    }
 
-  return successResponse(res, null, 'Logout successful', 200);
+    res.clearCookie('access_token', {
+      httpOnly: true,
+      secure: env.NODE_ENV === 'production',
+      sameSite: 'strict',
+    });
+
+    return successResponse(res, null, 'Logout successful', 200);
+  } catch (error) {
+    next(error);
+  }
 };

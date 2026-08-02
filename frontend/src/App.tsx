@@ -1,5 +1,5 @@
 import '@/App.css'; // styles
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom" // react-router
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom"; // react-router
 import { AuthProvider } from './context/context';
 
 import ProtectedRoute from './components/ProtectedRoute';
@@ -8,19 +8,20 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import User from './pages/User';
-
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
 
 {/* TODO: add protected routes, error routes... etc. */ }
 const routes = [
-  { path: "/", element: <Home></Home> },
-  { path: "/login", element: <Login></Login> },
-  { path: "/register", element: <Register></Register> },
-  { path: "/user", element: <ProtectedRoute><User /></ProtectedRoute> }
-
-]
+  { path: "/", element: <Home /> },
+  { path: "/login", element: <Login /> },
+  { path: "/register", element: <Register /> },
+  { path: "/user", element: <ProtectedRoute><User /></ProtectedRoute> },
+  { path: "/privacy", element: <PrivacyPolicy /> },
+  { path: "/terms", element: <TermsOfService /> }
+];
 
 function App() {
-
   return (
     <AuthProvider>
       <BrowserRouter>
@@ -29,7 +30,9 @@ function App() {
           <Link to="/">Home</Link> | {""}
           <Link to="/login">Login</Link> | {""}
           <Link to="/register">Register</Link> | {""}
-          <Link to="/user">User</Link> {""}
+          <Link to="/user">User</Link> | {""}
+          <Link to="/privacy">Privacy</Link> | {""}
+          <Link to="/terms">Terms</Link>
         </nav>
 
         {/* Routes */}
