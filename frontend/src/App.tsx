@@ -11,6 +11,8 @@ import User from './pages/User';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 
+import { GameCanvas } from './components/GameCanvas';
+
 {/* TODO: add protected routes, error routes... etc. */ }
 const routes = [
   { path: "/", element: <Home /> },
@@ -18,7 +20,8 @@ const routes = [
   { path: "/register", element: <Register /> },
   { path: "/user", element: <ProtectedRoute><User /></ProtectedRoute> },
   { path: "/privacy", element: <PrivacyPolicy /> },
-  { path: "/terms", element: <TermsOfService /> }
+  { path: "/terms", element: <TermsOfService /> },
+  { path: "/game", element: <GameCanvas /> }
 ];
 
 function App() {
@@ -27,11 +30,12 @@ function App() {
       <BrowserRouter>
         {/* simple nav system implemented for testing */}
         <nav>
-          <Link to="/">Home</Link> | {""}
-          <Link to="/login">Login</Link> | {""}
-          <Link to="/register">Register</Link> | {""}
-          <Link to="/user">User</Link> | {""}
-          <Link to="/privacy">Privacy</Link> | {""}
+          <Link to="/">Home</Link> | {" "}
+          <Link to="/login">Login</Link> | {" "}
+          <Link to="/register">Register</Link> | {" "}
+          <Link to="/user">User</Link> | {" "}
+          <Link to="/game">Game</Link> | {" "}
+          <Link to="/privacy">Privacy</Link> | {" "}
           <Link to="/terms">Terms</Link>
         </nav>
 
