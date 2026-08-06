@@ -52,7 +52,7 @@ export function useAuth() {
             if (error instanceof ApiError) {
                 return { error: error.message };
             }
-            return { error: "Network error or invalid response" };
+            return { error: "Network error or invalid response" + error.message };
         }
     }, []);
 
@@ -96,7 +96,7 @@ export function useAuth() {
             if (error instanceof ApiError) {
                 return { error: error.message };
             }
-            return { error: "Network error or invalid response" };
+            return { error: "Network error or invalid response"};
         }
     }, [user]);
 

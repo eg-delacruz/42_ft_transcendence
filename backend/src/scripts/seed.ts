@@ -14,7 +14,7 @@ export async function ensureSuperUser() {
     // Checks if super user / exisiting user is already created
     const existingUser = await User.findOne({ email: env.SUPER_EMAIL });
     if (existingUser) {
-      logger.warn("Supper user already exists, skipping.");
+      logger.warn("Super user already exists, skipping.");
       return;
     } else seedSuperUser();
   } catch (error) {
