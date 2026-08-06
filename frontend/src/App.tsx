@@ -20,7 +20,7 @@ const routes = [
   { path: "/login", element: <Login></Login> },
   { path: "/register", element: <Register></Register> },
   { path: "/user", element: <ProtectedRoute><User /></ProtectedRoute> },
-  { path: "/socket-debug", element: <ProtectedRoute><SocketDebug /></ProtectedRoute> }
+  { path: "/socket-debug", element: <ProtectedRoute><SocketDebug /></ProtectedRoute> },
 
   /* Terto 20260614 - Ruta temporal para acceder al menú general de minijuegos.*/
   { path: "/minigames", element: <MinigamesDevPage /> }
