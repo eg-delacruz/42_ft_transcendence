@@ -2,10 +2,14 @@ import { useState, useEffect, useCallback } from "react";
 import { api, ApiError } from "@/utils/api";
 
 export interface User {
-    _id: string; // Corrected to _id to match MongoDB
-    id: string;
+    _id?: string;
+    id?: string;
+    username?: string;
     email: string;
-    // TODO: implement more fields as backend need
+    avatarUrl?: string;
+    points?: number;
+    state?: string;
+    role?: string;
 }
 
 export function useAuth() {
@@ -18,7 +22,8 @@ export function useAuth() {
         setLoading(true);
         try {
             const data = await api.get("/auth/me");
-            setUser(data.body?.user ?? null);
+            const userData = data.body?.user ?? data.user ?? null;
+            setUser(userData);
             return data;
         } catch (error) {
             setUser(null);
@@ -42,8 +47,9 @@ export function useAuth() {
     const login = useCallback(async (email: string, password: string) => {
         try {
             const data = await api.post("/auth/login", { email, password });
-            if (data.body?.user) {
-                setUser(data.body.user);
+            const userData = data.body?.user ?? data.user;
+            if (userData) {
+                setUser(userData);
             }
             return data;
         } catch (error) {
@@ -56,11 +62,14 @@ export function useAuth() {
     }, []);
 
     // Register
-    const register = useCallback(async (email: string, password: string) => {
+    const register = useCallback(async (email: string, password: string, username?: string) => {
         try {
-            const data = await api.post("/auth/register", { email, password });
-            // After registration, you might want to automatically log the user in
-            // or prompt them to log in. Here, we just return the response.
+            const payload = username ? { email, password, username } : { email, password };
+            const data = await api.post("/auth/register", payload);
+            const userData = data.body?.user ?? data.user;
+            if (userData) {
+                setUser(userData);
+            }
             return data;
         } catch (error) {
             if (error instanceof ApiError) {
@@ -86,12 +95,11 @@ export function useAuth() {
     const deleteAccount = useCallback(async () => {
         if (!user) return { error: "No user authenticated" };
         try {
-            // Ensure you are using the correct user ID field (_id for MongoDB)
-            const data = await api.delete(`/users/delete/${user._id || user.id}`);
+            const userId = user.id || user._id;
+            const data = await api.delete(`/users/delete/${userId}`);
             setUser(null); // Clear user state on successful deletion
             return data;
         } catch (error) {
-            // The user state is not cleared on failure, allowing for retry
             if (error instanceof ApiError) {
                 return { error: error.message };
             }
@@ -101,33 +109,3 @@ export function useAuth() {
 
     return { user, loading, auth, login, register, logout, deleteAccount };
 }
-
-
-
-/**
- * useAuth - Custom React hook for user authentication management.
- *
- * Gives:
- *  - State from authenticated user (user)
- *  - Loading state(loading)
- *  - Functions for login, logout and register
- * 
- * Recommended use with AuthProvider for global access in the app.
- *
- * Usage:
- *   const { user, loading, login, logout, register } = useAuth();
- *
- *   // auth:
- *   await auth();
- * 
- *   // login:
- *   await login(email, password);
- *
- *   // logout:
- *   await logout();
- *
- *   // register:
- *   await register(email, password);
- *
- *   // user will be null if there is not active sesion.
- */

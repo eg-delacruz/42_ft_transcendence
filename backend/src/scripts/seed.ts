@@ -6,47 +6,45 @@ import { User } from '@modules/user/user.model';
 import { hash } from 'bcrypt';
 
 export async function ensureSuperUser() {
-    try {
-        // await connectDB();
-        logger.info('Running ensureSuperUser script...');
+  try {
+    // await connectDB();
+    logger.info('Running ensureSuperUser script...');
 
-        // Checks if super user / exisiting user is already created
-        const existingUser = await User.findOne({ email: env.SUPER_EMAIL });
-        if (existingUser) {
-            logger.warn('Supper user already exists, skipping.');
-            return;
-        }
-        else
-            seedSuperUser();
+    // Checks if super user / existing user is already created
+    const existingUser = await User.findOne({ email: env.SUPER_EMAIL });
+    if (existingUser) {
+      logger.warn('Super user already exists, skipping.');
+      return;
+    } else {
+      await seedSuperUser();
     }
-    catch (error) {
-        logger.error('Seed failed: ' + error);
-        process.exitCode = 1;
-    }
+  } catch (error) {
+    logger.error('Seed failed: ' + error);
+    process.exitCode = 1;
+  }
 }
 
 async function seedSuperUser() {
-    try {
-        
-        // Connect to DB to running this script
-        // await connectDB();
-        logger.info('Running seed script...');
+  try {
+    // Connect to DB to running this script
+    // await connectDB();
+    logger.info('Running seed script...');
 
-        // Hash super user password 
-        const hashedPassword = await hash(env.SUPER_PASS, 10);
+    // Hash super user password 
+    const hashedPassword = await hash(env.SUPER_PASS || 'Admin1234!', 10);
 
-        // Create the super user in the mongo db
-        await User.create({
-            email: env.SUPER_EMAIL,
-            password: hashedPassword,
-            role: 'super_user',
-        });
+    // Create the super user in the mongo db with ALL required fields
+    await User.create({
+      username: process.env.SUPER_USERNAME || 'admin', // Campo 'username' obligatorio añadido
+      email: env.SUPER_EMAIL,
+      password: hashedPassword,
+      role: 'super_user',
+      state: 'offline',
+    });
 
-        logger.info('Super user created successfully.');
-    }
-    catch(error)
-    {
-        logger.error('Seed failed: ' + error);
-        process.exitCode = 1;
-    }
+    logger.info('Super user created successfully.');
+  } catch (error) {
+    logger.error('Seed failed: ' + error);
+    process.exitCode = 1;
+  }
 }

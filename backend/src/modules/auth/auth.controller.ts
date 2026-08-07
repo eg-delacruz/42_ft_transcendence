@@ -74,10 +74,15 @@ export const registerUser = async (
   next: NextFunction
 ) => {
   try {
-    const { username, email, password } = req.body;
+    let { username, email, password } = req.body;
 
-    if (!username || !email || !password) {
-      return errorResponse(res, 'Username, email, and password are required', 400);
+    if (!email || !password) {
+      return errorResponse(res, 'Email and password are required', 400);
+    }
+
+    // Autogenerar username desde el email si no se proporciona desde el frontend
+    if (!username) {
+      username = email.split('@')[0];
     }
 
     // Checks for username or email availability in the DB
