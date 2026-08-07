@@ -46,6 +46,7 @@ function App() {
           <Link to="/socket-debug">Socket Debug</Link> | {""}
           <Link to="/privacy">Privacy Policy</Link> | {""}
           <Link to="/terms">Terms of Service</Link> | {""}
+          <Link to="/minigames">Minigames</Link> | {""}
           <Link to="/game">Game</Link> | {""}
         </nav>
 

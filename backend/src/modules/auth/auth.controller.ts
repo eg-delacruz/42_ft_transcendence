@@ -31,7 +31,6 @@ export const handleLogin = async (
       return errorResponse(res, 'Invalid credentials', 401);
     }
 
-    // Actualizar estado a 'online'
     user.state = 'online';
     await user.save();
 
@@ -45,7 +44,7 @@ export const handleLogin = async (
       httpOnly: true,
       secure: env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
+      maxAge: 24 * 60 * 60 * 1000,
     });
 
     const body = {
@@ -74,13 +73,17 @@ export const registerUser = async (
   next: NextFunction
 ) => {
   try {
-    const { username, email, password } = req.body;
+    let { username, email, password } = req.body;
 
-    if (!username || !email || !password) {
-      return errorResponse(res, 'Username, email, and password are required', 400);
+    if (!email || !password) {
+      return errorResponse(res, 'Email and password are required', 400);
     }
 
-    // Checks for username or email availability in the DB
+    // Autogenera un username basado en el correo si no viene especificado
+    if (!username) {
+      username = email.split('@')[0];
+    }
+
     const existingUser = await User.findOne({ 
       $or: [{ email }, { username }] 
     });
@@ -92,20 +95,19 @@ export const registerUser = async (
       return errorResponse(res, 'Username is already taken', 400);
     }
 
-    // Hash password and create user
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Corregido: se asigna 'user' acorde con el enum del modelo
     const newUser = new User({
       username,
       email,
       password: hashedPassword,
-      role: 'standard_user',
-      state: 'online', // Conectado por defecto al registrarse
+      role: 'user',
+      state: 'online',
     });
 
     const savedUser = await newUser.save();
 
-    // Generates token/cookie
     const token = jwt.sign(
       { userId: savedUser._id, role: savedUser.role, email: savedUser.email },
       env.JWT_SECRET,
@@ -156,9 +158,11 @@ export const handleLogout = async (
   next: NextFunction
 ) => {
   try {
-    if (req.user?.userId) {
-      // Cambiar estado a 'offline' al cerrar sesiÃ³n
-      await User.findByIdAndUpdate(req.user.userId, { state: 'offline' });
+    const userPayload = req.user as any;
+    const currentUserId = userPayload?.userId || userPayload?.id || userPayload?._id;
+
+    if (currentUserId) {
+      await User.findByIdAndUpdate(currentUserId, { state: 'offline' });
     }
 
     res.clearCookie('access_token', {
