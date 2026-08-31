@@ -23,7 +23,7 @@ function Login() {
         if (res.error) 
 			setError(res.error || "Login failed");
         else 
-			navigate("/user");
+			navigate("/game");
     };
 
     return (
@@ -47,6 +47,8 @@ function Login() {
 												type="email"
 												placeholder="email"
 												value={email}
+												id="email"
+												autocomplete="true"
 												onChange={e => setEmail(e.target.value)}
 												required
 												onFocus={() => setFocusedField("email")}
@@ -67,6 +69,8 @@ function Login() {
 												type="password"
 												placeholder="password"
 												value={password}
+												id="password"
+												autocomplete="true"
 												onChange={e => setPassword(e.target.value)}
 												required
 												onFocus={() => setFocusedField("password")}
@@ -95,7 +99,7 @@ function Login() {
 							<div className="p-2 flex items-center">
 								<p className="font-aldrich opacity-70">Don't have an account? <a href="/register" className="text-blue-300">Sign in</a></p>
 							</div>
-							<div className="p-2 flex items-center wrap-normal">
+							<div className="p-2 flex items-center text-center wrap-normal">
 								<p className="font-aldrich opacity-70">🛈 Before logging in, you should read our <a href="" className="text-blue-300">Terms and conditions</a></p>
 							</div>
 						</div>

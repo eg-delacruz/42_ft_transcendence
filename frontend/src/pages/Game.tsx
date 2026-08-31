@@ -42,7 +42,7 @@ function Game() {
 						Display name
 					</div>
 					<Menu as="div" className="col-start-6 size-10 top-0 mr-0">
-						<MenuButton className="h-full w-full items-center justify-center focus:animate-[spin_5s]">
+						<MenuButton className="h-full w-full items-center justify-center">
 							<div aria-hidden="true" className="text-gray-400">
 								<img src="/gear-solid-full.svg"></img>
 							</div>
@@ -59,7 +59,8 @@ function Game() {
 								Account settings
 								</a>
 							</MenuItem>
-							<form action="*" method="POST">
+							{/*No etsoy segura de que esto esté bien siendo un form con post pero es codigo externo asi que ni idea*/}
+							<form onClick={Logout} method="POST">
 								<MenuItem>
 								<button
 									type="submit"

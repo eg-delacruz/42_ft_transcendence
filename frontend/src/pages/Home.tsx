@@ -29,9 +29,9 @@ function Home ()
 				</div>
 
 			{/* Background and description */}
-			<div className="relative w-full h-auto flex-1 bg-linear-to-t from-(--gradient-dark) to-(--gradient-light) overflow-scroll">
+			<div className="relative w-full h-auto flex-1 bg-linear-to-t from-(--gradient-dark) to-(--gradient-light) "> {/*overflow-scroll*/}
 				<div className="fixed h-screen w-screen inset-0 bg-[url(/arcadePatternRepeat.png)] bg-auto animate-diagonal opacity-10 pointer-events-none z-0" aria-hidden="true"></div>
-				<div className="relative w-full p-6 lg:p-12 sm:gap-8 flex flex-col items-center justify-center overflow-scroll">
+				<div className="relative w-full p-6 lg:p-12 sm:gap-8 flex flex-col items-center justify-center ">{/*overflow-scroll*/}
 					<div className=" text-slate-300 text-center text-lg lg:text-3xl font-aldrich wrap-normal">
 						<p>[FT_TRANSCENDENCE] is a multiplayer minigames platform where users can compete against each other in real-time. 
 							This project is part of the 42 curriculum and demonstrates full-stack web development.</p>

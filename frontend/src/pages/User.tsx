@@ -36,7 +36,6 @@ function User() {
 
 	const createRoom = () => {
 		navigate("/game");
-		//create a code when a room is created
 	};
 
     if (loading) 
@@ -95,25 +94,9 @@ function User() {
 				</div>
 			</div>
 			<div className="w-full lg:w-1/3 p-10 gap-8 flex flex-col items-center justify-center text-2xl">
-				{/* Room buttons */}
-					<div className="relative w-full">
-						<label className="labelCustom">Write code to join a room
-						<input
-						className="arcadeform bg-mauve-500"
-						type="code"
-						placeholder="code"
-						text-label="room code"
-						//value={code}
-						//onChange={e => setEmail(e.target.value)}
-						/></label>
-					</div>
 					{/* These are <a> because they are just links to other pages right now, they can be changed to buttons */}
-						<button onClick={buttonTest} className="customButton w-full">
-							Join room
-						</button>
-						{error && <div style={{ color: "red" }}>{error}</div>}
 						<button onClick={createRoom} className="customButton w-full">
-							Create room
+							Back to game
 						</button>
 						{error && <div style={{ color: "red" }}>{error}</div>}
 				{/* Account buttons */}

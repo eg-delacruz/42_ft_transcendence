@@ -59,6 +59,8 @@ function Register() {
 												type="email"
 												placeholder="email"
 												value={email}
+												id="email"
+												autocomplete="true"
 												onChange={e => setEmail(e.target.value)}
 												required
 												onFocus={() => setFocusedField("email")}
@@ -79,6 +81,8 @@ function Register() {
 												type="password"
 												placeholder="password"
 												value={password}
+												id="password"
+												autocomplete="true"
 												onChange={e => setPassword(e.target.value)}
 												required
 												onFocus={() => setFocusedField("password")}
@@ -99,6 +103,8 @@ function Register() {
 												type="password"
 												placeholder="password"
 												value={validPassword}
+												id="repeatpassword"
+												autocomplete="true"
 												onChange={e => setValidPassword(e.target.value)}
 												required
 												onFocus={() => setFocusedField("repeatpassword")}
@@ -127,7 +133,7 @@ function Register() {
 							<div className="p-2 flex items-center">
 								<p className="font-aldrich opacity-70">Already have an account? <a href="/login" className="text-blue-300">Log in</a></p>
 							</div>
-							<div className="p-2 flex items-center wrap-normal">
+							<div className="p-2 flex items-center text-center wrap-normal">
 								<p className="font-aldrich opacity-70">🛈 Before signing in, you should read our <a href="" className="text-blue-300">Terms and conditions</a></p>
 							</div>
 						</div>
