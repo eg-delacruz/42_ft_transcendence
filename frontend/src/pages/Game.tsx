@@ -1,5 +1,6 @@
 import { useAuthContext } from "@/context/context";
 import { useUser } from "@/hooks/useUser";
+import { useState } from "react";
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { useNavigate } from "react-router-dom";
 // import { MinigamesDevPage } from "../minigames/MinigamesDevPage"
@@ -9,7 +10,13 @@ import { useNavigate } from "react-router-dom";
 function Game() {
     const { user, loading, error } = useUser();
     const { logout, deleteAccount } = useAuthContext();
-	const navigate = useNavigate();	
+	const navigate = useNavigate();
+
+	const displayName =
+		user?.display_name?.trim() ? user.display_name : "Anonymous";
+
+	const avatarUrl =
+		user?.avatar_url?.trim() ? user.avatar_url : "/game01.jpg";
 
     if (loading) 
 		return <div>Loading User...</div>;
@@ -35,11 +42,12 @@ function Game() {
 			<div className="w-full lg:w-1/3 h-full">
 				<div className="h-1/9 w-full grid grid-cols-6 items-center bg-slate-900/70">
 					{/*Color outline should be a variable*/}
-					<div className="col-start-1 h-2/3 ml-4 rounded-full aspect-square object-fill outline-4 outline-slate-300 bg-[url(/game01.jpg)]">
+					<div className="col-start-1 h-2/3 ml-4 rounded-full aspect-square outline-4 outline-slate-300">
+						<img src={avatarUrl} alt="user avatar" className="h-full w-full object-cover"></img>
 					</div>
 					{/*Display name should be a variable*/}
 					<div className="col-start-2 col-end-5 ml-8 text-lg lg:text-2xl font-pressstart text-slate-200">
-						Display name
+						<p>{displayName}</p>
 					</div>
 					<Menu as="div" className="col-start-6 size-10 top-0 mr-0">
 						<MenuButton className="h-full w-full items-center justify-center">

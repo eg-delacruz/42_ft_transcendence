@@ -126,13 +126,27 @@ export const registerUser = async (
 // Controller to get current authenticated user's info
 // This route is protected by authMiddleware, which ensures the user is authenticated and only sends what is in the token sent by the client. The user info is attached to req.user by the authMiddleware.
 export const getCurrentUser = async (req: AuthRequest, res: Response) => {
-  return successResponse(
-    res,
-    {
-      user: req.user,
-    },
-    "Authenticated user",
-  );
+  try {
+    if (!req.user?.id) {
+      return errorResponse(res, "Not authenticated", 401);
+    }
+
+    const dbUser = await User.findById(req.user.id)
+      .select("_id email role avatar_url display_name points createdAt updatedAt")
+      .lean();
+
+    if (!dbUser) {
+      return errorResponse(res, "User not found", 404);
+    }
+
+    return successResponse(
+      res,
+      { user: dbUser },
+      "Authenticated user",
+    );
+  } catch (error) {
+    return errorResponse(res, "Failed to load user", 500);
+  }
 };
 
 export const handleLogout = (req: Request, res: Response) => {
