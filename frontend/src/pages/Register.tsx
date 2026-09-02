@@ -34,7 +34,7 @@ function Register() {
 		{
 			setError("Registration failed, Please try again.");
         }
-        navigate("/user");
+        navigate("/gameroom");
     }
 	
     return (
@@ -60,7 +60,7 @@ function Register() {
 												placeholder="email"
 												value={email}
 												id="email"
-												autocomplete="true"
+												autoComplete="true"
 												onChange={e => setEmail(e.target.value)}
 												required
 												onFocus={() => setFocusedField("email")}
@@ -82,7 +82,7 @@ function Register() {
 												placeholder="password"
 												value={password}
 												id="password"
-												autocomplete="true"
+												autoComplete="true"
 												onChange={e => setPassword(e.target.value)}
 												required
 												onFocus={() => setFocusedField("password")}
@@ -104,7 +104,7 @@ function Register() {
 												placeholder="password"
 												value={validPassword}
 												id="repeatpassword"
-												autocomplete="true"
+												autoComplete="true"
 												onChange={e => setValidPassword(e.target.value)}
 												required
 												onFocus={() => setFocusedField("repeatpassword")}

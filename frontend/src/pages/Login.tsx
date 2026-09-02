@@ -23,7 +23,7 @@ function Login() {
         if (res.error) 
 			setError(res.error || "Login failed");
         else 
-			navigate("/game");
+			navigate("/gameroom");
     };
 
     return (
@@ -48,7 +48,7 @@ function Login() {
 												placeholder="email"
 												value={email}
 												id="email"
-												autocomplete="true"
+												autoComplete="true"
 												onChange={e => setEmail(e.target.value)}
 												required
 												onFocus={() => setFocusedField("email")}
@@ -70,7 +70,7 @@ function Login() {
 												placeholder="password"
 												value={password}
 												id="password"
-												autocomplete="true"
+												autoComplete="true"
 												onChange={e => setPassword(e.target.value)}
 												required
 												onFocus={() => setFocusedField("password")}

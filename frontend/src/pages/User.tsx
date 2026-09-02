@@ -47,7 +47,7 @@ function User() {
 	};
 
 	const backToGameBttn = () => {
-		navigate("/game");
+		navigate("/gameroom");
 	};
 
 	const changeUser = async (changes?: { displayName?: string; avatarUrl?: string }) => {

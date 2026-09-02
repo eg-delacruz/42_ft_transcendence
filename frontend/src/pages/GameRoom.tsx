@@ -3,11 +3,11 @@ import { useUser } from "@/hooks/useUser";
 import { useState } from "react";
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { useNavigate } from "react-router-dom";
-// import { MinigamesDevPage } from "../minigames/MinigamesDevPage"
+import { MinigamesDevPage } from "../minigames/MinigamesDevPage";
 
 //Using the user page conf here because it is related I guess
 
-function Game() {
+function GameRoom() {
     const { user, loading, error } = useUser();
     const { logout, deleteAccount } = useAuthContext();
 	const navigate = useNavigate();
@@ -36,7 +36,7 @@ function Game() {
 			{/* Game screen */}
 			<div className="w-0 lg:w-2/3 h-full lg:border-r-6 lg:border-amber-100">
 				{/*Game component*/}
-				{/* <MinigamesDevPage ></MinigamesDevPage> */}
+				<MinigamesDevPage ></MinigamesDevPage>
 			</div>
 			{/* Bets and chat column */}
 			<div className="w-full lg:w-1/3 h-full">
@@ -67,7 +67,7 @@ function Game() {
 								Account settings
 								</a>
 							</MenuItem>
-							{/*No etsoy segura de que esto esté bien siendo un form con post pero es codigo externo asi que ni idea*/}
+							{/*No estoy segura de que esto esté bien siendo un form con post pero es codigo externo asi que ni idea*/}
 							<form onClick={Logout} method="POST">
 								<MenuItem>
 								<button
@@ -99,4 +99,4 @@ function Game() {
     )
 }
 
-export default Game;
+export default GameRoom;
