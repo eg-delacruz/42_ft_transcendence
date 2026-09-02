@@ -12,6 +12,8 @@ const CHAT_ROOM_MESSAGES_PREFIX = 'chat:room:messages:';
 const CHAT_ROOM_MESSAGE_LIMIT = 200;
 
 export class ChatService {
+    static readonly GLOBAL_ROOM_ID = 'global';
+
     constructor(
         private readonly redis: Redis,
         private readonly socketService: SocketService,
@@ -161,5 +163,29 @@ export class ChatService {
 
     async roomExists(roomId: string): Promise<boolean> {
         return (await this.redis.exists(this.roomKey(roomId))) === 1;
+    }
+
+    async ensureGlobalRoom(): Promise<RoomInfo> {
+        const exists = await this.roomExists(ChatService.GLOBAL_ROOM_ID);
+        if (exists) {
+            const existingRoom = await this.getRoom(ChatService.GLOBAL_ROOM_ID);
+            if (existingRoom) {
+                return existingRoom;
+            }
+        }
+
+        const room: RoomInfo = {
+            roomId: ChatService.GLOBAL_ROOM_ID,
+            name: 'Global Chat',
+            description: 'Default global chat room',
+            createdAt: new Date(),
+            memberCount: 0,
+        };
+
+        await this.redis.set(this.roomKey(ChatService.GLOBAL_ROOM_ID), this.serializeRoom(room));
+        await this.redis.sadd(CHAT_ROOM_INDEX, ChatService.GLOBAL_ROOM_ID);
+
+        logger.info(`Global chat room ensured: ${ChatService.GLOBAL_ROOM_ID}`);
+        return room;
     }
 }

@@ -232,7 +232,13 @@ export function setupChatHandlers(
             payload: SendMessagePayload,
             callback?: (response: AckResponse<MessageResponse>) => void,
         ) => {
-            const validation = validatePayload(payload, CommonSchemas.sendMessage);
+            // Default to the global room when no roomId is provided
+            const messagePayload: SendMessagePayload = {
+                ...payload,
+                roomId: payload.roomId?.trim() || ChatService.GLOBAL_ROOM_ID,
+            };
+
+            const validation = validatePayload(messagePayload, CommonSchemas.sendMessage);
 
             if (!validation.valid) {
                 callback?.(createAckError(SocketErrorCode.INVALID_PAYLOAD, validation.error ?? 'Invalid payload'));
@@ -246,28 +252,28 @@ export function setupChatHandlers(
                     return;
                 }
 
-                if (!socket.data.rooms?.has(payload.roomId)) {
+                if (!socket.data.rooms?.has(messagePayload.roomId)) {
                     callback?.(createAckError(SocketErrorCode.NOT_IN_ROOM, 'Not in this room'));
                     return;
                 }
 
-                const room = await chatService.getRoom(payload.roomId);
+                const room = await chatService.getRoom(messagePayload.roomId);
                 if (!room) {
                     callback?.(createAckError(SocketErrorCode.ROOM_NOT_FOUND, 'Room not found'));
                     return;
                 }
 
-                const message = await chatService.saveMessage(payload.roomId, user, payload.text);
+                const message = await chatService.saveMessage(messagePayload.roomId, user, messagePayload.text);
                 const response: MessageResponse = {
                     messageId: message.messageId,
                     sender: message.sender,
                     text: message.text,
-                    roomId: payload.roomId,
+                    roomId: messagePayload.roomId,
                     createdAt: message.createdAt,
                 };
 
                 // Broadcast to everyone in room (including sender)
-                socketService.broadcastToRoom(payload.roomId, 'message:new', response);
+                socketService.broadcastToRoom(messagePayload.roomId, 'message:new', response);
                 await socketService.updateUserPresence(user, getJoinedRoomIds(socket));
 
                 callback?.({ success: true, data: response });

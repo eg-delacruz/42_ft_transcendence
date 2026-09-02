@@ -13,6 +13,9 @@ import SocketDebug from './pages/SocketDebug';
 import Game from './pages/Game';
 import React, { useState } from "react";
 
+/* Terto 20260614 - Import temporal para poder acceder a la página general de minijuegos. */
+import { MinigamesDevPage } from './minigames/MinigamesDevPage';
+
 
 {/* TODO: add protected routes, error routes... etc. */ }
 const routes = [
@@ -24,6 +27,8 @@ const routes = [
   { path: "/user", element: <ProtectedRoute><User /></ProtectedRoute> },
   { path: "/game", element: <ProtectedRoute><Game /></ProtectedRoute>},
 
+  /* Terto 20260614 - Ruta temporal para acceder al menú general de minijuegos.*/
+  { path: "/minigames", element: <MinigamesDevPage /> }
 ]
 
 function App() {
