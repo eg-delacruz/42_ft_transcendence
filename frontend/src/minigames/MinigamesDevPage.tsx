@@ -26,7 +26,7 @@ export function MinigamesDevPage() {
   }
 
   return (
-    <main style={styles.page}>
+    <main className="w-full h-full">
       {activeGame === 'menu' && (
         <section style={styles.menu}>
           <h1 style={styles.title}>Minigames Dev Page</h1>
@@ -72,16 +72,16 @@ export function MinigamesDevPage() {
       )}
 
       {activeGame !== 'menu' && (
-        <section style={styles.gameWrapper}>
-          <button
+        <section className="w-full h-full">
+          {/* <button
             type="button"
             style={styles.backButton}
             onClick={handleExitToMenu}
           >
             ← Volver al menú
-          </button>
+          </button> */}
 
-          <div style={styles.gameArea}>
+          <div className="w-full h-full">
             {activeGame === 'the-race' && (
               <TheRace onExitToMenu={handleExitToMenu} />
             )}

@@ -1,0 +1,108 @@
+@import url("https://fonts.googleapis.com/css2?family=Sixtyfour&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Bitcount+Ink:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Goldman:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Aldrich&family=Press+Start+2P&display=swap');
+
+@import 'tailwindcss';
+
+@theme {
+	--font-sixtyfour: "Sixtyfour", sans-serif;
+  	--font-bitcount: "Bitcount Ink", sans-serif;
+  	--font-goldman: "Goldman", helvetica;
+	--font-aldrich: "Aldrich";
+	--font-pressstart: "Press Start 2P";
+	--gradient-dark: rgb(14, 12, 23);
+	--gradient-light: rgb(30, 25, 47);
+}
+
+@view-transition {
+	navigation: auto;
+	types: slide;
+}
+
+::view-transition-group(*) {
+	animation-duration: 3s;
+}
+
+@layer components {
+	.glowingText {
+		font-family: var(--font-pressstart);
+		color: var(--color-lime-500);
+		text-shadow: var(--color-lime-600) 0px 1px 4px;
+	}
+
+	.basicText {
+		font-family: var(--font-pressstart);
+		color: var(--color-zinc-50);
+		text-shadow: var(--color-zinc-800) 0px 1px 4px;
+	}
+
+	.basicBox {
+		min-height:100px;
+		display: flex;
+		flex-direction: row;
+		align-items:center;
+		justify-content: center;
+		padding: 4px;
+		gap: 1rem;
+		border: solid 10px var(--color-zinc-200);
+		border-radius: 0.5rem;
+		background-color: var(--color-zinc-800);
+	}
+
+	.raceStatusBox {
+		position: absolute;
+		left: 50%;
+		top: 36px;
+		min-width: 260px;
+		min-height: 110px;
+		padding: 18px 24px;
+		gap: 8px;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		display: flex;
+		z-index: 8;
+		transform: translateX(-50%);
+	}
+
+	.raceBox {
+		min-height:100px;
+		display: flex;
+		align-items:center;
+		justify-content: center;
+		padding: 4px;
+		gap: 1rem;
+		border: solid 4px #32271f;
+		border-radius: 0.5rem;
+		background-color:transparent;
+		background-image: url("../minigames/assets/race-sign.png");
+		background-position: center;
+		background-size: cover;
+		background-repeat: repeat;
+	}
+
+	.raceFinishedOverlay {
+		transform: translate(-50%, -50%);
+	}
+
+	.raceRunner {
+		position: absolute;
+		display: flex;
+		flex-direction:column;
+		z-index: 4;
+		gap: 12px;
+		transform: translate(-50%, 50%);
+		transition: bottom 120ms linear;
+	}
+
+
+	.raceHorseBody {
+		margin: 0;
+		font-size: 72px;
+		line-height: 1;
+		color: #f8fafc;
+		text-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+	}
+}

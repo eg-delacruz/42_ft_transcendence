@@ -10,7 +10,7 @@ export const RACE_DEV_USERS: Record<RacePlayerId, RaceGameUser> = {
   player1: {
     playerId: 'player1',
     userId: '6a38160d2bef44c6bd9df8a3',
-    displayName: 'Terto',
+    displayName: 'terto',
   },
   player2: {
     playerId: 'player2',

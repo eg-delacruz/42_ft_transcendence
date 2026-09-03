@@ -1,3 +1,12 @@
+import fightPlayerOneDodge from '../assets/fight-playerone-dodge.png';
+import fightPlayerOneKick from '../assets/fight-playerone-kick.png';
+import fightPlayerOnePunch from '../assets/fight-playerone-punch.png';
+import fightPlayerOneIdle from '../assets/fight-playerone-idle.gif';
+import fightPlayerTwoDodge from '../assets/fight-playertwo-dodge.png';
+import fightPlayerTwoKick from '../assets/fight-playertwo-kick.png';
+import fightPlayerTwoPunch from '../assets/fight-playertwo-punch.png';
+import fightPlayerTwoIdle from '../assets/fight-playertwo-idle.gif';
+
 export type FightAction =
   | 'punch'
   | 'kick'
@@ -79,6 +88,33 @@ export const FIGHT_ACTION_ICONS: Record<FightAction, string> = {
   kick: '🦵',
   grab: '🤼',
   dodge: '💨',
+};
+
+export const FIGHT_PLAYER_1_ACTION_ICONS: Record<FightAction, string> = {
+  punch: fightPlayerOnePunch,
+  kick: fightPlayerOneKick,
+  grab: '🤼',
+  dodge: fightPlayerOneDodge,
+};
+
+export const FIGHT_PLAYER_2_ACTION_ICONS: Record<FightAction, string> = {
+  punch: fightPlayerTwoPunch,
+  kick: fightPlayerTwoKick,
+  grab: '🤼',
+  dodge: fightPlayerTwoDodge,
+};
+
+export const FIGHT_PLAYER_1_IDLE_ICON = fightPlayerOneIdle;
+export const FIGHT_PLAYER_2_IDLE_ICON = fightPlayerTwoIdle;
+
+export const FIGHT_PLAYER_IDLE_ICONS: Record<FightPlayerId, string> = {
+  player1: FIGHT_PLAYER_1_IDLE_ICON,
+  player2: FIGHT_PLAYER_2_IDLE_ICON,
+};
+
+export const FIGHT_PLAYER_ACTION_ICONS: Record<FightPlayerId, Record<FightAction, string>> = {
+  player1: FIGHT_PLAYER_1_ACTION_ICONS,
+  player2: FIGHT_PLAYER_2_ACTION_ICONS,
 };
 
 export const FIGHT_PLAYER_1_CONTROLS: Record<string, FightAction> = {
