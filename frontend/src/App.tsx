@@ -56,29 +56,6 @@ function App() {
 		</BrowserRouter>
 		</AuthProvider>
 	</div>
-    <AuthProvider>
-      <BrowserRouter>
-        {/* simple nav system implemented for testing */}
-        <nav>
-          <Link to="/">Home</Link> | {""}
-          <Link to="/login">Login</Link> | {""}
-          <Link to="/register">Register</Link> | {""}
-          <Link to="/user">User</Link> | {""}
-          <Link to="/socket-debug">Socket Debug</Link> | {""}
-          <Link to="/privacy">Privacy Policy</Link> | {""}
-          <Link to="/terms">Terms of Service</Link> | {""}
-          <Link to="/minigames">Minigames</Link> | {""}
-          <Link to="/game">Game</Link> | {""}
-        </nav>
-
-        {/* Routes */}
-        <Routes>
-          {routes.map(({ path, element }) => (
-            <Route key={path} path={path} element={element} />
-          ))}
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
   );
 }
 
