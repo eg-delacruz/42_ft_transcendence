@@ -9,8 +9,8 @@ import {
   finishAsDead,
   getVisualCardSlots,
   handleDungeonKey,
+  prepareNextDungeonStep,
   resolveCardChoice,
-  startNewRoom,
 } from './DDD.logic';
 
 import { styles } from './DDD.styles';
@@ -109,7 +109,7 @@ export function DeepDarkDungeon({ onExitToMenu }: DeepDarkDungeonProps) {
           return currentState;
         }
 
-        return startNewRoom(currentState);
+        return prepareNextDungeonStep(currentState);
       });
     }, 600);
 
@@ -325,7 +325,11 @@ export function DeepDarkDungeon({ onExitToMenu }: DeepDarkDungeonProps) {
           {dungeonState.phase === 'drawingCards' && (
             <section style={styles.bottomMessageBox}>
               <h2 style={styles.phaseTitle}>Robando cartas...</h2>
-              <p style={styles.text}>Preparando la siguiente sala.</p>
+              <p style={styles.text}>
+                {isContinuingCurrentRoom(dungeonState)
+                  ? 'El reto continúa. Robando nuevas cartas para intentarlo de nuevo.'
+                  : 'Preparando la siguiente sala.'}
+              </p>
             </section>
           )}
 
@@ -450,7 +454,12 @@ function ActiveChallenge({ dungeonState }: { dungeonState: DungeonState }) {
           <h2 style={styles.challengeTitle}>Apuestas</h2>
           <p style={styles.bigNumber}>{dungeonState.bettingCountdown}</p>
           <p style={styles.challengeDescription}>
-            Esperando antes de entrar en la mazmorra.
+            Elige una clase y adéntrate en la mazmorra. Cada ronda te enfrentarás a una
+            sala de combate, trampa o sala vacía, y robarás 3 cartas para intentar
+            superarla. Si la carta no resuelve el reto, la sala continuará y tendrás que
+            seguir intentándolo con nuevas cartas. Algunas cartas evitan daño, curan o dan
+            puntos extra, pero no siempre superan la sala. Puedes abandonar usando ↓ para
+            conservar tu puntuación; si mueres, perderás parte del score acumulado.
           </p>
         </article>
       </section>
@@ -476,15 +485,29 @@ function ActiveChallenge({ dungeonState }: { dungeonState: DungeonState }) {
   }
 
   if (dungeonState.phase === 'drawingCards') {
+    const shouldContinueRoom = isContinuingCurrentRoom(dungeonState);
+
     return (
       <section style={styles.challengeArea}>
         <p style={styles.challengeLabel}>Reto activo</p>
 
         <article style={styles.challengeCard}>
-          <h2 style={styles.challengeTitle}>Nueva sala</h2>
-          <p style={styles.roomIcon}>🃏</p>
+          <h2 style={styles.challengeTitle}>
+            {shouldContinueRoom && dungeonState.currentRoom
+              ? dungeonState.currentRoom.name
+              : 'Nueva sala'}
+          </h2>
+
+          <p style={styles.roomIcon}>
+            {shouldContinueRoom && dungeonState.currentRoom
+              ? dungeonState.currentRoom.icon
+              : '🃏'}
+          </p>
+
           <p style={styles.challengeDescription}>
-            Robando cartas y preparando el siguiente reto.
+            {shouldContinueRoom && dungeonState.currentRoom
+              ? 'El reto no se ha superado todavía. Robando nuevas cartas.'
+              : 'Robando cartas y preparando el siguiente reto.'}
           </p>
         </article>
       </section>
@@ -607,7 +630,9 @@ function getDungeonTimeText(dungeonState: DungeonState): string {
       return `${dungeonState.classSelectionCountdown}s clase`;
 
     case 'drawingCards':
-      return 'Robando cartas';
+      return isContinuingCurrentRoom(dungeonState)
+        ? 'Mismo reto'
+        : 'Robando cartas';
 
     case 'choosingCard':
       return `${dungeonState.cardSelectionCountdown}s carta`;
@@ -656,4 +681,12 @@ function getResultTitle(dungeonState: DungeonState): string {
   }
 
   return 'Partida finalizada';
+}
+
+function isContinuingCurrentRoom(dungeonState: DungeonState): boolean {
+  return Boolean(
+    dungeonState.currentRoom &&
+      dungeonState.lastTurnResult &&
+      !dungeonState.lastTurnResult.roomCleared,
+  );
 }

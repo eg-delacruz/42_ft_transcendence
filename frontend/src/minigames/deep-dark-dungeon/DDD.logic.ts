@@ -13,7 +13,6 @@ import {
   DUNGEON_RESULTS_COUNTDOWN_SECONDS,
   DUNGEON_ROOMS,
   DUNGEON_ROOM_SCORE,
-  DUNGEON_STREAK_SCORE,
   type DungeonCard,
   type DungeonClass,
   type DungeonPlayer,
@@ -100,6 +99,42 @@ export function chooseClass(
   };
 }
 
+export function prepareNextDungeonStep(state: DungeonState): DungeonState {
+  if (state.phase !== 'drawingCards') {
+    return state;
+  }
+
+  if (shouldContinueCurrentRoom(state)) {
+    return continueCurrentRoom(state);
+  }
+
+  return startNewRoom(state);
+}
+
+export function continueCurrentRoom(state: DungeonState): DungeonState {
+  if (!state.player.class || !state.currentRoom) {
+    return startNewRoom(state);
+  }
+
+  return {
+    ...state,
+    phase: 'choosingCard',
+    currentRoom: state.currentRoom,
+    hand: drawCards(state.player.class, DUNGEON_HAND_SIZE),
+    cardSelectionCountdown: DUNGEON_CARD_SELECTION_SECONDS,
+    resolveCountdown: DUNGEON_RESOLVE_SECONDS,
+    lastTurnResult: undefined,
+  };
+}
+
+function shouldContinueCurrentRoom(state: DungeonState): boolean {
+  return Boolean(
+    state.currentRoom &&
+      state.lastTurnResult &&
+      !state.lastTurnResult.roomCleared,
+  );
+}
+
 export function startNewRoom(state: DungeonState): DungeonState {
   if (!state.player.class) {
     return chooseClass(state, 'warrior');
@@ -111,6 +146,7 @@ export function startNewRoom(state: DungeonState): DungeonState {
     currentRoom: drawRoom(),
     hand: drawCards(state.player.class, DUNGEON_HAND_SIZE),
     cardSelectionCountdown: DUNGEON_CARD_SELECTION_SECONDS,
+    resolveCountdown: DUNGEON_RESOLVE_SECONDS,
     lastTurnResult: undefined,
   };
 }
@@ -175,7 +211,7 @@ export function resolveTurn(
       damageTaken: 0,
       healingReceived: getHealing(card),
       scoreGained,
-      message: `🚪 Sala vacía. ${card.icon} ${card.name}. Sala superada.`,
+      message: `🚪 Sala vacía. ${card.icon} ${card.name}. Sala superada. +${scoreGained}`,
     };
   }
 
@@ -218,9 +254,10 @@ export function buildTurnMessage(
   healingReceived: number,
   scoreGained: number,
 ): string {
-  const resultText = roomCleared ? 'Superada' : 'Fallida';
+  const resultText = roomCleared ? 'Superada' : 'No superada';
+  const continueText = roomCleared ? 'Avanzas' : 'El reto continúa';
 
-  return `${room.icon} ${room.name} | ${card.icon} ${card.name} | ${resultText} | Daño ${damageTaken} | Cura ${healingReceived} | +${scoreGained}`;
+  return `${room.icon} ${room.name} | ${card.icon} ${card.name} | ${resultText} | Daño ${damageTaken} | Cura ${healingReceived} | +${scoreGained} | ${continueText}`;
 }
 
 export function escapeDungeon(state: DungeonState): DungeonState {
@@ -300,11 +337,9 @@ export function drawCard(dungeonClass: DungeonClass): DungeonCard {
 }
 
 export function getRoomScore(currentStreak: number): number {
-  if (currentStreak > 0) {
-    return DUNGEON_STREAK_SCORE;
-  }
+  const nextStreak = currentStreak + 1;
 
-  return DUNGEON_ROOM_SCORE;
+  return DUNGEON_ROOM_SCORE * nextStreak;
 }
 
 export function getBonusScore(card: DungeonCard): number {
