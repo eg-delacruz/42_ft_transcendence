@@ -91,6 +91,21 @@ function emitWithAck<TPayload, TResponse>(
   });
 }
 
+// Función auxiliar para recuperar el token en caso de que no use solo HttpOnly cookie
+function getAuthToken(): string | null {
+  if (typeof window === "undefined") return null;
+  
+  // 1. Intentar desde LocalStorage
+  const localToken = localStorage.getItem("access_token") || localStorage.getItem("token");
+  if (localToken) return localToken;
+
+  // 2. Intentar parsear de document.cookie si no es HttpOnly
+  const match = document.cookie.match(new RegExp("(^| )access_token=([^;]+)"));
+  if (match) return match[2];
+
+  return null;
+}
+
 export function useChatSocket() {
   const { user, loading } = useAuthContext();
   const socketRef = useRef<Socket | null>(null);
@@ -135,9 +150,14 @@ export function useChatSocket() {
     }
 
     if (!socketRef.current) {
+      const token = getAuthToken();
+
       const socket = io(SOCKET_URL, {
         withCredentials: true,
-        transports: ["websocket"],
+        transports: ["polling", "websocket"], // Soporte para polling antes de upgrade a websocket
+        auth: {
+          token: token ? (token.startsWith("Bearer ") ? token : `Bearer ${token}`) : undefined,
+        },
         autoConnect: false,
         reconnection: true,
         reconnectionAttempts: 5,
@@ -150,9 +170,11 @@ export function useChatSocket() {
         setStatus("connected");
         setError(null);
         pushEvent("connect", { socketId: socket.id });
+
         // Activar sala global por defecto inmediatamente
         setActiveRoomId(GLOBAL_ROOM_ID);
-        // Cargar rooms y mensajes previos (no bloquean el chat)
+
+        // Cargar rooms y mensajes previos
         try {
           const res = await emitWithAck<object, { rooms: ChatRoomInfo[] }>(
             socket,
@@ -164,6 +186,7 @@ export function useChatSocket() {
         } catch {
           /* silencioso */
         }
+
         try {
           const msgRes = await emitWithAck<
             GetRoomMessagesPayload,
@@ -192,6 +215,11 @@ export function useChatSocket() {
         setStatus("error");
         setError(socketError.message);
         pushEvent("connect_error", socketError.message);
+
+        // Si el error es de token/autenticación, cancelar reconexiones automáticas
+        if (socketError.message.includes("Unauthorized") || socketError.message.includes("token")) {
+          socket.disconnect();
+        }
       });
 
       socket.on("room:user_joined", (payload) => {
@@ -233,7 +261,6 @@ export function useChatSocket() {
     if (!socketRef.current) {
       throw new Error("Socket not connected");
     }
-    console.log("Creating room with payload [name]:", payload);
     type RoomCreatedResponse = { room: ChatRoomInfo; timestamp: string };
 
     const response = await emitWithAck<CreateRoomPayload, RoomCreatedResponse>(
@@ -242,8 +269,6 @@ export function useChatSocket() {
       payload,
     );
     pushEvent("create_room", response);
-    console.log("Create room response:", response);
-    // REVIEWQUE MIERDA PASA AQUI?
 
     if (response.success && response.data?.room) {
       setLastCreatedRoom(response.data.room);

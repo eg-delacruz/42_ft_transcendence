@@ -30,7 +30,7 @@ status:
 	docker-compose ps
 
 clean: down
-	docker volume rm $$(docker volume ls -qf dangling=true) || true
+	docker volume prune -f
 	docker image prune -a -f
 
 mongo:

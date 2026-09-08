@@ -1,8 +1,13 @@
 // Main entry point of the backend.
 // Initializes MongoDB, HTTP server, Socket.IO, and Redis adapter.
 
+import path from "path";
 import dotenv from "dotenv";
-dotenv.config();
+
+// Busca el archivo .env en la raíz del proyecto
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+dotenv.config({ path: path.resolve(process.cwd(), "../.env") });
+dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
 import http from 'http';
 import Redis from 'ioredis';

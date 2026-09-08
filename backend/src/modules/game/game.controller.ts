@@ -13,7 +13,7 @@ export const getGameByName = async (
   const game_name = req.params.game_name;
 
   try {
-    const game = await Game.findOne({ name: game_name })
+    const game = await Game.findOne({ name: game_name as any })
       .populate({
         path: "top_1_user top_2_user top_3_user",
         select: "email display_name avatar_url points",
@@ -46,7 +46,7 @@ export const updateGameScores = async (
   }
 
   try {
-    const game = await Game.findOne({ name: game_name });
+    const game = await Game.findOne({ name: game_name as any });
 
     if (!game) {
       return errorResponse(res, "Game not found", 404);
