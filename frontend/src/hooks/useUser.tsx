@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { API_BASE_URL } from '@/utils/urls';
 
 export function useUser() {
     const [user, setUser] = useState<any>(null);
@@ -8,7 +9,7 @@ export function useUser() {
     useEffect(() => {
         console.log("[useUser] called");
         setLoading(false);
-        fetch("http://localhost:3000/api/auth/me", {
+        fetch(`${API_BASE_URL}/auth/me`, {
             credentials: "include"
         })
         .then(res => res.json())
