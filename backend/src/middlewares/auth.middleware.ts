@@ -4,7 +4,8 @@ import env from "@config/env";
 import { errorResponse } from "@utils/response";
 
 export interface AuthPayload {
-  id: string;
+  userId: string;
+  id?: string;
   email: string;
   role: string;
 }
@@ -25,8 +26,19 @@ export const authMiddleware = (
   }
 
   try {
-    const decoded = jwt.verify(token, env.JWT_SECRET) as AuthPayload;
-    req.user = decoded;
+    const decoded = jwt.verify(token, env.JWT_SECRET) as Partial<AuthPayload>;
+
+    if (!decoded?.userId && !decoded?.id) {
+      return errorResponse(res, "Invalid token payload", 401);
+    }
+
+    req.user = {
+      userId: decoded.userId ?? decoded.id!,
+      id: decoded.id ?? decoded.userId,
+      email: decoded.email ?? "",
+      role: decoded.role ?? "",
+    };
+
     next();
   } catch (err) {
     return errorResponse(res, "Invalid or expired token", 401);

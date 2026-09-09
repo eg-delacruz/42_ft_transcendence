@@ -117,7 +117,7 @@ export const registerUser = async (
     res.cookie('access_token', token, {
       httpOnly: true,
       secure: env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax',
       maxAge: 24 * 60 * 60 * 1000,
     });
 
@@ -143,25 +143,32 @@ export const registerUser = async (
 // Controller to get current authenticated user's info
 export const getCurrentUser = async (req: AuthRequest, res: Response) => {
   try {
-    if (!req.user?.id) {
-      return errorResponse(res, "Not authenticated", 401);
+    const currentUserId = req.user?.userId || req.user?.id;
+
+    if (!currentUserId) {
+      return errorResponse(res, 'Not authenticated', 401);
     }
 
-    const dbUser = await User.findById(req.user.id)
-      .select("_id email role avatar_url display_name points createdAt updatedAt")
+    const dbUser = await User.findById(currentUserId)
+      .select('_id username email role avatarUrl avatar_url display_name points state stats createdAt updatedAt')
       .lean();
 
     if (!dbUser) {
-      return errorResponse(res, "User not found", 404);
+      return errorResponse(res, 'User not found', 404);
     }
 
     return successResponse(
       res,
-      { user: dbUser },
-      "Authenticated user",
+      {
+        user: {
+          ...dbUser,
+          id: dbUser._id,
+        },
+      },
+      'Authenticated user'
     );
   } catch (error) {
-    return errorResponse(res, "Failed to load user", 500);
+    return errorResponse(res, 'Failed to load user', 500);
   }
 };
 

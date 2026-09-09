@@ -29,7 +29,7 @@ async function startServer() {
 
     const io = new Server(httpServer, {
         cors: {
-            origin: `http://localhost:${env.FRONT_PORT}`,
+            origin: (origin, cb) => cb(null, true),
             credentials: true,
         },
     });

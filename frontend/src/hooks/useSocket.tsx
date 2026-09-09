@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { io, type Socket } from 'socket.io-client';
 
 import { useAuthContext } from '@/context/context';
+import { SOCKET_URL } from '@/utils/urls';
 
 type SocketStatus = 'idle' | 'connecting' | 'connected' | 'reconnecting' | 'disconnected' | 'error';
 
@@ -9,8 +10,6 @@ type PongPayload = {
   ok: boolean;
   timestamp: number;
 };
-
-const SOCKET_URL = 'http://localhost:3000';
 
 export function useSocket() {
   const { user, loading } = useAuthContext();

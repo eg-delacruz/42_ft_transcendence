@@ -5,7 +5,7 @@ import {
   type MinigameTopScore,
 } from '../types';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+import { API_BASE_URL } from '@/utils/urls';
 
 type ApiGameResponse = {
   error?: string;

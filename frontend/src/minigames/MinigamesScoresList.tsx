@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { getMinigameTopScores } from './components/TopScores.api';
 import { styles } from './MinigamesDevPage.styles';
 import type { MinigameId, MinigameTopScore } from './types';
+import { API_BASE_URL } from '@/utils/urls';
 
 type MinigamesScoresListProps = {
   onExitToMenu: () => void;
@@ -254,7 +255,7 @@ export function MinigamesScoresList({
 }
 
 async function getPortalUsers(): Promise<PortalUser[]> {
-  const response = await fetch('http://localhost:3000/api/users/all', {
+  const response = await fetch(`${API_BASE_URL}/users/all`, {
     method: 'GET',
     credentials: 'include',
   });

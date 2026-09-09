@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { SOCKET_URL } from '@/utils/urls';
 
 interface PlayerPosition {
   x: number;
@@ -18,7 +19,7 @@ export const GameCanvas: React.FC = () => {
 
   useEffect(() => {
     // Conectar al backend de Socket.IO
-    const socket = io('http://localhost:3000', {
+    const socket = io(SOCKET_URL, {
       transports: ['websocket', 'polling'],
       withCredentials: true,
     });

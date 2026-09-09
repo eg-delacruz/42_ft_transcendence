@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { io, type Socket } from "socket.io-client";
 
 import { useAuthContext } from "@/context/context";
+import { CHAT_SOCKET_URL } from '@/utils/urls';
 
 type SocketStatus =
   | "idle"
@@ -76,7 +77,6 @@ type GetRoomMessagesPayload = {
   offset?: number;
 };
 
-const SOCKET_URL = "http://localhost:3000/chat";
 const GLOBAL_ROOM_ID = "global";
 
 function emitWithAck<TPayload, TResponse>(
