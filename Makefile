@@ -18,26 +18,25 @@ down:
 restart: down up
 
 logs:
-	@if [ -n "$(CONTAINER)" ]; then \
-		echo "\033[1;36mMostrando logs del contenedor: $(CONTAINER)\033[0m"; \
-		docker-compose logs $(CONTAINER) -f; \
-	else \
-		echo "\033[1;33mMostrando logs de todos los contenedores\033[0m"; \
-		docker-compose logs -f; \
-	fi
+	docker-compose logs -f
 
 status:
 	docker-compose ps
+	@echo "\n\n"
+	docker-compose volumes
+	@echo "\n\n"
+	docker-compose images
+
 
 clean: down
-	docker volume prune -f
-	docker image prune -a -f
+	docker compose down -v --rmi all --remove-orphans
+
 
 mongo:
 	docker-compose exec mongo sh
 
 mongosh:
-	@docker-compose exec mongo sh -c 'mongosh -u "$$MONGO_INITDB_ROOT_USERNAME" -p "$$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase $$MONGO_ROOT_USER "$$MONGO_INITDB_DATABASE"'
+	docker-compose exec mongo sh -c 'mongosh -u "$$MONGO_INITDB_ROOT_USERNAME" -p "$$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase $$MONGO_ROOT_USER "$$MONGO_INITDB_DATABASE"'
 
 backend:
 	docker-compose exec backend sh
@@ -52,8 +51,8 @@ help:
 	@echo "  make up       - Levanta los contenedores en segundo plano"
 	@echo "  make down     - Detiene y elimina los contenedores"
 	@echo "  make restart  - Reinicia los contenedores"
-	@echo "  make logs     - Muestra los logs de los contenedores (puedes usar make logs CONTAINER=nombre)"
-	@echo "  make clean    - Limpia volúmenes e imágenes no usados"
+	@echo "  make logs     - Muestra los logs de los contenedores"
+	@echo "  make clean    - Limpia volúmenes e imágenes"
 	@echo "  make mongo    - Abre una shell dentro del contenedor mongo"
 	@echo "  make mongosh  - Abre la consola interactiva de MongoDB (mongosh)"
 	@echo "  make backend  - Abre una shell dentro del contenedor backend"

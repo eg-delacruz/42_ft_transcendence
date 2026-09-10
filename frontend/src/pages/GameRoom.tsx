@@ -67,8 +67,7 @@ function GameRoom() {
 								Account settings
 								</a>
 							</MenuItem>
-							{/*No estoy segura de que esto esté bien siendo un form con post pero es codigo externo asi que ni idea*/}
-							<form onClick={Logout} method="POST">
+							<form onClick={Logout}>
 								<MenuItem>
 								<button
 									type="submit"
