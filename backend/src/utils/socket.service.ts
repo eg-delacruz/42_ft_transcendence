@@ -1,6 +1,6 @@
 /**
  * Socket Service
- * Business logic for Socket.IO operations (presence, rooms, users)
+ * Business logic for Socket.IO operations (presence, rooms, users, matchmaking)
  * Abstracts Redis operations and Socket.IO instance interactions
  */
 
@@ -11,6 +11,7 @@ import { logger } from '@/config/logger';
 
 const PRESENCE_PREFIX = 'user_presence:';
 const ROOM_USERS_PREFIX = 'room_users:';
+const MATCHMAKING_QUEUE_KEY = 'matchmaking:queue';
 const PRESENCE_TTL = 3600; // 1 hour
 
 export class SocketService {
@@ -196,7 +197,11 @@ export class SocketService {
     /**
      * Create standardized error response
      */
-    static createError(code: SocketErrorCode, message: string, details?: Record<string, any>): SocketErrorResponse {
+    static createError(
+        code: SocketErrorCode | string, 
+        message: string, 
+        details?: Record<string, any>
+    ): SocketErrorResponse {
         return {
             code,
             message,
@@ -216,6 +221,66 @@ export class SocketService {
         } catch (error) {
             logger.error(`Error checking user in room:`, error);
             return false;
+        }
+    }
+
+    /**
+     * Matchmaking: Add user to queue and try to match immediately
+     */
+    async joinMatchmaking(user: SocketUser, socketId: string): Promise<{ matched: boolean; opponentId?: string; roomId?: string }> {
+        try {
+            const rawWaitingUser = await this.redis.lpop(MATCHMAKING_QUEUE_KEY);
+
+            if (rawWaitingUser) {
+                const waitingUser = JSON.parse(rawWaitingUser);
+
+                // Evita emparejar al usuario consigo mismo si re-envía solicitud
+                if (waitingUser.userId === user.userId) {
+                    await this.redis.lpush(MATCHMAKING_QUEUE_KEY, rawWaitingUser);
+                    return { matched: false };
+                }
+
+                const roomId = `room_game_${Date.now()}_${user.userId}_${waitingUser.userId}`;
+
+                // Registrar a ambos en Redis como integrantes de la nueva sala
+                await this.addUserToRoom(user.userId, roomId);
+                await this.addUserToRoom(waitingUser.userId, roomId);
+
+                logger.info(`Match created: ${user.userId} vs ${waitingUser.userId} in room ${roomId}`);
+
+                return {
+                    matched: true,
+                    opponentId: waitingUser.userId,
+                    roomId
+                };
+            } else {
+                const payload = JSON.stringify({ userId: user.userId, socketId, timestamp: Date.now() });
+                await this.redis.rpush(MATCHMAKING_QUEUE_KEY, payload);
+                logger.debug(`User ${user.userId} added to matchmaking queue`);
+                return { matched: false };
+            }
+        } catch (error) {
+            logger.error(`Error in joinMatchmaking for user ${user.userId}:`, error);
+            return { matched: false };
+        }
+    }
+
+    /**
+     * Matchmaking: Remove user from queue
+     */
+    async leaveMatchmaking(userId: string): Promise<void> {
+        try {
+            const queueItems = await this.redis.lrange(MATCHMAKING_QUEUE_KEY, 0, -1);
+            for (const item of queueItems) {
+                const parsed = JSON.parse(item);
+                if (parsed.userId === userId) {
+                    await this.redis.lrem(MATCHMAKING_QUEUE_KEY, 1, item);
+                    logger.debug(`User ${userId} removed from matchmaking queue`);
+                    break;
+                }
+            }
+        } catch (error) {
+            logger.error(`Error leaving matchmaking queue for user ${userId}:`, error);
         }
     }
 }

@@ -21,6 +21,7 @@ import { connectDB } from '@config/db';
 import { initializeChatNamespace } from '@modules/chat';
 import { jwtSocketMiddleware } from '@utils/socket-auth';
 import { SocketUser } from '@interfaces/socket';
+import { SocketService } from '@utils/socket.service';
 
 async function startServer() {
     await connectDB();
@@ -35,7 +36,6 @@ async function startServer() {
     });
 
     // ── Redis adapter ──────────────────────────────────────────────────────
-    // Declared outside try so it's accessible for initializeChatNamespace.
     let pubClient: Redis | null = null;
 
     try {
@@ -47,12 +47,12 @@ async function startServer() {
         logger.info('[✓] Redis connected and socket.io adapter configured');
     } catch (error) {
         logger.error('[✗] Failed to connect to Redis:', error);
-        // pubClient stays null; chat namespace will not be initialized
     }
 
+    // Instanciar SocketService solo si Redis está disponible
+    const socketService = pubClient ? new SocketService(io, pubClient) : null;
+
     // ── Global auth middleware (root namespace /) ──────────────────────────
-    // Each namespace also registers jwtSocketMiddleware independently
-    // because Socket.IO 4.x does NOT propagate io.use() to custom namespaces.
     io.use(jwtSocketMiddleware);
 
     // ── /chat namespace ────────────────────────────────────────────────────
@@ -63,16 +63,63 @@ async function startServer() {
     }
 
     // ── Root namespace connection handler ──────────────────────────────────
-    io.on('connection', (socket: Socket) => {
+    io.on('connection', async (socket: Socket) => {
         const user = socket.data.user as SocketUser | undefined;
         logger.info(`[ws:/] connected socket=${socket.id} user=${user?.userId ?? 'unknown'}`);
+
+        if (user && socketService) {
+            // Unir el socket a la sala propia del usuario
+            socket.join(`user:${user.userId}`);
+            // Registrar la presencia del usuario
+            await socketService.addUserPresence(user);
+        }
 
         // Minimal ping/pong for health checks
         socket.on('ping', () => {
             socket.emit('pong', { ok: true, timestamp: Date.now() });
         });
 
-        socket.on('disconnect', (reason) => {
+        // ── Matchmaking Events ──────────────────────────────────────────────
+        socket.on('join_matchmaking', async () => {
+            if (!user || !socketService) {
+                socket.emit('error', SocketService.createError('UNAUTHORIZED', 'Usuario o servicio no disponible'));
+                return;
+            }
+
+            const result = await socketService.joinMatchmaking(user, socket.id);
+
+            if (result.matched && result.roomId) {
+                // Unir este socket a la sala de la partida
+                socket.join(result.roomId);
+
+                // Unir también los sockets del oponente
+                const opponentSockets = await socketService.getUserSockets(result.opponentId!);
+                for (const oppSocket of opponentSockets) {
+                    oppSocket.join(result.roomId);
+                }
+
+                // Notificar a la sala completa que se ha encontrado partida
+                socketService.broadcastToRoom(result.roomId, 'match_found', {
+                    roomId: result.roomId,
+                    players: [user.userId, result.opponentId],
+                });
+            } else {
+                socket.emit('queue_status', { status: 'waiting' });
+            }
+        });
+
+        socket.on('leave_matchmaking', async () => {
+            if (user && socketService) {
+                await socketService.leaveMatchmaking(user.userId);
+                socket.emit('queue_status', { status: 'cancelled' });
+            }
+        });
+
+        socket.on('disconnect', async (reason) => {
+            if (user && socketService) {
+                await socketService.leaveMatchmaking(user.userId);
+                await socketService.removeUserPresence(user.userId);
+            }
             logger.info(`[ws:/] disconnected socket=${socket.id} reason=${reason}`);
         });
     });
