@@ -99,6 +99,12 @@
 		color: var(--color-neutral-200);
 		font-family: var(--font-aldrich);
 	}
+
+	.chatText {
+		font-family: var(--font-aldrich);
+		color: var(--color-zinc-50);
+		font-size: small;
+	}
 }
 
 

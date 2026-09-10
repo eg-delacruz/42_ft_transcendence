@@ -152,7 +152,7 @@ export function useChatSocket() {
     if (!socketRef.current) {
       const token = getAuthToken();
 
-      const socket = io(SOCKET_URL, {
+      const socket = io(CHAT_SOCKET_URL, {
         withCredentials: true,
         transports: ["polling", "websocket"], // Soporte para polling antes de upgrade a websocket
         auth: {
