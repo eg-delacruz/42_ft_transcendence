@@ -92,7 +92,7 @@ export function ChatRoomViewer({
     });
 
     return (
-        <div className="h-7/9 w-full relative mt-2 overflow-scroll scroll-mx-2">
+        <div className="h-7/9 w-full relative mt-2 overflow-y-scroll">
             {/* <div className="flex justify-between items-center m-3 g-3">
                 <span className="chatText text-sm font-bold uppercase mb-2 m-0">
                     {activeRoomId ? activeRoomId.slice(0, 8) + "…" : "No room"}

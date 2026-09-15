@@ -51,7 +51,9 @@ function App() {
 			<Route path="/login" element={<Login />} />
 			<Route path="/register" element={<Register />} />
 			<Route path="/user" element={<User />} />
-			<Route path="/gameroom" element={<GameRoom />} /> 
+			<Route path="/gameroom" element={<GameRoom />} />
+			<Route path="/privacy" element={<PrivacyPolicy />} />
+			<Route path="/terms" element={<TermsOfService />} />
 		</Routes>
 		</BrowserRouter>
 		</AuthProvider>
