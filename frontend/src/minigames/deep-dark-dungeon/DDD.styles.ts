@@ -1,6 +1,12 @@
 import type { CSSProperties } from 'react';
 
 export const styles: Record<string, CSSProperties> = {
+  /*
+   * ============================================================
+   * PÁGINA PRINCIPAL
+   * ============================================================
+   */
+
   page: {
     width: '100%',
     minHeight: '100vh',
@@ -21,6 +27,12 @@ export const styles: Record<string, CSSProperties> = {
     justifyContent: 'center',
     gap: '28px',
   },
+
+  /*
+   * ============================================================
+   * CABECERA
+   * ============================================================
+   */
 
   header: {
     textAlign: 'center',
@@ -48,6 +60,12 @@ export const styles: Record<string, CSSProperties> = {
     fontSize: '16px',
   },
 
+  /*
+   * ============================================================
+   * ZONA SUPERIOR
+   * ============================================================
+   */
+
   topGameArea: {
     display: 'grid',
     gridTemplateColumns: '360px minmax(520px, 1fr)',
@@ -55,6 +73,12 @@ export const styles: Record<string, CSSProperties> = {
     gap: '32px',
     width: '100%',
   },
+
+  /*
+   * ============================================================
+   * HUD DEL JUGADOR
+   * ============================================================
+   */
 
   playerHud: {
     width: '100%',
@@ -102,6 +126,12 @@ export const styles: Record<string, CSSProperties> = {
     textShadow: '0 1px 0 #000',
   },
 
+  /*
+   * ============================================================
+   * RETO ACTIVO
+   * ============================================================
+   */
+
   challengeArea: {
     width: '100%',
     display: 'flex',
@@ -131,6 +161,21 @@ export const styles: Record<string, CSSProperties> = {
     justifyContent: 'center',
     gap: '14px',
     boxShadow: '0 0 0 1px rgba(255, 255, 255, 0.04)',
+  },
+
+  /*
+   * Imagen de Combate / Trampa / Pasillo.
+   *
+   * Para hacerla más grande o pequeña, cambia width.
+   */
+
+  roomImage: {
+    display: 'block',
+    width: '300px',
+    maxHeight: '310px',
+    height: 'auto',
+    objectFit: 'contain',
+    margin: '0 auto',
   },
 
   bettingChallengeCard: {
@@ -202,12 +247,6 @@ export const styles: Record<string, CSSProperties> = {
     lineHeight: 1.1,
   },
 
-  roomIcon: {
-    margin: '6px 0',
-    fontSize: '72px',
-    lineHeight: 1,
-  },
-
   challengeDescription: {
     width: '100%',
     maxWidth: '500px',
@@ -232,12 +271,24 @@ export const styles: Record<string, CSSProperties> = {
     lineHeight: 1.4,
   },
 
+  /*
+   * ============================================================
+   * DIVISOR
+   * ============================================================
+   */
+
   boardDivider: {
     width: '100%',
     height: '2px',
     background: 'rgba(255, 255, 255, 0.65)',
     margin: '2px 0',
   },
+
+  /*
+   * ============================================================
+   * ZONA INFERIOR
+   * ============================================================
+   */
 
   bottomGameArea: {
     width: '100%',
@@ -290,6 +341,12 @@ export const styles: Record<string, CSSProperties> = {
     color: '#facc15',
   },
 
+  /*
+   * ============================================================
+   * SELECCIÓN DE CLASE
+   * ============================================================
+   */
+
   classSelectionArea: {
     width: '100%',
     display: 'flex',
@@ -339,20 +396,10 @@ export const styles: Record<string, CSSProperties> = {
     fontWeight: 700,
   },
 
-  handArea: {
-    width: '100%',
-    display: 'grid',
-    gridTemplateColumns: '190px 1fr',
-    alignItems: 'center',
-    gap: '26px',
-  },
-
-  handHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: '16px',
-  },
+  /*
+   * Este estilo sigue utilizándose para
+   * "Clases disponibles".
+   */
 
   handSideLabel: {
     margin: 0,
@@ -362,85 +409,55 @@ export const styles: Record<string, CSSProperties> = {
     fontSize: '22px',
     fontWeight: 700,
     lineHeight: 1.4,
-    textAlign: 'right',
+    textAlign: 'center',
     whiteSpace: 'pre-line',
   },
 
-  handArrow: {
-    color: '#f4f4f5',
-    fontSize: '42px',
-    lineHeight: 1,
+  /*
+   * ============================================================
+   * CARTAS DEL JUGADOR
+   * ============================================================
+   */
+
+  handArea: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '18px',
   },
 
   cards: {
+    width: '100%',
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, minmax(210px, 260px))',
+    gridTemplateColumns: 'repeat(3, 220px)',
     justifyContent: 'center',
-    gap: '28px',
-  },
-
-  card: {
-    minHeight: '300px',
-    border: '2px solid #d4d4d8',
-    borderRadius: '8px',
-    background: 'rgba(24, 24, 31, 0.94)',
-    padding: '16px',
-    boxSizing: 'border-box',
-    textAlign: 'center',
-    display: 'flex',
-    flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: '10px',
-    boxShadow: '0 0 0 1px rgba(255, 255, 255, 0.04)',
+    gap: '12px',
   },
 
-  cardKey: {
-    width: '100%',
-    margin: 0,
-    color: '#a1a1aa',
-    fontSize: '14px',
-    textAlign: 'left',
-  },
+  /*
+   * Ya no construimos la carta con HTML.
+   * El PNG es la carta completa.
+   */
 
-  cardTitle: {
-    width: '100%',
-    margin: 0,
-    paddingBottom: '10px',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.25)',
-    textTransform: 'uppercase',
-    letterSpacing: '0.12em',
-    fontSize: '21px',
-    lineHeight: 1.15,
-  },
-
-  cardIcon: {
-    margin: '4px 0',
-    fontSize: '68px',
-    lineHeight: 1,
-  },
-
-  effectList: {
-    width: '100%',
-    minHeight: '86px',
-    paddingTop: '12px',
-    borderTop: '1px solid rgba(255, 255, 255, 0.25)',
+  gameCard: {
+    width: '220px',
     display: 'flex',
-    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '6px',
-  },
-
-  effectText: {
+    background: 'transparent',
+    border: 'none',
+    padding: 0,
     margin: 0,
-    color: '#f4f4f5',
-    fontSize: '16px',
-    lineHeight: 1.3,
   },
 
-  effectIcon: {
-    fontSize: '20px',
+  gameCardImage: {
+    display: 'block',
+    width: '100%',
+    height: 'auto',
+    objectFit: 'contain',
   },
 
   controlsHint: {
@@ -449,5 +466,76 @@ export const styles: Record<string, CSSProperties> = {
     fontSize: '16px',
     letterSpacing: '0.08em',
     textAlign: 'center',
+  },
+
+  /*
+   * ============================================================
+   * TUTORIAL VISUAL
+   * ============================================================
+   */
+
+  tutorialArea: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '20px',
+    textAlign: 'center',
+  },
+
+  tutorialGrid: {
+    width: '100%',
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+    gap: '24px',
+    alignItems: 'stretch',
+  },
+
+  tutorialCard: {
+    minWidth: 0,
+    border: '1px solid #3f3f46',
+    borderRadius: '14px',
+    background: '#18181f',
+    padding: '18px',
+    boxSizing: 'border-box',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '12px',
+  },
+
+  tutorialTitle: {
+    margin: 0,
+    color: '#f4f4f5',
+    fontSize: '20px',
+    fontWeight: 700,
+  },
+
+  tutorialText: {
+    margin: 0,
+    color: '#d4d4d8',
+    fontSize: '14px',
+    lineHeight: 1.5,
+  },
+
+  tutorialImage: {
+    display: 'block',
+    width: '100%',
+    height: 'auto',
+    margin: '8px auto 0',
+    objectFit: 'contain',
+  },
+
+  tutorialEscape: {
+    width: '100%',
+    border: '1px solid #3f3f46',
+    borderRadius: '12px',
+    background: '#18181f',
+    padding: '14px 18px',
+    boxSizing: 'border-box',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '14px',
   },
 };
