@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
-
 import { TopScores } from '../components/TopScores';
+import { useMinigameContext } from '../context/minigameContext';
 import { updateMinigameTopScore } from '../components/TopScores.api';
 
 import {
@@ -28,16 +28,16 @@ import {
 
 import { getFightDisplayName, getFightUserId } from './Fight.users';
 
-type FightFightProps = {
-  onExitToMenu?: () => void;
-};
 
-export function FightFight({ onExitToMenu }: FightFightProps) {
-  const [fightState, setFightState] = useState<FightState>(
-	createInitialFightState,
-  );
+export function FightFight({ onExitToMenu, onMinigameChange }: FightFightProps) {
+	const { setActiveGame } = useMinigameContext();
+	const [fightState, setFightState] = useState<FightState>(createInitialFightState,);
+	const hasSubmittedScore = useRef(false);
 
-  const hasSubmittedScore = useRef(false);
+	useEffect(() => {
+    	setActiveGame('fight-fight');
+    	return () => setActiveGame(null); // clear when it unmounts
+  	}, [setActiveGame]);
 
   const player1Name = getFightDisplayName('player1');
   const player2Name = getFightDisplayName('player2');
@@ -221,7 +221,6 @@ export function FightFight({ onExitToMenu }: FightFightProps) {
 
 return (
 	<main className="w-full h-screen flex items-center justify-center font-pressstart p-0 relative">
-		<TopScores minigameId="fight-fight" />
 
 		<div className="w-full h-full relative overflow-hidden">
 			{/* TopHUD - payer status and timer */}

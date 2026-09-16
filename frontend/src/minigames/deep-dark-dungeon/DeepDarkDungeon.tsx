@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-
 import { TopScores } from '../components/TopScores';
+import { useMinigameContext } from '../context/minigameContext';
 import { updateMinigameTopScore } from '../components/TopScores.api';
 
 import {
@@ -26,6 +26,7 @@ import {
   DUNGEON_EFFECT_LABELS,
   DUNGEON_INITIAL_HEALTH,
   DUNGEON_RESOLVE_SECONDS,
+  type MinigameId,
   type DungeonClass,
   type DungeonState,
 } from './DDD.types';
@@ -34,14 +35,18 @@ import { getDungeonUserId } from './DDD.users';
 
 type DeepDarkDungeonProps = {
   onExitToMenu?: () => void;
+  onMinigameChange?: (minigameId: MinigameId) => void;
 };
 
-export function DeepDarkDungeon({ onExitToMenu }: DeepDarkDungeonProps) {
-  const [dungeonState, setDungeonState] = useState<DungeonState>(
-    createInitialDungeonState,
-  );
+export function DeepDarkDungeon({ onExitToMenu, onMinigameChange }: DeepDarkDungeonProps) {
+	const { setActiveGame } = useMinigameContext();
+	const [dungeonState, setDungeonState] = useState<DungeonState>(createInitialDungeonState,);
+	const hasSubmittedScore = useRef(false);
 
-  const hasSubmittedScore = useRef(false);
+	useEffect(() => {
+    	setActiveGame('deep-dark-dungeon');
+    	return () => setActiveGame(null); // clear when it unmounts
+  	}, [setActiveGame]);
 
   useEffect(() => {
     if (dungeonState.phase !== 'bettingCountdown') {
@@ -279,7 +284,6 @@ export function DeepDarkDungeon({ onExitToMenu }: DeepDarkDungeonProps) {
 
   return (
     <main style={styles.page}>
-      <TopScores minigameId="deep-dark-dungeon" />
 
       <section style={styles.board}>
         <header style={styles.header}>

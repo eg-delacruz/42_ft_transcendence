@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { TopScores } from '../components/TopScores';
+import { useMinigameContext } from '../context/minigameContext';
 import { updateMinigameTopScore } from '../components/TopScores.api';
 import {
   advancePlayer,
@@ -22,11 +23,15 @@ type TheRaceProps = {
 };
 
 export function TheRace({ onExitToMenu }: TheRaceProps) {
-  const [raceState, setRaceState] = useState<RaceState>(
-	createInitialRaceState,
-  );
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  const hasSubmittedScore = useRef(false);
+	const { setActiveGame } = useMinigameContext();
+	const [raceState, setRaceState] = useState<RaceState>(createInitialRaceState,);
+	const [elapsedSeconds, setElapsedSeconds] = useState(0);
+	const hasSubmittedScore = useRef(false);
+
+	useEffect(() => {
+    	setActiveGame('the-race');
+    	return () => setActiveGame(null); // clear when it unmounts
+  	}, [setActiveGame]);
 
   useEffect(() => {
 	if (raceState.phase !== 'bettingCountdown') {
@@ -192,7 +197,6 @@ export function TheRace({ onExitToMenu }: TheRaceProps) {
 
   return (
 	<main className="w-full h-screen lex items-center justify-center p-0 relative overflow-hidden bg-amber-500">
-	  <TopScores minigameId="the-race" />
 
 	  <div className="w-full h-full grid grid-cols-3 overflow-hidden relative">
 		{/* Left side - clock */}
@@ -209,7 +213,7 @@ export function TheRace({ onExitToMenu }: TheRaceProps) {
 		<section className="trackArea relative flex flex-col pt-12 pl-2 pr-2 gap-20 bg-[url(../minigames/assets/race-grass.gif)] bg-repeat">
 			<RaceStatus raceState={raceState} winnerName={winnerName} />
 		  
-			<div className="h-full relative flex flex-row items-end justify-center pt-12 pl-2 pr-2 gap-20 overflow-hidden bg-[url(../minigames/assets/race-track.png)] bg-center bg-auto bg-repeat-y">
+			<div className="h-full relative flex flex-row items-end justify-center pt-12 pl-2 pr-2 gap-20 overflow-hidden bg-[url(../minigames/assets/race-track.png)] bg-center bg-contain bg-repeat-y">
 				<RaceRunner
 					player={player1}
 					color="blue"

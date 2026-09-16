@@ -1,16 +1,18 @@
 import { useAuthContext } from "@/context/context";
 import { useUser } from "@/hooks/useUser";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { useNavigate } from "react-router-dom";
 import { MinigamesDevPage } from "../minigames/MinigamesDevPage";
 import { SocketDebug } from "./SocketDebug";
+import { TopScores } from '../minigames/components/TopScores';
+import type { MinigameId } from "../minigames/types";
+import { MinigameProvider, useMinigameContext } from "../minigames/context/minigameContext";
 
-//Using the user page conf here because it is related I guess
-
-function GameRoom() {
+function GameRoomContent() {
     const { user, loading, error } = useUser();
     const { logout, deleteAccount } = useAuthContext();
+	const { activeGame } = useMinigameContext();
 	const navigate = useNavigate();
 
 	const displayName =
@@ -37,7 +39,10 @@ function GameRoom() {
 			{/* Game screen */}
 			<div className="w-2/3 h-full border-r-6 border-amber-100 hidden lg:block">
 				{/*Game component*/}
-				<MinigamesDevPage></MinigamesDevPage>
+				 <MinigamesDevPage />
+				{/* <div className="h-full w-full flex items-center justify-center bg-slate-950/30 text-slate-200 font-aldrich text-xl">
+					{activeGame ? `Match ready: ${activeGame}` : 'Waiting for match...'}
+				</div> */}
 			</div>
 			{/* Bets and chat column */}
 			<div className="w-full lg:w-1/3 h-full">
@@ -82,13 +87,14 @@ function GameRoom() {
 						</MenuItems>
 					</Menu>
 				</div>
-				<div className="h-2/9 p-4 w-full flex flex-col items-center border-b-6 border-amber-100">
+				<div className="h-1/9 p-4 w-full flex flex-col items-center border-b-6 border-amber-100">
 
-					<div className="h-full w-full m-4 bg-slate-900 opacity-20">
-						{/* Bets component */}
+					<div className="h-full w-full bg-slate-900 opacity-70">
+						{/* Scores component */}
+						{activeGame ? <TopScores minigameId={activeGame} /> : null}
 					</div>
 				</div>
-				<div className="h-6/9 p-4 w-full flex flex-col items-center bg-slate-900 opacity-70">
+				<div className="h-7/9 p-4 w-full flex flex-col items-center bg-slate-900 opacity-70">
 					<h2 className="text-center font-aldrich font-bold text-xl text-transparent bg-clip-text bg-linear-to-r from-amber-200 to-amber-500">CHAT</h2>
 					<div className="h-9/10 w-full m-4 overflow-hidden">
 						{/* Chat component */}
@@ -98,6 +104,14 @@ function GameRoom() {
 			</div>
         </div>
     )
+}
+
+function GameRoom() {
+    return (
+        <MinigameProvider>
+            <GameRoomContent />
+        </MinigameProvider>
+    );
 }
 
 export default GameRoom;
