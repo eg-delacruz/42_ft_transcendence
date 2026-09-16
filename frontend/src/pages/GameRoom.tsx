@@ -8,6 +8,8 @@ import { SocketDebug } from "./SocketDebug";
 import { TopScores } from '../minigames/components/TopScores';
 import type { MinigameId } from "../minigames/types";
 import { MinigameProvider, useMinigameContext } from "../minigames/context/minigameContext";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faGear } from '@fortawesome/free-solid-svg-icons'
 
 function GameRoomContent() {
     const { user, loading, error } = useUser();
@@ -57,8 +59,8 @@ function GameRoomContent() {
 					</div>
 					<Menu as="div" className="col-start-6 size-10 top-0 mr-0">
 						<MenuButton className="h-full w-full items-center justify-center">
-							<div aria-hidden="true" className="text-gray-400">
-								<img src="/gear-solid-full.svg"></img>
+							<div aria-hidden="true" className="">
+								<FontAwesomeIcon icon={faGear} className="text-white text-4xl"/>
 							</div>
 						</MenuButton>	
 						<MenuItems
