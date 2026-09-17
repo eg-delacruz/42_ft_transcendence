@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/context/context";
 import { isStrongPassword } from "@/utils/passwordUtils";
 import { preload } from 'react-dom';
+import { TermsOfService } from '@/pages/TermsOfService';
 
 function Register() {
     const { register } = useAuthContext();
@@ -14,6 +15,7 @@ function Register() {
     const [error, setError] = useState<string | null>(null);
 	const [focusedField, setFocusedField] = useState<string | null>(null);
 	const [hoveredField, setHoveredField] = useState<string | null>(null);
+	const [showTerms, setShowTerms] = useState(false);
 
     const handleSummit = async (e: React.FormEvent) => 
 	{
@@ -36,6 +38,8 @@ function Register() {
         }
         navigate("/gameroom");
     }
+
+	const handleTerms = () => setShowTerms(true);
 	
     return (
 		<div className="h-screen flex flex-row bg-linear-to-t from-(--gradient-dark) to-(--gradient-light) ">
@@ -133,8 +137,17 @@ function Register() {
 							<div className="p-2 flex items-center">
 								<p className="font-aldrich opacity-70">Already have an account? <a href="/login" className="text-blue-300">Log in</a></p>
 							</div>
-							<div className="p-2 flex items-center text-center wrap-normal">
-								<p className="font-aldrich opacity-70">🛈 Before signing in, you should read our <a href="" className="text-blue-300">Terms and conditions</a></p>
+							<div className="p-2 flex items-center text-center wrap-normal gap-2">
+								<p className="font-aldrich opacity-70">🛈 Before signing in, you should read our </p>
+								<button onClick={handleTerms} className="text-blue-300 font-aldrich opacity-70">
+									terms and conditions
+								</button> 
+								{showTerms && (
+										<div className="absolute inset-0 flex flex-col items-center justify-center z-50 animate-appear bg-black/60">
+											<TermsOfService></TermsOfService>
+											<button onClick={() => setShowTerms(false)} className="customButton mt-5">BACK</button>
+										</div>
+									)}
 							</div>
 						</div>
 					</div>

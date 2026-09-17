@@ -106,12 +106,11 @@ function Login() {
 							<div className="p-2 flex items-center">
 								<p className="font-aldrich opacity-70">Don't have an account? <a href="/register" className="text-blue-300">Sign in</a></p>
 							</div>
-							<div className="p-2 flex items-center text-center wrap-normal">
-								<p className="font-aldrich opacity-70">🛈 Before logging in, you should read our  
-									<button onClick={handleTerms} className="text-blue-300">
-										 terms and conditions
-									</button>
-								</p>		
+							<div className="p-2 flex items-center text-center wrap-normal gap-2">
+								<p className="font-aldrich opacity-70">🛈 Before signing in, you should read our </p>
+								<button onClick={handleTerms} className="text-blue-300 font-aldrich opacity-70">
+									terms and conditions
+								</button>
 									{showTerms && (
 										<div className="absolute inset-0 flex flex-col items-center justify-center z-50 animate-appear bg-black/60">
 											<TermsOfService></TermsOfService>
