@@ -196,7 +196,7 @@ export function TheRace({ onExitToMenu }: TheRaceProps) {
 
 	  <div className="w-full h-full grid grid-cols-3 overflow-hidden relative">
 		{/* Left side - clock */}
-		<aside className="flex flex-col pt-12 pl-2 pr-2 gap-20 bg-[url(../minigames/assets/race-grass.gif)] bg-repeat bg-contain">
+		<aside className="flex flex-col pt-12 pl-2 pr-2 gap-20 bg-[url(../minigames/assets/race-grass.gif)] bg-repeat">
 		  <div className="raceBox">
 			<span className="basicText text-4xl">◷</span>
 			<div className="flex flex-col gap-1">
@@ -206,10 +206,10 @@ export function TheRace({ onExitToMenu }: TheRaceProps) {
 		  </div>
 		</aside>
 		{/* Center - prompt and race track and players*/}
-		<section className="trackArea relative flex flex-col pt-12 pl-2 pr-2 gap-20 bg-[url(../minigames/assets/race-grass.gif)] bg-repeat bg-contain">
+		<section className="trackArea relative flex flex-col pt-12 pl-2 pr-2 gap-20 bg-[url(../minigames/assets/race-grass.gif)] bg-repeat">
 			<RaceStatus raceState={raceState} winnerName={winnerName} />
 		  
-			<div className="h-full relative flex flex-row items-end justify-center pt-12 pl-2 pr-2 gap-20 overflow-hidden bg-[url(../minigames/assets/race-track.png)] bg-contain bg-repeat-y">
+			<div className="h-full relative flex flex-row items-end justify-center pt-12 pl-2 pr-2 gap-20 overflow-hidden bg-[url(../minigames/assets/race-track.png)] bg-center bg-auto bg-repeat-y">
 				<RaceRunner
 					player={player1}
 					color="blue"
@@ -221,7 +221,7 @@ export function TheRace({ onExitToMenu }: TheRaceProps) {
 		  </div>
 		</section>
 		{/* Right side - progress*/}
-		<aside className="flex flex-col pt-12 pl-2 pr-2 gap-20 bg-[url(../minigames/assets/race-grass.gif)] bg-repeat bg-contain">
+		<aside className="flex flex-col pt-12 pl-2 pr-2 gap-20 bg-[url(../minigames/assets/race-grass.gif)] bg-repeat">
 		  <header className="raceBox">
 			<p className="basicText">Meta - {RACE_TARGET_SCORE}</p>
 		  </header>
@@ -314,16 +314,16 @@ function RaceRunner({
 		<div
 			className={
 				isPlayerOne 
-					? 'raceRunner bg-[url(../minigames/assets/race-playerone.png)] bg-center bg-contain bg-no-repeat left-1/3'
-					: 'raceRunner bg-[url(../minigames/assets/race-playertwo.png)] bg-center bg-contain bg-no-repeat left-2/3'
+					? 'raceRunner bg-[url(../minigames/assets/race-playerone.gif)] bg-center bg-cover bg-no-repeat left-1/3'
+					: 'raceRunner bg-[url(../minigames/assets/race-playertwo.gif)] bg-center bg-cover bg-no-repeat left-2/3'
 				}
 			style={{ bottom }}	
 			>
 			<div
 				className={
 					isPlayerOne
-						? 'mt-8 z-2 aspect-square rounded-4xl h-8 w-8 border-2 border-blue-300 bg-blue-400'
-						: 'mt-8 z-2 aspect-square rounded-4xl h-8 w-8 border-2 border-red-300 bg-red-400'
+						? 'mt-8 z-2 aspect-square rounded-4xl h-30 w-30'
+						: 'mt-8 z-2 aspect-square rounded-4xl h-30 w-30'
 					}
 			/>
 		</div>

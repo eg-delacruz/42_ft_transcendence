@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-
+import { useUser } from "@/hooks/useUser";
 import { useAuthContext } from "@/context/context";
 import { useChatSocket } from "@/hooks/useChatSocket";
+
 
 type Status =
     | "idle"
@@ -27,72 +28,30 @@ function StatusBadge({ status }: { status: Status }) {
         },
     };
     return (
-        <span
-            style={{
-                display: "inline-flex",
-                alignItems: "center",
-                padding: "2px 8px",
-                borderRadius: "var(--border-radius-md)",
-                fontSize: 12,
-                fontWeight: 500,
-                ...styles[status],
-            }}
+        <span className="flex items-center p-2 rounded-xs"
+            style={{ ...styles[status],}}
         >
             {status}
         </span>
     );
 }
 
-const card: React.CSSProperties = {
-    background: "var(--color-background-primary)",
-    border: "0.5px solid var(--color-border-tertiary)",
-    borderRadius: "var(--border-radius-lg)",
-    padding: "1rem 1.25rem",
-};
-
-const sectionLabel: React.CSSProperties = {
-    fontSize: 11,
-    fontWeight: 500,
-    color: "var(--color-text-tertiary)",
-    textTransform: "uppercase",
-    letterSpacing: "0.05em",
-    marginBottom: 8,
-};
-
-const formLabel: React.CSSProperties = {
-    fontSize: 12,
-    color: "var(--color-text-secondary)",
-    display: "block",
-    marginBottom: 4,
-};
-
 function ErrorBox({ message }: { message: string }) {
     return (
-        <div
-            style={{
-                background: "#FCEBEB",
-                border: "0.5px solid #F7C1C1",
-                borderRadius: "var(--border-radius-md)",
-                padding: "8px 12px",
-                fontSize: 12,
-                color: "#A32D2D",
-                marginTop: 8,
-                display: "flex",
-                alignItems: "flex-start",
-                gap: 6,
-            }}
-        >
+        <div className="flex items-start bg-red-100 text-red-500 rounded-sm p-2">
             <span>⚠</span> {message}
         </div>
     );
 }
 
-function getSenderName(msg: any): string {
-    if (typeof msg.sender === "string") {
-        return msg.sender;
-    }
 
-    if (msg.sender?.email) {
+function getSenderName(msg: any): string {
+
+	console.log(msg);
+    if (msg.sender?.username)
+		return msg.sender.username;
+	
+	if (msg.sender?.email) {
         return msg.sender.email;
     }
 
@@ -100,28 +59,29 @@ function getSenderName(msg: any): string {
         return msg.user.email;
     }
 
-    if (msg.user?.name) {
-        return msg.user.name;
-    }
-
-    if (msg.senderName) {
-        return msg.senderName;
-    }
-
     return "Unknown";
 }
 
-function ChatRoomViewer({
+export function ChatRoomViewer({
     messages,
     activeRoomId,
 }: {
-    messages: any[];
+    messages?: any[];
     activeRoomId?: string | null;
 }) {
-    const containerRef = useRef<HTMLDivElement>(null);
     const [userFilter, setUserFilter] = useState("");
+	const safeMessages = Array.isArray(messages) ? messages : [];
 
-    const filteredMessages = messages.filter((msg) => {
+	const { user, loading, error } = useUser();
+	const [displayName, setDisplayname] = useState(user?.username ?? "");
+
+	useEffect(() => {
+		setDisplayname(user?.username ?? "");
+	}, [user]);
+
+	// console.log("USER:", user);
+
+    const filteredMessages = safeMessages.filter((msg) => {
         const sender = getSenderName(msg);
 
         if (!userFilter) {
@@ -131,126 +91,48 @@ function ChatRoomViewer({
         return sender.toLowerCase().includes(userFilter.toLowerCase());
     });
 
-    useEffect(() => {
-        if (containerRef.current) {
-            containerRef.current.scrollTop = containerRef.current.scrollHeight;
-        }
-    }, [filteredMessages.length]);
-
     return (
-        <div style={card}>
-            <div
-                style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: 12,
-                    gap: 12,
-                }}
-            >
-                <p
-                    style={{
-                        ...sectionLabel,
-                        marginBottom: 0,
-                    }}
-                >
-                    Room chat
-                </p>
-
-                <span
-                    style={{
-                        fontSize: 12,
-                        color: "var(--color-text-secondary)",
-                    }}
-                >
+        <div className="h-7/9 w-full relative mt-2 overflow-y-scroll">
+            {/* <div className="flex justify-between items-center m-3 g-3">
+                <span className="chatText text-sm font-bold uppercase mb-2 m-0">
                     {activeRoomId ? activeRoomId.slice(0, 8) + "…" : "No room"}
                 </span>
-            </div>
+            </div> */}
 
-            <div style={{ marginBottom: 12 }}>
-                <input
+            <div className="fixed chatText text-sm font-bold uppercase mb-2 m-0 bg-slate-900">
+                <input className="p-1 w-full"
                     type="text"
                     placeholder="Filter by user..."
                     value={userFilter}
                     onChange={(e) => setUserFilter(e.target.value)}
-                    style={{ width: "100%" }}
                 />
             </div>
 
-            <div
-                ref={containerRef}
-                style={{
-                    height: 380,
-                    overflowY: "auto",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 8,
-                    padding: 10,
-                    background: "var(--color-background-secondary)",
-                    borderRadius: "var(--border-radius-md)",
-                }}
-            >
+            <div className="flex flex-col mt-10 ">
                 {filteredMessages.length === 0 && (
-                    <div
-                        style={{
-                            textAlign: "center",
-                            color: "var(--color-text-secondary)",
-                            padding: 40,
-                            fontSize: 13,
-                        }}
-                    >
+                    <div className="chatText text-xs font-bold uppercase mb-2 m-0">
                         No messages
                     </div>
                 )}
 
                 {filteredMessages.map((msg, index) => {
                     const sender = getSenderName(msg);
-
                     const text = msg.text ?? msg.content ?? msg.message ?? "";
 
                     return (
-                        <div
-                            key={msg.id ?? index}
-                            style={{
-                                background: "var(--color-background-primary)",
-                                border: "0.5px solid var(--color-border-tertiary)",
-                                borderRadius: "var(--border-radius-md)",
-                                padding: 10,
-                            }}
-                        >
-                            <div
-                                style={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    marginBottom: 5,
-                                }}
-                            >
-                                <span
-                                    style={{
-                                        fontWeight: 600,
-                                        fontSize: 12,
-                                    }}
-                                >
+                        <div key={msg.id ?? index} className="border-b-2 border-slate-700 mb-2">
+                            <div className="flex flex-row justify-between chatText">
+                                <span className="chatText font-black uppercase mb-2 m-0">
                                     {sender}
                                 </span>
-
-                                <span
-                                    style={{
-                                        fontSize: 11,
-                                        color: "var(--color-text-tertiary)",
-                                    }}
-                                >
+                                <span className="chatText font-bold uppercase mb-2 m-0">
                                     {msg.createdAt
                                         ? new Date(msg.createdAt).toLocaleTimeString()
                                         : ""}
                                 </span>
                             </div>
 
-                            <div
-                                style={{
-                                    fontSize: 14,
-                                }}
-                            >
+                            <div className="chatText mb-2 m-0">
                                 {text}
                             </div>
                         </div>
@@ -261,7 +143,7 @@ function ChatRoomViewer({
     );
 }
 
-function SocketDebug() {
+export function SocketDebug() {
     const { user } = useAuthContext();
     const {
         status: chatStatus,
@@ -284,27 +166,12 @@ function SocketDebug() {
     };
 
     return (
-        <div style={{ padding: "1.5rem 0", display: "grid", gap: "1rem" }}>
+        <div className="h-full w-full flex flex-col items-stretch">
             {/* Header */}
-            <div
-                style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                }}
-            >
+            <div className="h-1/9 flex justify-between items-center">
                 <div>
-                    <p
-                        style={{
-                            fontSize: 18,
-                            fontWeight: 500,
-                            color: "var(--color-text-primary)",
-                        }}
-                    >
-                        Global Chat
-                    </p>
-                    <p style={{ fontSize: 13, color: "var(--color-text-secondary)" }}>
-                        {user ? `Logged in as ${user.email}` : "No user authenticated"}
+                    <p className="chatText uppercase font-black p-2">
+                        {user ? `Logged in as ${user.username}` : "No user authenticated"}
                     </p>
                 </div>
                 <StatusBadge status={chatStatus as Status} />
@@ -321,27 +188,22 @@ function SocketDebug() {
             />
 
             {/* Message input */}
-            <div style={card}>
-                <p style={sectionLabel}>Send message</p>
-                <div style={{ marginBottom: 12 }}>
-                    <label style={formLabel} htmlFor="inp-msg">
-                        Message text
-                    </label>
-                    <textarea
+            <div className="h-1/9 w-full flex flex-row items-center gap-2 ">
+                <div className="h-full w-full">
+                    <label htmlFor="inp-msg" className="labelCustom"></label>
+                    <textarea className="h-full w-full border-2 border-zinc-50 rounded-md bg-zinc-700/50 chatText text-sm p-2"
                         id="inp-msg"
                         value={messageText}
                         onChange={(e) => setMessageText(e.target.value)}
                         placeholder="Type a message..."
-                        style={{ width: "100%", minHeight: 80, resize: "vertical" }}
                     />
                 </div>
-                <button
+                <button className="customButton p-3 text-xs"
                     type="button"
                     onClick={() =>
                         runAction(() => sendMessage({ text: messageText }))
                     }
                     disabled={!messageText.trim()}
-                    style={{ width: "100%" }}
                 >
                     Send
                 </button>
@@ -349,17 +211,10 @@ function SocketDebug() {
 
             {chatError && <ErrorBox message={chatError} />}
 
-            {/* Last result */}
-            <div style={card}>
-                <div
-                    style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        marginBottom: 10,
-                    }}
-                >
-                    <p style={{ ...sectionLabel, margin: 0 }}>Last result</p>
+            {/* Last result - Message debug*/}
+            {/* <div>
+                <div className="flex items-center justify-between mb-2">
+                    <p>Last result</p>
                     <button
                         type="button"
                         onClick={() => setLastResult("No action yet")}
@@ -386,7 +241,7 @@ function SocketDebug() {
                 >
                     {lastResult}
                 </pre>
-            </div>
+            </div> */}
         </div>
     );
 }

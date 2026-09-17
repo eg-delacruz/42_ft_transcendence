@@ -26,7 +26,7 @@ export function MinigamesDevPage() {
   }
 
   return (
-    <main className="w-full h-full">
+    <main className="">
       {activeGame === 'menu' && (
         <section style={styles.menu}>
           <h1 style={styles.title}>Minigames Dev Page</h1>

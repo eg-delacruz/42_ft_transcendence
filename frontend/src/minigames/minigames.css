@@ -79,7 +79,7 @@
 		background-color:transparent;
 		background-image: url("../minigames/assets/race-sign.png");
 		background-position: center;
-		background-size: cover;
+		background-size: contain;
 		background-repeat: repeat;
 	}
 
@@ -103,6 +103,5 @@
 		font-size: 72px;
 		line-height: 1;
 		color: #f8fafc;
-		text-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
 	}
 }

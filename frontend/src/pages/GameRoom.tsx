@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { useNavigate } from "react-router-dom";
 import { MinigamesDevPage } from "../minigames/MinigamesDevPage";
+import { SocketDebug } from "./SocketDebug";
 
 //Using the user page conf here because it is related I guess
 
@@ -13,10 +14,10 @@ function GameRoom() {
 	const navigate = useNavigate();
 
 	const displayName =
-		user?.display_name?.trim() ? user.display_name : "Anonymous";
+		user?.username?.trim() ? user.username : "Anonymous";
 
 	const avatarUrl =
-		user?.avatar_url?.trim() ? user.avatar_url : "/game01.jpg";
+		user?.avatarUrl?.trim() ? user.avatarUrl : "/game01.jpg";
 
     if (loading) 
 		return <div>Loading User...</div>;
@@ -34,9 +35,9 @@ function GameRoom() {
     return (
         <div className="w-screen h-screen flex flex-row items-start bg-linear-to-br from-(--gradient-dark) to-(--gradient-light) relative">
 			{/* Game screen */}
-			<div className="w-0 lg:w-2/3 h-full lg:border-r-6 lg:border-amber-100">
+			<div className="w-2/3 h-full border-r-6 border-amber-100 hidden lg:block">
 				{/*Game component*/}
-				<MinigamesDevPage ></MinigamesDevPage>
+				<MinigamesDevPage></MinigamesDevPage>
 			</div>
 			{/* Bets and chat column */}
 			<div className="w-full lg:w-1/3 h-full">
@@ -81,16 +82,17 @@ function GameRoom() {
 						</MenuItems>
 					</Menu>
 				</div>
-				<div className="h-4/9 p-8 w-full flex flex-col items-center border-b-6 border-amber-100">
-					<h2 className="text-center font-aldrich font-bold text-4xl text-transparent bg-clip-text bg-linear-to-r from-amber-200 to-amber-500">BETS</h2>
+				<div className="h-2/9 p-4 w-full flex flex-col items-center border-b-6 border-amber-100">
+
 					<div className="h-full w-full m-4 bg-slate-900 opacity-20">
 						{/* Bets component */}
 					</div>
 				</div>
-				<div className="h-4/9 p-8 w-full flex flex-col items-center">
-					<h2 className="text-center font-aldrich font-bold text-4xl text-transparent bg-clip-text bg-linear-to-r from-amber-200 to-amber-500">CHAT</h2>
-					<div className="h-full w-full m-4 bg-slate-900 opacity-20">
+				<div className="h-6/9 p-4 w-full flex flex-col items-center bg-slate-900 opacity-70">
+					<h2 className="text-center font-aldrich font-bold text-xl text-transparent bg-clip-text bg-linear-to-r from-amber-200 to-amber-500">CHAT</h2>
+					<div className="h-9/10 w-full m-4 overflow-hidden">
 						{/* Chat component */}
+						<SocketDebug></SocketDebug>
 					</div>
 				</div>
 			</div>

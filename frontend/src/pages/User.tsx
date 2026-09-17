@@ -22,13 +22,13 @@ function User() {
 	const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 	const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 	const [showAvatarPicker, setShowAvatarPicker] = useState(false);
-	const [displayName, setDisplayname] = useState(user?.display_name ?? "");
-	const [avatarUrl, setAvatarUrl] = useState(user?.avatar_url ?? "");
+	const [displayName, setDisplayname] = useState(user?.username ?? "");
+	const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl ?? "");
 	const [isSaving, setIsSaving] = useState(false);
 
 	useEffect(() => {
-		setDisplayname(user?.display_name ?? "");
-		setAvatarUrl(user?.avatar_url ?? "");
+		setDisplayname(user?.username ?? "");
+		setAvatarUrl(user?.avatarUrl ?? "");
 	}, [user]);
 
 	const handleLogout = () => setShowLogoutConfirm(true);
@@ -57,11 +57,11 @@ function User() {
 		const update: Record<string, string> = {};
 
 		if (changes?.displayName !== undefined) {
-			update.display_name = changes.displayName;
+			update.username = changes.displayName;
 		}
 
 		if (changes?.avatarUrl !== undefined) {
-			update.avatar_url = changes.avatarUrl;
+			update.avatarUrl = changes.avatarUrl;
 		}
 
 		if (Object.keys(update).length === 0) {
@@ -73,11 +73,11 @@ function User() {
 			const response = await api.patch(`/users/update/${user._id || user.id}`, update);
 			const updatedUser = response.body?.body ?? response.body?.user ?? response.body;
 
-			if (updatedUser?.display_name !== undefined) {
-				setDisplayname(updatedUser.display_name);
+			if (updatedUser?.username !== undefined) {
+				setDisplayname(updatedUser.username);
 			}
-			if (updatedUser?.avatar_url !== undefined) {
-				setAvatarUrl(updatedUser.avatar_url);
+			if (updatedUser?.avatarUrl !== undefined) {
+				setAvatarUrl(updatedUser.avatarUrl);
 			}
 
 			await auth();

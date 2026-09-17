@@ -1,0 +1,28 @@
+{
+	"home.intro":"FT_TRANSCENDANCE es una web de minijuegos donde los usuarios conectados puede jugar entre ellos en tiempo real. Este proyecto es parte del cuerriculum de 42 y demuestra nuestras habilidades en desarrollo web.",
+	"login.button": "Entrar",
+	"register.button": "Registrar",
+
+	"email.label": "Correo",
+	"password.label": "Constraseña",
+	"repeatpassword.label": "Repetir contraseña",
+	"privacy.label": "Política de privacidad",
+	"terms.label": "Términos de servicio",
+	"noaccount.text": "¿No tienes cuenta?",
+	"hasaccount.text": "¿Ya tienes cuenta?",
+	"termswarning.text": "Antes de continuar, es necesario leer ",
+	
+	"profile.lable": "Perfil",
+	"chat.session": "Logeado como: ",
+	"chat.button": "Enviar",
+	"chat.browse": "Filtrar por usuario...",
+	"chat.empty": "Sin mensajes",
+	"chat.placeholder": "Escribe un mensaje...",
+
+	"game.clock": "Tiempo",
+	"game.ready": "Preparado?",
+	"game.go": "Corre",
+	"game.goal": "Meta",
+	"game.fight": "Lucha"
+}
+

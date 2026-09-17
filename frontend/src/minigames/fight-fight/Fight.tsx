@@ -220,12 +220,12 @@ export function FightFight({ onExitToMenu }: FightFightProps) {
   }, []);
 
 return (
-	<main className="w-full h-full flex items-center justify-center font-pressstart p-0 relative overflow-hidden">
+	<main className="w-full h-screen flex items-center justify-center font-pressstart p-0 relative">
 		<TopScores minigameId="fight-fight" />
 
-		<div className="w-full h-full grid grid-rows-[20%_60%_20%] relative overflow-hidden">
+		<div className="w-full h-full relative overflow-hidden">
 			{/* TopHUD - payer status and timer */}
-			<section className="w-full h-1/5 p-4 grid grid-cols-3 gap-10">
+			<section className="w-full h-1/5 p-4 grid grid-cols-3 gap-10 pt-8">
 				<FighterStatus
 					player={fightState.player1}
 					side="left"
@@ -239,7 +239,7 @@ return (
 				/>
 			</section>
 			{/* Animations and prompt */}
-			<section className="grid grid-cols-3 items-center justify-center gap-10 p-5 bg-cover bg-center bg-[url(../minigames/assets/fight-background.jpg)]">
+			<section className="w-full h-3/5 grid grid-cols-3 items-center justify-center gap-10 p-5 bg-cover bg-center bg-[url(../minigames/assets/fight-background.jpg)]">
 				<DecisionDisplay player={fightState.player1} phase={fightState.phase} />
 					<RoundResult
 					fightState={fightState}
@@ -301,15 +301,15 @@ function FighterStatus({
   	<h2
     	className={
 			isLeft
-			? 'm-0 text-md uppercase basicText items-center justify-center text-center gap-2 text-blue-500'
-			: 'm-0 text-md uppercase basicText items-center justify-center text-center gap-2 text-red-500'
+			? 'm-0 text-2xl uppercase basicText items-center justify-center text-center gap-2 text-blue-500'
+			: 'm-0 text-2xl uppercase basicText items-center justify-center text-center gap-2 text-red-500'
 		}
 	>
-		<span>{label}</span>
+		<span>{label} </span>
 		<span>{player.score} pts</span>
 	</h2>
 
-	<div className="w-full h-8 border-2 border-zinc-50 rounded-lg overflow-hidden p-1">
+	<div className="w-full h-1/4 border-2 border-zinc-50 rounded-lg overflow-hidden p-1">
 		<div
 			className={
 				isLeft
@@ -325,12 +325,12 @@ function FighterStatus({
 
 function FightClock({ fightState }: { fightState: FightState }) {
   return (
-	<div className="flex flex-col items-center justify-start gap-2 bg-cover bg-no-repeat bg-center bg-[url(../minigames/assets/fight-sign.png)]">
-	  <div className="w-full h-full flex flex-col items-center justify-center mt-4">
+	<div className="h-2/3 my-auto flex flex-col items-center bg-cover bg-no-repeat bg-center bg-[url(../minigames/assets/fight-sign.png)]">
+	  <div className="w-full h-full flex flex-col items-center justify-center">
 		<p className="basicText text-md">{getClockLabel(fightState)}</p>
 		<p className="basicText text-2xl">{getClockValue(fightState)}</p>
 	  </div>
-	  <p className="basicText text-lg">Ronda {fightState.round}</p>
+	  <p className="basicText text-lg p-2">Ronda {fightState.round}</p>
 	</div>
   );
 }
@@ -352,7 +352,7 @@ function DecisionDisplay({
 
   return (
 	<div className="w-full h-full flex flex-col items-center justify-center gap-2">
-		<p className="m-0 w-full h-2/3 flex items-center justify-center bg-cover bg-center"
+		<p className="m-0 w-full h-2/3 flex items-center justify-center bg-contain bg-center bg-no-repeat"
  			style={{ backgroundImage: isImageIcon ? `url(${actionIcon})` : undefined,
 		}}>
 		</p>
@@ -375,14 +375,14 @@ function RoundResult({
   player1Name: string;
   player2Name: string;
 }) {
-  if (fightState.phase === 'bettingCountdown') {
-	return (
-	  <section className="flex flex-col items-center justify-center gap-6 text-center">
-		<p className="basicText text-2xl">Apuestas</p>
-		<p className="basicText text-lg">El combate empezará automáticamente.</p>
-	  </section>
-	);
-  }
+//   if (fightState.phase === 'bettingCountdown') {
+// 	return (
+// 	  <section className="flex flex-col items-center justify-center gap-6 text-center">
+// 		<p className="basicText text-2xl">Apuestas</p>
+// 		<p className="basicText text-lg">El combate empezará automáticamente.</p>
+// 	  </section>
+// 	);
+//   }
 
   if (fightState.phase === 'selecting') {
 	return (
@@ -508,7 +508,7 @@ function ActionGuideItem({
 }) {
   return (
 	<article className="h-full flex flex-row items-center gap-3">
-	  <div className="w-1/2 h-auto aspect-square border-2 border-zinc-50 rounded-lg text-center text-2xl">{arrow}</div>
+	  <div className="w-1/2 h-auto aspect-square border-2 border-zinc-50 rounded-lg place-content-center text-center text-4xl">{arrow}</div>
 
 	  <div className="flex flex-col gap-4">
 		<p className={['basicText uppercase text-md', colorStyle].filter(Boolean).join(' ')}

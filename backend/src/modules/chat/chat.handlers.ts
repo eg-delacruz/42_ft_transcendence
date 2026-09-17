@@ -36,6 +36,7 @@ function createAckError(
 }
 
 function getSocketUser(socket: Socket) {
+	console.log("SOCKET: ", socket);
     return socket.data.user;
 }
 

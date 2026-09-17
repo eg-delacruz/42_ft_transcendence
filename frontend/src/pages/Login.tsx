@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/context/context";
+import { PrivacyPolicy } from '@/pages/PrivacyPolicy';
+import { TermsOfService } from '@/pages/TermsOfService';
 
 
 function Login() {
@@ -13,6 +15,8 @@ function Login() {
     const [error, setError] = useState<string | null>(null);
 	const [focusedField, setFocusedField] = useState<string | null>(null);
 	const [hoveredField, setHoveredField] = useState<string | null>(null);
+	const [showPrivacy, setShowPrivacy] = useState(false);
+	const [showTerms, setShowTerms] = useState(false);
 
     const handleSummit = async (e: React.FormEvent) => 
 	{
@@ -25,6 +29,9 @@ function Login() {
         else 
 			navigate("/gameroom");
     };
+
+	const handlePrivacy = () => setShowPrivacy(true);
+	const handleTerms = () => setShowTerms(true);
 
     return (
 		<div className="h-screen flex flex-row bg-linear-to-t from-(--gradient-dark) to-(--gradient-light)">
@@ -100,7 +107,17 @@ function Login() {
 								<p className="font-aldrich opacity-70">Don't have an account? <a href="/register" className="text-blue-300">Sign in</a></p>
 							</div>
 							<div className="p-2 flex items-center text-center wrap-normal">
-								<p className="font-aldrich opacity-70">🛈 Before logging in, you should read our <a href="" className="text-blue-300">Terms and conditions</a></p>
+								<p className="font-aldrich opacity-70">🛈 Before logging in, you should read our  
+									<button onClick={handleTerms} className="text-blue-300">
+										 terms and conditions
+									</button>
+								</p>		
+									{showTerms && (
+										<div className="absolute inset-0 flex flex-col items-center justify-center z-50 animate-appear bg-black/60">
+											<TermsOfService></TermsOfService>
+											<button onClick={() => setShowTerms(false)} className="customButton mt-5">BACK</button>
+										</div>
+									)}
 							</div>
 						</div>
 					</div>

@@ -42,6 +42,7 @@ export function jwtSocketMiddleware(socket: Socket, next: (err?: Error) => void)
         const email  = typeof decoded.email  === 'string' ? decoded.email  : null;
         const role   = typeof decoded.role   === 'string' ? decoded.role   : null;
 
+
         if (!userId || !email || !role) {
             return next(new Error('Unauthorized: invalid token payload'));
         }
