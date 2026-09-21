@@ -31,17 +31,26 @@ import {
 } from './DDD.types';
 
 import { getDungeonUserId } from './DDD.users';
+import type { MatchRole } from '@/hooks/useMatchmaking';
+import { useGameSync, type RemoteGameAction } from '@/hooks/useGameSync';
 
 type DeepDarkDungeonProps = {
   onExitToMenu?: () => void;
+  playerRole?: MatchRole;
 };
 
-export function DeepDarkDungeon({ onExitToMenu }: DeepDarkDungeonProps) {
+export function DeepDarkDungeon({ onExitToMenu, playerRole }: DeepDarkDungeonProps) {
   const [dungeonState, setDungeonState] = useState<DungeonState>(
     createInitialDungeonState,
   );
 
   const hasSubmittedScore = useRef(false);
+
+  const { sendAction } = useGameSync(
+    'deep_&_dark',
+    (_action: RemoteGameAction) => undefined,
+    (state) => setDungeonState(state.state as DungeonState),
+  );
 
   useEffect(() => {
     if (dungeonState.phase !== 'bettingCountdown') {
@@ -243,7 +252,7 @@ export function DeepDarkDungeon({ onExitToMenu }: DeepDarkDungeonProps) {
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.repeat) {
+      if (event.repeat || playerRole !== 'solo') {
         return;
       }
 
@@ -254,14 +263,12 @@ export function DeepDarkDungeon({ onExitToMenu }: DeepDarkDungeonProps) {
         return;
       }
 
-      const nextState = handleDungeonKey(dungeonState, event.code);
-
-      if (!nextState) {
+      if (!handleDungeonKey(dungeonState, event.code)) {
         return;
       }
 
       event.preventDefault();
-      setDungeonState(nextState);
+      sendAction('dungeon_key', event.code);
     }
 
     window.addEventListener('keydown', handleKeyDown);

@@ -4,12 +4,8 @@ import { TopScores } from '../components/TopScores';
 import { updateMinigameTopScore } from '../components/TopScores.api';
 
 import {
-  checkFinished,
   createInitialFightState,
   getSelectionFromKey,
-  resolveRound,
-  selectAction,
-  startNextRound,
 } from './Fight.logic';
 
 import { styles } from './Fight.styles';
@@ -21,112 +17,34 @@ import {
   FIGHT_PLAYER_2_CONTROLS_TEXT,
   FIGHT_PLAYER_ACTION_ICONS,
   FIGHT_PLAYER_IDLE_ICONS,
-  FIGHT_SELECTION_SECONDS,
   type FightPlayer,
   type FightState,
 } from './Fight.types';
 
 import { getFightDisplayName, getFightUserId } from './Fight.users';
+import type { MatchRole } from '@/hooks/useMatchmaking';
+import { useGameSync, type RemoteGameAction } from '@/hooks/useGameSync';
 
 type FightFightProps = {
   onExitToMenu?: () => void;
+  playerRole?: MatchRole;
 };
 
-export function FightFight({ onExitToMenu }: FightFightProps) {
+export function FightFight({ onExitToMenu, playerRole }: FightFightProps) {
   const [fightState, setFightState] = useState<FightState>(
 	createInitialFightState,
   );
 
   const hasSubmittedScore = useRef(false);
 
+	const { sendAction } = useGameSync(
+		'fight_fight',
+		(_action: RemoteGameAction) => undefined,
+		(state) => setFightState(state.state as FightState),
+	);
+
   const player1Name = getFightDisplayName('player1');
   const player2Name = getFightDisplayName('player2');
-
-  useEffect(() => {
-	if (fightState.phase !== 'bettingCountdown') {
-	  return;
-	}
-
-	const timeoutId = window.setTimeout(() => {
-	  setFightState((currentState) => {
-		if (currentState.phase !== 'bettingCountdown') {
-		  return currentState;
-		}
-
-		if (currentState.bettingCountdown <= 1) {
-		  return {
-			...currentState,
-			phase: 'selecting',
-			bettingCountdown: 0,
-			selectionTimeLeft: FIGHT_SELECTION_SECONDS,
-		  };
-		}
-
-		return {
-		  ...currentState,
-		  bettingCountdown: currentState.bettingCountdown - 1,
-		};
-	  });
-	}, 1000);
-
-	return () => window.clearTimeout(timeoutId);
-  }, [fightState.phase, fightState.bettingCountdown]);
-
-  useEffect(() => {
-	if (fightState.phase !== 'selecting') {
-	  return;
-	}
-
-	const timeoutId = window.setTimeout(() => {
-	  setFightState((currentState) => {
-		if (currentState.phase !== 'selecting') {
-		  return currentState;
-		}
-
-		if (currentState.selectionTimeLeft <= 1) {
-		  return resolveRound(currentState);
-		}
-
-		return {
-		  ...currentState,
-		  selectionTimeLeft: currentState.selectionTimeLeft - 1,
-		};
-	  });
-	}, 1000);
-
-	return () => window.clearTimeout(timeoutId);
-  }, [fightState.phase, fightState.selectionTimeLeft]);
-
-  useEffect(() => {
-	if (fightState.phase !== 'resolving') {
-	  return;
-	}
-
-	const timeoutId = window.setTimeout(() => {
-	  setFightState((currentState) => {
-		if (currentState.phase !== 'resolving') {
-		  return currentState;
-		}
-
-		if (currentState.resolutionTimeLeft <= 1) {
-		  const finishedState = checkFinished(currentState);
-
-		  if (finishedState.phase === 'finished') {
-			return finishedState;
-		  }
-
-		  return startNextRound(currentState);
-		}
-
-		return {
-		  ...currentState,
-		  resolutionTimeLeft: currentState.resolutionTimeLeft - 1,
-		};
-	  });
-	}, 1000);
-
-	return () => window.clearTimeout(timeoutId);
-  }, [fightState.phase, fightState.resolutionTimeLeft]);
 
   useEffect(() => {
 	if (fightState.phase !== 'finished') {
@@ -201,15 +119,13 @@ export function FightFight({ onExitToMenu }: FightFightProps) {
 
 	  const selection = getSelectionFromKey(event.code);
 
-	  if (!selection) {
+	  if (!selection || (playerRole !== 'player1' && playerRole !== 'player2') || selection.playerId !== playerRole) {
 		return;
 	  }
 
 	  event.preventDefault();
 
-	  setFightState((currentState) =>
-		selectAction(currentState, selection.playerId, selection.action),
-	  );
+	  sendAction('fight_select', selection.action);
 	}
 
 	window.addEventListener('keydown', handleKeyDown);

@@ -4,6 +4,7 @@
  */
 
 import type { UserRole } from '@interfaces/roles';
+import type { GameName } from '@/types/games';
 
 export interface SocketUser {
     userId: string;
@@ -14,6 +15,42 @@ export interface SocketUser {
 export interface SocketData {
     user?: SocketUser;
     rooms?: Set<string>;
+}
+
+export type GamePlayerRole = 'player1' | 'player2' | 'solo' | 'spectator';
+
+export interface MatchParticipant {
+    userId: string;
+    role: GamePlayerRole;
+}
+
+export interface MatchFoundPayload {
+    roomId: string;
+    game: GameName;
+    players: MatchParticipant[];
+    spectators: string[];
+}
+
+export type GameActionType = 'race_step' | 'fight_select' | 'dungeon_key';
+
+export interface GameActionPayload {
+    roomId: string;
+    game: GameName;
+    type: GameActionType;
+    action?: string;
+}
+
+export interface GameActionBroadcast extends GameActionPayload {
+    userId: string;
+    role: GamePlayerRole;
+    timestamp: number;
+}
+
+export interface GameStatePayload {
+    roomId: string;
+    game: GameName;
+    state: unknown;
+    timestamp: number;
 }
 
 /**

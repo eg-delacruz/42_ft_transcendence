@@ -1,0 +1,258 @@
+RESUMEN DE IMPLEMENTACION: MATCHMAKING Y SALA GLOBAL
+=====================================================
+
+Fecha: 2026-09-19
+
+OBJETIVO DEFINIDO
+-----------------
+El proyecto debe tener una unica sala global para todos los usuarios autenticados.
+Al conectarse despues del login, cada usuario entra automaticamente en la sala y en
+la cola de matchmaking.
+
+Cuando se crea una partida:
+- El backend selecciona aleatoriamente uno de los tres juegos.
+- The Race y Fight Fight utilizan dos jugadores.
+- Deep & Dark Dungeon utiliza un solo jugador.
+- Los usuarios no seleccionados quedan como espectadores.
+- Los espectadores no pueden interactuar con el minijuego y solo pueden utilizar el chat.
+
+
+IMPLEMENTADO
+------------
+
+1. Contrato de matchmaking
+
+- Se ampliaron los tipos Socket.IO del backend.
+- Se anadieron los roles:
+  - player1
+  - player2
+  - solo
+  - spectator
+- El evento match_found ahora puede transportar:
+  - roomId
+  - game
+  - players
+  - spectators
+
+2. Sala global
+
+- La sala de juego global utiliza el identificador global.
+- Los sockets autenticados se unen automaticamente a esta sala al conectarse.
+- El usuario tambien entra automaticamente en la cola, sin pulsar BUSCAR PARTIDA.
+- Una partida activa se invalida si no conserva al menos dos usuarios presentes.
+- Las entradas antiguas de usuarios desconectados se limpian de la cola.
+- Antes de iniciar una partida se ejecuta una cuenta atras real de 5 segundos.
+
+3. Matchmaking backend
+
+- Se sustituyo el emparejamiento inmediato de dos usuarios por una cola Redis.
+- Se evita duplicar al mismo usuario en la cola.
+- Se almacena una partida activa en Redis.
+- Se utiliza un lock Redis para evitar crear dos partidas simultaneas en condiciones de carrera.
+- El backend selecciona aleatoriamente:
+  - the_race
+  - fight_fight
+  - deep_&_dark
+- Los usuarios se mezclan aleatoriamente antes de recibir sus roles.
+- Para The Race y Fight Fight se asignan player1 y player2.
+- Para Deep & Dark Dungeon se asigna solo un jugador con rol solo y el otro queda como espectador.
+
+4. Frontend de matchmaking
+
+- useMatchmaking recibe el juego, jugadores y espectadores.
+- Cada cliente calcula su rol a partir de su userId.
+- El hook entra automaticamente en matchmaking al conectar el socket.
+- GameRoom deja de mostrar un boton manual para buscar partida.
+- GameRoom abre el juego recibido por el backend.
+- Se muestra si el usuario esta jugando o en modo espectador.
+
+5. Restriccion de controles
+
+- The Race solo procesa las teclas del jugador asignado.
+- Fight Fight solo procesa las acciones del jugador asignado.
+- Deep & Dark Dungeon solo procesa teclas cuando el rol es solo.
+- Los espectadores no pueden modificar el estado local mediante teclado.
+
+6. Chat
+
+- Se anadio un componente ChatPanel conectado al namespace /chat.
+- El chat usa la sala global global.
+- Los usuarios pueden leer y enviar mensajes desde GameRoom.
+- El chat es el unico control permitido para espectadores.
+
+8. Logs de matchmaking
+
+- El backend registra entradas y salidas de usuarios.
+- Se registran los usuarios activos actuales.
+- Se emite una cuenta atras de 5 segundos antes de iniciar.
+- Se informa de cancelaciones por desconexion.
+- Se informa del juego, jugadores y espectadores asignados.
+- El frontend muestra los ultimos eventos bajo el panel de matchmaking y tambien
+  los escribe en la consola del navegador.
+
+7. Limpieza
+
+- Se elimino la implementacion duplicada antigua de matchmaking en:
+  backend/src/modules/game/matchmaking.service.ts
+- La implementacion activa queda centralizada en:
+  backend/src/utils/socket.service.ts
+
+
+VALIDACION REALIZADA
+--------------------
+
+- El backend compila correctamente dentro de Docker:
+  docker compose run --rm backend pnpm build
+
+- Los archivos modificados del matchmaking y del frontend no presentan errores en
+  los diagnosticos del editor.
+
+- El build completo del frontend sigue fallando por errores preexistentes en otros
+  archivos, entre ellos App.tsx, ErrorBoundary.tsx, ProtectedRoute.tsx, Fight.tsx,
+  TheRace.tsx y varias paginas existentes.
+
+
+LO QUE TOCA HACER AHORA
+-----------------------
+
+PRIORIDAD 1: SINCRONIZAR LAS PARTIDAS EN TIEMPO REAL
+
+ESTADO ACTUAL DE ESTA PRIORIDAD
+
+Se ha implementado una primera capa de sincronizacion de acciones:
+- game:join permite a un cliente unirse a la sesion del juego activo.
+- game:action permite enviar decisiones al backend.
+- El backend valida el juego activo y el rol del usuario.
+- Los espectadores y usuarios sin rol de jugador no pueden enviar acciones.
+- The Race sincroniza pasos de carrera.
+- Fight Fight sincroniza acciones de combate.
+- Deep & Dark Dungeon sincroniza decisiones de teclado.
+- El backend retransmite las acciones autorizadas a toda la sala global.
+
+Esta capa evita que cada jugador procese de forma independiente sus propias
+entradas. Todavia falta mover el estado completo y la resolucion de reglas al
+backend para que el servidor sea completamente autoritativo.
+
+AVANCE IMPLEMENTADO: THE RACE AUTORITATIVO
+
+- The Race guarda su estado en Redis mediante matchmaking:game-state.
+- game:join devuelve el estado actual al cliente que entra.
+- El backend controla la cuenta atras de apuestas y la cuenta atras inicial.
+- Las acciones de carrera se validan y resuelven en el backend.
+- El progreso y el ganador se actualizan bajo un lock Redis.
+- El backend emite game:state a toda la sala global.
+- The Race ya no ejecuta localmente sus cuentas atras de preparacion.
+
+AVANCE IMPLEMENTADO: FIGHT FIGHT AUTORITATIVO
+
+- Fight Fight guarda su estado en Redis mediante matchmaking:game-state.
+- El backend controla apuestas, seleccion, resolucion y cambio de ronda.
+- El backend valida las acciones punch, kick, grab y dodge.
+- El backend calcula dano, salud, puntuacion, combos y ganador.
+- Los snapshots game:state se emiten a todos los clientes de la sala.
+- Fight Fight ya no resuelve localmente sus rondas ni sus cuentas atras principales.
+
+Los componentes React mantienen estados de presentacion y cuenta atras de resultados,
+pero el estado principal de juego ya se recibe del backend. Aun queda endurecer la
+persistencia y el ciclo de vida para evitar partidas activas abandonadas.
+
+AVANCE IMPLEMENTADO: DEEP & DARK DUNGEON AUTORITATIVO
+
+- Deep & Dark Dungeon guarda su estado en Redis mediante matchmaking:game-state.
+- El backend controla la cuenta atras, la seleccion de clase y la seleccion de carta.
+- El backend genera la sala, la mano, el dano, la salud y la puntuacion.
+- Escape y muerte se resuelven en el backend.
+- Los jugadores y espectadores reciben los snapshots game:state.
+- El cliente ya no aplica acciones remotas directamente; muestra el estado del servidor.
+
+Con esto los tres minijuegos tienen un flujo backend de acciones y snapshots. Queda
+endurecer la persistencia y el ciclo de vida de las partidas antes de considerarlo
+multiplayer de produccion.
+
+Hay que implementar eventos Socket.IO por partida, por ejemplo:
+- game:join
+- game:action
+- game:state
+- game:finish
+- game:leave
+
+El backend debe validar:
+- Que el usuario pertenece a la sala global.
+- Que el usuario tiene rol player1, player2 o solo.
+- Que un espectador no puede enviar acciones.
+- Que la accion corresponde al juego activo.
+- Que la accion corresponde al rol del usuario.
+
+PRIORIDAD 2: HACER EL BACKEND AUTORITATIVO
+
+Para The Race y Fight Fight:
+- El backend debe conservar el estado de la partida.
+- Las acciones de cada jugador deben enviarse al backend.
+- El backend debe resolver turnos, puntuaciones, dano, ganador y finalizacion.
+- El estado resultante debe emitirse a todos los miembros de global.
+
+Para Deep & Dark Dungeon:
+- El backend debe conservar el estado del jugador solo.
+- El usuario solo debe poder enviar sus decisiones.
+- Los espectadores deben recibir actualizaciones de estado sin poder modificarlas.
+
+PRIORIDAD 3: CICLO DE VIDA DE LA PARTIDA
+
+Actualmente se almacena una partida activa en Redis.
+Hay que implementar:
+- Finalizacion de la partida.
+- Eliminacion de matchmaking:active.
+- Limpieza de los participantes y espectadores.
+- Inicio automatico de la siguiente partida con usuarios pendientes.
+- Reincorporacion a la cola de los usuarios que sigan conectados.
+- Tratamiento de desconexiones durante una partida.
+- Expiracion de partidas abandonadas mediante TTL.
+
+PRIORIDAD 4: IDENTIDADES REALES
+
+Los minijuegos aun utilizan archivos de usuarios de desarrollo con IDs fijos:
+- frontend/src/minigames/the-race/Race.users.ts
+- frontend/src/minigames/fight-fight/Fight.users.ts
+- frontend/src/minigames/deep-dark-dungeon/DDD.users.ts
+
+Deben sustituirse por los participantes recibidos desde matchmaking, incluyendo sus
+nombres visibles y sus userId reales.
+
+PRIORIDAD 5: PUNTUACIONES
+
+Las puntuaciones actualmente se actualizan desde el frontend.
+Debe decidirse y preferiblemente implementarse en backend:
+- Validacion del resultado.
+- Registro de ganador y perdedor.
+- Evitar que un cliente manipule su puntuacion.
+- Aplicar puntos una sola vez al finalizar la partida.
+
+PRIORIDAD 6: BUILD DEL FRONTEND
+
+Hay que corregir los errores preexistentes que impiden ejecutar:
+  docker compose run --rm frontend pnpm build
+
+Algunos errores detectados pertenecen a imports sin usar, tipos React, JSX y
+componentes auxiliares. Hasta que se corrijan, el build completo del frontend no
+puede considerarse verde.
+
+
+ORDEN RECOMENDADO DE TRABAJO
+----------------------------
+
+1. Corregir el build del frontend.
+2. Definir tipos compartidos de estado y acciones de partida.
+3. Implementar el ciclo de vida Redis de una partida activa.
+4. Implementar eventos Socket.IO de acciones y estado.
+5. Reemplazar los usuarios de desarrollo por participantes reales.
+6. Validar desconexiones, espectadores, finalizacion y siguiente partida.
+7. Anadir tests de matchmaking, permisos y transiciones de partida.
+
+
+NOTA IMPORTANTE
+---------------
+
+La implementacion actual cubre la entrada automatica a la sala global, la seleccion
+aleatoria del juego, la asignacion aleatoria de roles, la visualizacion automatica y
+la restriccion local de controles. Todavia no constituye multiplayer sincronizado de
+produccion hasta que el backend controle y distribuya el estado de cada minijuego.

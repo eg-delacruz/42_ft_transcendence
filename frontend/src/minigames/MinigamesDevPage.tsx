@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { DeepDarkDungeon } from './deep-dark-dungeon/DeepDarkDungeon';
 import { FightFight } from './fight-fight/Fight';
@@ -6,6 +6,7 @@ import { MinigamesScoresList } from './MinigamesScoresList';
 import { TheRace } from './the-race/TheRace';
 
 import { styles } from './MinigamesDevPage.styles';
+import type { MatchGame, MatchRole } from '@/hooks/useMatchmaking';
 
 type DevMinigame =
   | 'menu'
@@ -14,8 +15,25 @@ type DevMinigame =
   | 'fight-fight'
   | 'deep-dark-dungeon';
 
-export function MinigamesDevPage() {
-  const [activeGame, setActiveGame] = useState<DevMinigame>('menu');
+type MinigamesDevPageProps = {
+  matchGame?: MatchGame;
+  matchRole?: MatchRole;
+};
+
+function toDevMinigame(game: MatchGame): DevMinigame {
+  if (game === 'the_race') return 'the-race';
+  if (game === 'fight_fight') return 'fight-fight';
+  return 'deep-dark-dungeon';
+}
+
+export function MinigamesDevPage({ matchGame, matchRole }: MinigamesDevPageProps) {
+  const [activeGame, setActiveGame] = useState<DevMinigame>(
+    matchGame ? toDevMinigame(matchGame) : 'menu',
+  );
+
+  useEffect(() => {
+    if (matchGame) setActiveGame(toDevMinigame(matchGame));
+  }, [matchGame]);
 
   function handleExitToMenu() {
     setActiveGame('menu');
@@ -83,15 +101,15 @@ export function MinigamesDevPage() {
 
           <div className="w-full h-full">
             {activeGame === 'the-race' && (
-              <TheRace onExitToMenu={handleExitToMenu} />
+              <TheRace onExitToMenu={handleExitToMenu} playerRole={matchRole} />
             )}
 
             {activeGame === 'fight-fight' && (
-              <FightFight onExitToMenu={handleExitToMenu} />
+              <FightFight onExitToMenu={handleExitToMenu} playerRole={matchRole} />
             )}
 
             {activeGame === 'deep-dark-dungeon' && (
-              <DeepDarkDungeon onExitToMenu={handleExitToMenu} />
+              <DeepDarkDungeon onExitToMenu={handleExitToMenu} playerRole={matchRole} />
             )}
           </div>
         </section>

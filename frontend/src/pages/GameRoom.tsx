@@ -4,7 +4,7 @@ import { useMatchmaking } from "@/hooks/useMatchmaking";
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import { useNavigate } from "react-router-dom";
 import { MinigamesDevPage } from "../minigames/MinigamesDevPage";
-import { SocketDebug } from "./SocketDebug";
+import { ChatPanel } from "../components/ChatPanel";
 
 function GameRoom() {
     const { user, loading, error } = useUser();
@@ -12,7 +12,7 @@ function GameRoom() {
     const navigate = useNavigate();
 
     // Hook de Matchmaking creado en el Punto 3
-    const { inQueue, matchData, joinQueue, leaveQueue } = useMatchmaking();
+    const { inQueue, matchData, logs, leaveQueue } = useMatchmaking();
 
     const displayName = user?.username?.trim() ? user.username : "Anonymous";
     const avatarUrl = user?.avatarUrl?.trim() ? user.avatarUrl : "/game01.jpg";
@@ -30,7 +30,7 @@ function GameRoom() {
         <div className="w-screen h-screen flex flex-row items-start bg-linear-to-br from-(--gradient-dark) to-(--gradient-light) relative">
             {/* Game screen */}
             <div className="w-0 lg:w-2/3 h-full lg:border-r-6 lg:border-amber-100 flex flex-col justify-between">
-                <MinigamesDevPage />
+                <MinigamesDevPage matchGame={matchData?.game} matchRole={matchData?.role} />
                 
                 {/* Panel / Banner de Matchmaking en la parte del Juego */}
                 <div className="p-4 bg-slate-900/80 border-t-2 border-amber-100 flex items-center justify-between text-white font-aldrich">
@@ -38,7 +38,7 @@ function GameRoom() {
                         <div className="flex items-center space-x-4">
                             <span className="w-3 h-3 bg-green-500 rounded-full animate-ping" />
                             <p className="text-lg text-green-400">
-                                ¡Partida encontrada! Sala: <span className="font-mono text-amber-300">{matchData.roomId}</span>
+                                {matchData.role === 'spectator' ? 'Espectador' : 'Partida encontrada'}: {matchData.game}
                             </p>
                         </div>
                     ) : inQueue ? (
@@ -54,13 +54,14 @@ function GameRoom() {
                         </div>
                     ) : (
                         <div className="flex items-center justify-between w-full">
-                            <p className="text-slate-300 text-sm">¿Listo para jugar?</p>
-                            <button 
-                                onClick={joinQueue}
-                                className="px-6 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded shadow-lg transition-transform hover:scale-105 cursor-pointer font-pressstart text-xs"
-                            >
-                                BUSCAR PARTIDA
-                            </button>
+                            <p className="text-slate-300 text-sm">Entrando en la sala global...</p>
+                        </div>
+                    )}
+                    {logs.length > 0 && (
+                        <div className="ml-4 max-w-xl overflow-hidden text-xs text-slate-400">
+                            {logs.slice(0, 2).map((log) => (
+                                <p key={`${log.timestamp}-${log.message}`}>{log.message}</p>
+                            ))}
                         </div>
                     )}
                 </div>
@@ -117,8 +118,8 @@ function GameRoom() {
 
                 <div className="h-4/9 p-8 w-full flex flex-col items-center">
                     <h2 className="text-center font-aldrich font-bold text-4xl text-transparent bg-clip-text bg-linear-to-r from-amber-200 to-amber-500">CHAT</h2>
-                    <div className="h-full w-full m-4 bg-slate-900 opacity-20">
-                        {/* Chat component */}
+                    <div className="h-full w-full m-4 min-h-0">
+                        <ChatPanel />
                     </div>
                 </div>
             </div>
