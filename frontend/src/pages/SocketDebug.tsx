@@ -47,7 +47,6 @@ function ErrorBox({ message }: { message: string }) {
 
 function getSenderName(msg: any): string {
 
-	console.log(msg);
     if (msg.sender?.username)
 		return msg.sender.username;
 	
@@ -78,8 +77,6 @@ export function ChatRoomViewer({
 	useEffect(() => {
 		setDisplayname(user?.username ?? "");
 	}, [user]);
-
-	// console.log("USER:", user);
 
     const filteredMessages = safeMessages.filter((msg) => {
         const sender = getSenderName(msg);
@@ -118,24 +115,30 @@ export function ChatRoomViewer({
                 {filteredMessages.map((msg, index) => {
                     const sender = getSenderName(msg);
                     const text = msg.text ?? msg.content ?? msg.message ?? "";
+                    const avatarSrc = msg.sender?.avatarUrl || "/defaultavatar.png";
 
                     return (
-                        <div key={msg.id ?? index} className="border-b-2 border-slate-700 mb-2">
-                            <div className="flex flex-row justify-between chatText">
-                                <span className="chatText font-black uppercase mb-2 m-0">
-                                    {sender}
-                                </span>
-                                <span className="chatText font-bold uppercase mb-2 m-0">
-                                    {msg.createdAt
-                                        ? new Date(msg.createdAt).toLocaleTimeString()
-                                        : ""}
-                                </span>
+                        <div key={msg.id ?? index} className="flex flex-row w-full gap-4 items-start">
+                            <div className="h-10 w-10 shrink-0 overflow-hidden aspect-square rounded-full border-3 border-slate-300">
+                                <img src={avatarSrc} alt={`${sender} avatar`} className="h-full w-full object-cover" />
                             </div>
+                            <div className="min-w-0 flex-1 border-b-2 border-slate-700 p-2 wrap-break-word">
+                                <div className="flex flex-row justify-between chatText ">
+									<span className="chatText font-black uppercase mb-2 m-0 ">
+										{sender}
+									</span>
+									<span className="chatText font-bold uppercase mb-2 m-0">
+										{msg.createdAt
+											? new Date(msg.createdAt).toLocaleTimeString()
+											: ""}
+									</span>
+								</div>
 
-                            <div className="chatText mb-2 m-0">
-                                {text}
-                            </div>
-                        </div>
+								<div className="chatText mb-2 m-0">
+									{text}
+								</div>
+							</div>
+						</div>
                     );
                 })}
             </div>
@@ -196,12 +199,16 @@ export function SocketDebug() {
                         value={messageText}
                         onChange={(e) => setMessageText(e.target.value)}
                         placeholder="Type a message..."
+						maxlength="258"
                     />
                 </div>
                 <button className="customButton p-3 text-xs"
                     type="button"
                     onClick={() =>
-                        runAction(() => sendMessage({ text: messageText }))
+                        runAction(async () => {
+                            await sendMessage({ text: messageText });
+                            setMessageText("");
+                        })
                     }
                     disabled={!messageText.trim()}
                 >

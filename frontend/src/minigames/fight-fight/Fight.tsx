@@ -238,7 +238,7 @@ return (
 				/>
 			</section>
 			{/* Animations and prompt */}
-			<section className="w-full h-3/5 grid grid-cols-3 items-center justify-center gap-10 p-5 bg-cover bg-center bg-[url(../minigames/assets/fight-background.jpg)]">
+			<section className="w-full h-3/5 grid grid-cols-3 items-center justify-center gap-10 p-5 bg-cover bg-center bg-[url(../minigames/assets/fight-background.png)]">
 				<DecisionDisplay player={fightState.player1} phase={fightState.phase} />
 					<RoundResult
 					fightState={fightState}
@@ -604,5 +604,5 @@ function ActionKeyword({
   children: ReactNode;
   colorStyle: string;
 }) {
-  return <span className={['basitText uppercase text-md font-bold', colorStyle].filter(Boolean).join(' ')}>{children}</span>;
+  return <span className={['basicText uppercase text-md font-bold', colorStyle].filter(Boolean).join(' ')}>{children}</span>;
 }

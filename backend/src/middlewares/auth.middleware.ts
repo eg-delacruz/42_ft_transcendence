@@ -7,6 +7,8 @@ export interface AuthPayload {
   userId: string;
   id?: string;
   email: string;
+  username?: string;
+  avatarUrl?: string | null;
   role: string;
 }
 
@@ -36,6 +38,8 @@ export const authMiddleware = (
       userId: decoded.userId ?? decoded.id!,
       id: decoded.id ?? decoded.userId,
       email: decoded.email ?? "",
+      username: decoded.username,
+      avatarUrl: decoded.avatarUrl ?? null,
       role: decoded.role ?? "",
     };
 

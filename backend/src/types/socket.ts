@@ -8,6 +8,8 @@ import type { UserRole } from '@interfaces/roles';
 export interface SocketUser {
     userId: string;
     email: string;
+    username: string;
+    avatarUrl?: string | null;
     role: UserRole;
 }
 

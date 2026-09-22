@@ -21,7 +21,7 @@ function GameRoomContent() {
 		user?.username?.trim() ? user.username : "Anonymous";
 
 	const avatarUrl =
-		user?.avatarUrl?.trim() ? user.avatarUrl : "/game01.jpg";
+		user?.avatarUrl?.trim() ? user.avatarUrl : "/defaultavatar.png";
 
     if (loading) 
 		return <div>Loading User...</div>;
@@ -50,8 +50,8 @@ function GameRoomContent() {
 			<div className="w-full lg:w-1/3 h-full">
 				<div className="h-1/9 w-full grid grid-cols-6 items-center bg-slate-900/70">
 					{/*Color outline should be a variable*/}
-					<div className="col-start-1 h-2/3 ml-4 rounded-full aspect-square outline-4 outline-slate-300">
-						<img src={avatarUrl} alt="user avatar" className="h-full w-full object-cover"></img>
+					<div className="col-start-1 h-2/3 ml-4 aspect-square overflow-hidden rounded-full outline-4 outline-slate-300">
+						<img src={avatarUrl} alt="user avatar" className="block h-full w-full object-cover"></img>
 					</div>
 					{/*Display name should be a variable*/}
 					<div className="col-start-2 col-end-5 ml-8 text-lg lg:text-2xl font-pressstart text-slate-200">

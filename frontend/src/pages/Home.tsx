@@ -22,9 +22,9 @@ function Home ()
 					{/*Banner*/}
 					<div className="absolute inset-0 overflow-hidden bg-slate-200">
 						<div className="flex w-screen h-full gap-0 lg:gap-4">
-							<div className="w-1/3 h-full marquee-item bg-[url(/game01.jpg)]" aria-hidden="true"></div>
-							<div className="w-1/3 h-full marquee-item bg-[url(/game02.png)]" aria-hidden="true"></div>
-							<div className="w-1/3 h-full marquee-item bg-[url(/game03.jpg)]" aria-hidden="true"></div>
+							<div className="w-1/3 h-full marquee-item bg-[url(/race-thumbnail.png)] bg-cover bg-bottom " aria-hidden="true"></div>
+							<div className="w-1/3 h-full marquee-item bg-[url(/fight-thumbnail.png)] bg-cover bg-center " aria-hidden="true"></div>
+							<div className="w-1/3 h-full marquee-item bg-[url(/ddd-thumbnail.png)] bg-cover bg-top " aria-hidden="true"></div>
 						</div>
 					</div>
 					{/*Black screen*/}
@@ -38,8 +38,8 @@ function Home ()
 				</div>
 
 			{/* Background and description */}
-			<div className="relative w-full h-auto flex-1 bg-linear-to-t from-(--gradient-dark) to-(--gradient-light)"> {/*overflow-scroll*/}
-				<div className="fixed h-screen w-screen inset-0 bg-[url(/arcadePatternRepeat.png)] bg-auto animate-diagonal opacity-10 pointer-events-none z-0" aria-hidden="true"></div>
+			<div className="relative w-full h-2/3 flex-1 bg-linear-to-t from-(--gradient-dark) to-(--gradient-light)"> {/*overflow-scroll*/}
+				<div className="fixed h-full w-screen inset-0 bg-[url(/arcadePatternRepeat.png)] bg-auto animate-diagonal opacity-10 pointer-events-none z-0" aria-hidden="true"></div>
 				<div className="relative w-full p-6 lg:p-12 sm:gap-8 flex flex-col items-center justify-center ">{/*overflow-scroll*/}
 					<div className=" text-slate-300 text-center text-lg lg:text-3xl font-aldrich wrap-normal">
 						<p>[FT_TRANSCENDENCE] is a multiplayer minigames platform where users can compete against each other in real-time. 

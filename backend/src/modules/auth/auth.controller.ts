@@ -35,7 +35,13 @@ export const handleLogin = async (
     await user.save();
 
     const token = jwt.sign(
-      { userId: user._id, role: user.role, email: user.email },
+      {
+        userId: user._id,
+        role: user.role,
+        email: user.email,
+        username: user.username,
+        avatarUrl: user.avatarUrl,
+      },
       env.JWT_SECRET,
       { expiresIn: '1d' }
     );
@@ -109,7 +115,13 @@ export const registerUser = async (
     const savedUser = await newUser.save();
 
     const token = jwt.sign(
-      { userId: savedUser._id, role: savedUser.role, email: savedUser.email },
+      {
+        userId: savedUser._id,
+        role: savedUser.role,
+        email: savedUser.email,
+        username: savedUser.username,
+        avatarUrl: savedUser.avatarUrl,
+      },
       env.JWT_SECRET,
       { expiresIn: '1d' }
     );

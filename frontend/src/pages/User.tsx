@@ -1,5 +1,4 @@
 import { useAuthContext } from "@/context/context";
-import { useUser } from "@/hooks/useUser";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -8,16 +7,15 @@ import { faArrowsRotate } from '@fortawesome/free-solid-svg-icons'
 import { api } from "@/utils/api";
 
 const avatarOptions = [
-	{ src: "/game01.jpg", alt: "Arcade avatar" },
-	{ src: "/game02.png", alt: "Blue avatar" },
-	{ src: "/game03.jpg", alt: "Retro avatar" },
-	{ src: "/icon01.jpeg", alt: "Icon avatar" },
+	{ src: "/avatar01.jpg", alt: "Arcade avatar" },
+	{ src: "/avatar02.jpg", alt: "Blue avatar" },
+	{ src: "/avatar03.gif", alt: "Retro avatar" },
+	{ src: "/avatar04.jpg", alt: "Icon avatar" },
 ];
 
 
 function User() {
-	const { user, loading, error } = useUser();
-	const { logout, deleteAccount, auth } = useAuthContext();
+	const { user, loading, error, logout, deleteAccount, auth } = useAuthContext();
 	const navigate = useNavigate();
 	const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 	const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);

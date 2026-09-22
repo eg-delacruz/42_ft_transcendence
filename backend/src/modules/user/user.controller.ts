@@ -52,7 +52,7 @@ export const getAllUsers = async (
   try {
     const users = await User.find(
       {},
-      "_id email role avatar_url display_name points createdAt updatedAt",
+      "_id email role username avatarUrl avatar_url display_name points createdAt updatedAt",
     ).lean(); //lean() returns plain JavaScript objects instead of Mongoose documents, which can be more efficient for read operations
 
     // Eliminate the user with super_admin role from the list
@@ -121,7 +121,7 @@ export const updateUserById = async (
 
   // Build update object only with fields present in the request body.
   // This prevents overwriting absent fields with undefined.
-  const allowedFields = ["avatar_url", "display_name", "points"] as const;
+  const allowedFields = ["username", "avatarUrl", "avatar_url", "display_name", "points"] as const;
   const update: Record<string, unknown> = {};
 
   for (const field of allowedFields) {
@@ -147,6 +147,8 @@ export const updateUserById = async (
         _id: updatedUser._id,
         email: updatedUser.email,
         role: updatedUser.role,
+		username: updatedUser.username,
+		avatarUrl: updatedUser.avatarUrl,
         avatar_url: updatedUser.avatar_url,
         display_name: updatedUser.display_name,
         points: updatedUser.points,
