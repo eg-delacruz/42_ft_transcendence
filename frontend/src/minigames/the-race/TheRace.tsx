@@ -201,13 +201,20 @@ export function TheRace({ onExitToMenu }: TheRaceProps) {
 	  <div className="w-full h-full grid grid-cols-3 overflow-hidden relative">
 		{/* Left side - clock */}
 		<aside className="flex flex-col pt-12 pl-2 pr-2 gap-20 bg-[url(../minigames/assets/race-grass.gif)] bg-repeat">
-		  <div className="raceBox">
-			<span className="basicText text-4xl">◷</span>
-			<div className="flex flex-col gap-1">
-			  <p className="basicText">Tiempo:</p>
-			  <p className="basicText">{getRaceTimeText(raceState, elapsedSeconds)}</p>
+			<div className="raceBox">
+				<span className="basicText text-4xl">◷</span>
+				<div className="flex flex-col gap-1">
+				<p className="basicText">Tiempo:</p>
+				<p className="basicText">{getRaceTimeText(raceState, elapsedSeconds)}</p>
+				</div>
 			</div>
-		  </div>
+			<div className="grid grid-cols-2 text-center raceBox">
+				{player1 && (
+					<p className="basicText text-xs">
+					{getRaceDisplayName(player.id)}: {player.progress}
+					</p>
+				)}
+			</div>
 		</aside>
 		{/* Center - prompt and race track and players*/}
 		<section className="trackArea relative flex flex-col pt-12 pl-2 pr-2 gap-20 bg-[url(../minigames/assets/race-grass.gif)] bg-repeat">
@@ -231,11 +238,16 @@ export function TheRace({ onExitToMenu }: TheRaceProps) {
 		  </header>
 
 		  <div className="grid grid-cols-2 text-center raceBox">
-			{raceState.players.map((player) => (
+			{/* {raceState.players.map((player) => (
 			  <p key={player.id} className="basicText text-xs">
 				{getRaceDisplayName(player.id)}: {player.progress}
 			  </p>
-			))}
+			))} */}
+			{player2 && (
+				<p className="basicText text-xs">
+				{getRaceDisplayName(player.id)}: {player.progress}
+				</p>
+			)}
 		  </div>
 		</aside>
 

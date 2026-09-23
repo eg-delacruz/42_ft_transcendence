@@ -33,20 +33,20 @@ function Home ()
 					</div>
 					{/*Title*/}
 					<div className="relative z-20 font-pressstart">
-						<p className="text-xl sm:text-3xl lg:text-6xl text-slate-100 text-shadow-lg text-shadow-slate-400">FT_TRANSCENDENCE</p>
+						<p className="text-xl sm:text-3xl lg:text-6xl text-slate-100 text-shadow-lg text-shadow-slate-400">{t("home.title")}</p>
 					</div>
 				</div>
-
+				<div className ="h-auto absolute ttop-0 right-0 p-4 gap-4 flex flex-row  ">
+					<button onClick={() => i18n.changeLanguage("es")} className="customButton p-4">ES</button>
+					<button onClick={() => i18n.changeLanguage("en")} className="customButton p-4">EN</button>
+				</div>
 			{/* Background and description */}
 			<div className="relative w-full h-2/3 flex-1 bg-linear-to-t from-(--gradient-dark) to-(--gradient-light)"> {/*overflow-scroll*/}
 				<div className="fixed h-full w-screen inset-0 bg-[url(/arcadePatternRepeat.png)] bg-auto animate-diagonal opacity-10 pointer-events-none z-0" aria-hidden="true"></div>
 				<div className="relative w-full p-6 lg:p-12 sm:gap-8 flex flex-col items-center justify-center ">{/*overflow-scroll*/}
 					<div className=" text-slate-300 text-center text-lg lg:text-3xl font-aldrich wrap-normal">
-						<p>[FT_TRANSCENDENCE] is a multiplayer minigames platform where users can compete against each other in real-time. 
-							This project is part of the 42 curriculum and demonstrates full-stack web development.</p>
+						<p>{t("home.description")}</p>
 					</div>
-					<button onClick={() => i18n.changeLanguage("es")}>ES</button>
-					<button onClick={() => i18n.changeLanguage("en")}>EN</button>
 					<div className="p-6 gap-4 lg:gap-8 flex flex-col sm:flex-row">
 						<Link className="customButton lg:p-6 lg:text-2xl transition ease-out-4 bg-linear-to-t from-amber-500 to-amber-300" to="/login">
 							<p>{t("login.button")}</p>
@@ -59,7 +59,7 @@ function Home ()
 
 				{/*Credits*/}
 				<div className="relative w-full py-6 flex flex-col items-center justify-center">
-					<p className="text-lg text-slate-200 opacity-80 font-bold font-aldrich">MADE BY</p>
+					<p className="text-lg text-slate-200 opacity-80 font-bold font-aldrich">{t("home.madeBy")}</p>
 					<div className="p-4 gap-2 w-full lg:w-4/5 2xl:w-3/5 flex lg:flex-row flex-wrap justify-around items-center">
 						<div className="credit-icon">
 							<Link to="https://github.com/pexpalacios">
@@ -97,7 +97,7 @@ function Home ()
 							<p className="font-aldrich text-neutral-20">backend</p>
 						</div>
 					</div>
-					<label htmlFor="giticon" className="labelCustom p-2">see repo on github</label>
+					<label htmlFor="giticon" className="labelCustom p-2">{t("home.repo")}</label>
 					<Link to="https://github.com/eg-delacruz/42_ft_transcendence" id="giticon">
 						<FontAwesomeIcon icon={faGithub} className="text-white text-4xl"/>
 					</Link>
@@ -106,26 +106,26 @@ function Home ()
 			{/*Políticas y Términos */}
 			<footer className="w-full flex flex-col sm:flex-row justify-between items-center text-center text-sm font-aldrich border-t pt-6  text-slate-500 bg-(--gradient-dark)">
 				<div>
-					ft_transcendence &copy; {new Date().getFullYear()} — Proyecto 42
+					{t("home.footer.copyright", {year: new Date().getFullYear()})}
 				</div>
 				<div className="flex items-center gap-4 mr-2">
 					<button onClick={handlePrivacy} className="hover:text-slate-300 transition-colors">
-						Política de Privacidad
+						{t("home.footer.privacy")}
 					</button>
 					{showPrivacy && (
 						<div className="absolute inset-0 flex flex-col items-center justify-center z-50 animate-appear bg-black/60">
 							<PrivacyPolicy></PrivacyPolicy>
-							<button onClick={() => setShowPrivacy(false)} className="customButton mt-5">BACK</button>
+							<button onClick={() => setShowPrivacy(false)} className="customButton mt-5">{t("common.back")}</button>
 						</div>
 					)}
 				<span>•</span>
 					<button onClick={handleTerms} className="hover:text-slate-300 transition-colors">
-						Términos del Servicio
+						{t("home.footer.terms")}
 					</button>
 					{showTerms && (
 						<div className="absolute inset-0 flex flex-col items-center justify-center z-50 animate-appear bg-black/60">
 							<TermsOfService></TermsOfService>
-							<button onClick={() => setShowTerms(false)} className="customButton mt-5">BACK</button>
+							<button onClick={() => setShowTerms(false)} className="customButton mt-5">{t("common.back")}</button>
 						</div>
 					)}
 				</div>

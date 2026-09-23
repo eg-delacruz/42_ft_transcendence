@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useUser } from "@/hooks/useUser";
 import { useAuthContext } from "@/context/context";
 import { useChatSocket } from "@/hooks/useChatSocket";
+import { useTranslation } from 'react-i18next';
 
 
 type Status =
@@ -13,20 +14,31 @@ type Status =
     | "error";
 
 function StatusBadge({ status }: { status: Status }) {
-    const styles: Record<Status, React.CSSProperties> = {
-        connected: { background: "#EAF3DE", color: "#3B6D11" },
-        connecting: { background: "#FAEEDA", color: "#854F0B" },
-        reconnecting: { background: "#FAEEDA", color: "#854F0B" },
-        error: { background: "#FCEBEB", color: "#A32D2D" },
-        idle: {
-            background: "var(--color-background-secondary)",
-            color: "var(--color-text-secondary)",
-        },
-        disconnected: {
-            background: "var(--color-background-secondary)",
-            color: "var(--color-text-secondary)",
-        },
-    };
+	const { t } = useTranslation();
+	const styles: Record<Status, React.CSSProperties> = {
+		connected: { background: "#EAF3DE", color: "#3B6D11" },
+		connecting: { background: "#FAEEDA", color: "#854F0B" },
+		reconnecting: { background: "#FAEEDA", color: "#854F0B" },
+		error: { background: "#FCEBEB", color: "#A32D2D" },
+		idle: {
+			background: "var(--color-background-secondary)",
+			color: "var(--color-text-secondary)",
+		},
+		disconnected: {
+			background: "var(--color-background-secondary)",
+			color: "var(--color-text-secondary)",
+		},
+	};
+
+	const labels: Record<Status, string> = {
+		connected: t("chat.status.connected"),
+		connecting: t("chat.status.connecting"),
+		reconnecting: t("chat.status.reconnecting"),
+		error: t("chat.status.error"),
+		idle: t("chat.status.idle"),
+		disconnected: t("chat.status.disconnected"),
+	};
+
     return (
         <span className="flex items-center p-2 rounded-xs"
             style={{ ...styles[status],}}
@@ -45,7 +57,7 @@ function ErrorBox({ message }: { message: string }) {
 }
 
 
-function getSenderName(msg: any): string {
+function getSenderName(msg: any, t:TFunction): string {
 
     if (msg.sender?.username)
 		return msg.sender.username;
@@ -58,7 +70,7 @@ function getSenderName(msg: any): string {
         return msg.user.email;
     }
 
-    return "Unknown";
+    return t("chat.unknownUser");
 }
 
 export function ChatRoomViewer({
@@ -74,12 +86,14 @@ export function ChatRoomViewer({
 	const { user, loading, error } = useUser();
 	const [displayName, setDisplayname] = useState(user?.username ?? "");
 
+	const { t } = useTranslation();
+
 	useEffect(() => {
 		setDisplayname(user?.username ?? "");
 	}, [user]);
 
     const filteredMessages = safeMessages.filter((msg) => {
-        const sender = getSenderName(msg);
+        const sender = getSenderName(msg, t);
 
         if (!userFilter) {
             return true;
@@ -99,7 +113,7 @@ export function ChatRoomViewer({
             <div className="fixed chatText text-sm font-bold uppercase mb-2 m-0 bg-slate-900">
                 <input className="p-1 w-full"
                     type="text"
-                    placeholder="Filter by user..."
+                    placeholder={t("chat.filterByUser")}
                     value={userFilter}
                     onChange={(e) => setUserFilter(e.target.value)}
                 />
@@ -108,7 +122,7 @@ export function ChatRoomViewer({
             <div className="flex flex-col mt-10 ">
                 {filteredMessages.length === 0 && (
                     <div className="chatText text-xs font-bold uppercase mb-2 m-0">
-                        No messages
+                        {t("chat.noMessages")}
                     </div>
                 )}
 
@@ -157,7 +171,8 @@ export function SocketDebug() {
     } = useChatSocket();
 
     const [messageText, setMessageText] = useState("");
-    const [lastResult, setLastResult] = useState("No action yet");
+	const { t, i18n } = useTranslation();
+    const [lastResult, setLastResult] = useState(t("chat.noAction"));
 
     const runAction = async (action: () => Promise<unknown>) => {
         try {
@@ -174,7 +189,7 @@ export function SocketDebug() {
             <div className="h-1/9 flex justify-between items-center">
                 <div>
                     <p className="chatText uppercase font-black p-2">
-                        {user ? `Logged in as ${user.username}` : "No user authenticated"}
+                        {user ? t("chat.loggedAs", { user: user.username}) : t("chat.noUser")}
                     </p>
                 </div>
                 <StatusBadge status={chatStatus as Status} />
@@ -198,7 +213,7 @@ export function SocketDebug() {
                         id="inp-msg"
                         value={messageText}
                         onChange={(e) => setMessageText(e.target.value)}
-                        placeholder="Type a message..."
+                        placeholder={t("chat.placeholder")}
 						maxlength="258"
                     />
                 </div>
@@ -212,7 +227,7 @@ export function SocketDebug() {
                     }
                     disabled={!messageText.trim()}
                 >
-                    Send
+                    {t("chat.send")}
                 </button>
             </div>
 

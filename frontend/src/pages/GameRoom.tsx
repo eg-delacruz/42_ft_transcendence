@@ -10,12 +10,14 @@ import type { MinigameId } from "../minigames/types";
 import { MinigameProvider, useMinigameContext } from "../minigames/context/minigameContext";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faGear } from '@fortawesome/free-solid-svg-icons'
+import { useTranslation } from 'react-i18next';
 
 function GameRoomContent() {
     const { user, loading, error } = useUser();
     const { logout, deleteAccount } = useAuthContext();
 	const { activeGame } = useMinigameContext();
 	const navigate = useNavigate();
+	const { t, i18n } = useTranslation();
 
 	const displayName =
 		user?.username?.trim() ? user.username : "Anonymous";
@@ -24,11 +26,11 @@ function GameRoomContent() {
 		user?.avatarUrl?.trim() ? user.avatarUrl : "/defaultavatar.png";
 
     if (loading) 
-		return <div>Loading User...</div>;
+		return <div>{t("user.loading")}</div>;
     if (error) 
-		return <div>Error: {error}</div>;
+		return <div>{t("user.error")}</div>;
     if (!user) 
-		return <div>Not authenticated user.</div>;
+		return <div>{t("user.notAuthenticated")}</div>;
 
 	const Logout = () => 
 	{
@@ -54,8 +56,12 @@ function GameRoomContent() {
 						<img src={avatarUrl} alt="user avatar" className="block h-full w-full object-cover"></img>
 					</div>
 					{/*Display name should be a variable*/}
-					<div className="col-start-2 col-end-5 ml-8 text-lg lg:text-2xl font-pressstart text-slate-200">
+					<div className="col-start-2 col-end-4 ml-8 text-lg lg:text-2xl font-pressstart text-slate-200">
 						<p>{displayName}</p>
+					</div>
+					<div className="col-start-4 col-end-5 ml-8 text-lg lg:text-2xl font-pressstart text-slate-200 flex flex-row">
+						<button onClick={() => i18n.changeLanguage("es")} className="customButton text-xs p-2">ES</button>
+						<button onClick={() => i18n.changeLanguage("en")} className="customButton text-xs p-2">EN</button>
 					</div>
 					<Menu as="div" className="col-start-6 size-10 top-0 mr-0">
 						<MenuButton className="h-full w-full items-center justify-center">
@@ -72,7 +78,7 @@ function GameRoomContent() {
 								href="/user"
 								className="block px-4 py-2 text-lg lg:text-2xl font-aldrich text-gray-300"
 								>
-								Account settings
+								{t("user.settings")}
 								</a>
 							</MenuItem>
 							<form onClick={Logout}>
@@ -81,7 +87,7 @@ function GameRoomContent() {
 									type="submit"
 									className="block w-full px-4 py-2 text-left text-lg lg:text-2xl font-aldrich text-gray-300"
 								>
-									Log out
+								{t("user.logout")}
 								</button>
 								</MenuItem>
 							</form>
