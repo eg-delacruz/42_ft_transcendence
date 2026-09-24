@@ -183,6 +183,14 @@ export function SocketDebug() {
         }
     };
 
+	const handleSend = () => {
+		if (!messageText.trim()) return;
+			runAction(async () => {
+				await sendMessage({ text: messageText });
+				setMessageText("");
+		});
+	};
+
     return (
         <div className="h-full w-full flex flex-col items-stretch">
             {/* Header */}
@@ -213,18 +221,19 @@ export function SocketDebug() {
                         id="inp-msg"
                         value={messageText}
                         onChange={(e) => setMessageText(e.target.value)}
-                        placeholder={t("chat.placeholder")}
-						maxlength="258"
+						onKeyDown={(e) => {
+							if (e.key === 'Enter' && !e.shiftKey) {
+								e.preventDefault();
+								handleSend();
+							}
+						}}
+						placeholder={t("chat.placeholder")}
+						maxLength={258}
                     />
                 </div>
                 <button className="customButton p-3 text-xs"
                     type="button"
-                    onClick={() =>
-                        runAction(async () => {
-                            await sendMessage({ text: messageText });
-                            setMessageText("");
-                        })
-                    }
+                    onClick={handleSend}
                     disabled={!messageText.trim()}
                 >
                     {t("chat.send")}

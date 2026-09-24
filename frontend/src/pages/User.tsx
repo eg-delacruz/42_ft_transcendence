@@ -8,10 +8,10 @@ import { api } from "@/utils/api";
 import { useTranslation } from 'react-i18next';
 
 const avatarOptions = [
-	{ src: "/avatar01.jpg", alt: "Arcade avatar" },
-	{ src: "/avatar02.jpg", alt: "Blue avatar" },
-	{ src: "/avatar03.gif", alt: "Retro avatar" },
-	{ src: "/avatar04.jpg", alt: "Icon avatar" },
+	{ src: "/avatar01.png", alt: "Arcade avatar" },
+	{ src: "/avatar02.png", alt: "Blue avatar" },
+	{ src: "/avatar03.png", alt: "Retro avatar" },
+	{ src: "/avatar04.png", alt: "Icon avatar" },
 ];
 
 

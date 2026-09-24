@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { useNavigate } from "react-router-dom";
 import { MinigamesDevPage } from "../minigames/MinigamesDevPage";
-import { SocketDebug } from "./SocketDebug";
+import { SocketDebug } from "./Chat";
 import { TopScores } from '../minigames/components/TopScores';
 import type { MinigameId } from "../minigames/types";
 import { MinigameProvider, useMinigameContext } from "../minigames/context/minigameContext";
@@ -28,7 +28,7 @@ function GameRoomContent() {
     if (loading) 
 		return <div>{t("user.loading")}</div>;
     if (error) 
-		return <div>{t("user.error")}</div>;
+		return <div>{t("user.error", {message: error})}</div>;
     if (!user) 
 		return <div>{t("user.notAuthenticated")}</div>;
 
@@ -50,50 +50,54 @@ function GameRoomContent() {
 			</div>
 			{/* Bets and chat column */}
 			<div className="w-full lg:w-1/3 h-full">
-				<div className="h-1/9 w-full grid grid-cols-6 items-center bg-slate-900/70">
-					{/*Color outline should be a variable*/}
-					<div className="col-start-1 h-2/3 ml-4 aspect-square overflow-hidden rounded-full outline-4 outline-slate-300">
-						<img src={avatarUrl} alt="user avatar" className="block h-full w-full object-cover"></img>
+				<div className="h-1/9 w-full flex flex-row items-center bg-slate-900/70">
+					<div className="w-1/2 mx-auto flex flex-row items-center p-4">
+						<div className="size-20 aspect-square overflow-hidden rounded-full outline-4 outline-slate-300">
+							<img src={avatarUrl} alt="user avatar" className="block h-full w-full object-cover"></img>
+						</div>
+						{/*Display name should be a variable*/}
+						<div className="ml-8 text-lg lg:text-2xl mx-auto font-pressstart text-slate-200">
+							<p>{displayName}</p>
+						</div>
 					</div>
-					{/*Display name should be a variable*/}
-					<div className="col-start-2 col-end-4 ml-8 text-lg lg:text-2xl font-pressstart text-slate-200">
-						<p>{displayName}</p>
-					</div>
-					<div className="col-start-4 col-end-5 ml-8 text-lg lg:text-2xl font-pressstart text-slate-200 flex flex-row">
-						<button onClick={() => i18n.changeLanguage("es")} className="customButton text-xs p-2">ES</button>
-						<button onClick={() => i18n.changeLanguage("en")} className="customButton text-xs p-2">EN</button>
-					</div>
-					<Menu as="div" className="col-start-6 size-10 top-0 mr-0">
-						<MenuButton className="h-full w-full items-center justify-center">
-							<div aria-hidden="true" className="">
-								<FontAwesomeIcon icon={faGear} className="text-white text-4xl"/>
-							</div>
-						</MenuButton>	
-						<MenuItems
-							transition
-							className="absolute right-0 z-10 mt-2 w-64 origin-top-right rounded-md bg-slate-900/60 outline-3 -outline-offset-1 outline-white/10 transition data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in">
-							<div className="py-1">
-							<MenuItem>
-								<a
-								href="/user"
-								className="block px-4 py-2 text-lg lg:text-2xl font-aldrich text-gray-300"
-								>
-								{t("user.settings")}
-								</a>
-							</MenuItem>
-							<form onClick={Logout}>
+					<div className="w-1/2 mx-auto flex flex-row items-center p-4 justify-end gap-4">
+						<div className="flex flex-col gap-1">
+							<button onClick={() => i18n.changeLanguage("es")} className="customButton text-xs p-2">ES</button>
+							<button onClick={() => i18n.changeLanguage("en")} className="customButton text-xs p-2">EN</button>
+							<button onClick={() => i18n.changeLanguage("en")} className="customButton text-xs p-2">EN</button>
+						</div>
+						<Menu as="div" className="size-10">
+							<MenuButton className="h-full w-full items-center justify-center">
+								<div aria-hidden="true" className="">
+									<FontAwesomeIcon icon={faGear} className="text-white text-4xl"/>
+								</div>
+							</MenuButton>	
+							<MenuItems
+								transition
+								className="absolute right-0 z-10 mt-2 w-64 origin-top-right rounded-md bg-slate-900/60 outline-3 -outline-offset-1 outline-white/10 transition data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in">
+								<div className="py-1">
 								<MenuItem>
-								<button
-									type="submit"
-									className="block w-full px-4 py-2 text-left text-lg lg:text-2xl font-aldrich text-gray-300"
-								>
-								{t("user.logout")}
-								</button>
+									<a
+									href="/user"
+									className="block px-4 py-2 text-lg lg:text-2xl font-aldrich text-gray-300"
+									>
+									{t("user.settings")}
+									</a>
 								</MenuItem>
-							</form>
-							</div>
-						</MenuItems>
-					</Menu>
+								<form onClick={Logout}>
+									<MenuItem>
+									<button
+										type="submit"
+										className="block w-full px-4 py-2 text-left text-lg lg:text-2xl font-aldrich text-gray-300"
+									>
+									{t("user.logout")}
+									</button>
+									</MenuItem>
+								</form>
+								</div>
+							</MenuItems>
+						</Menu>
+					</div>
 				</div>
 				<div className="h-1/9 p-4 w-full flex flex-col items-center border-b-6 border-amber-100">
 

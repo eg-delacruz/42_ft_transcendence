@@ -22,9 +22,9 @@ function Home ()
 					{/*Banner*/}
 					<div className="absolute inset-0 overflow-hidden bg-slate-200">
 						<div className="flex w-screen h-full gap-0 lg:gap-4">
-							<div className="w-1/3 h-full marquee-item bg-[url(/race-thumbnail.png)] bg-cover bg-bottom " aria-hidden="true"></div>
-							<div className="w-1/3 h-full marquee-item bg-[url(/fight-thumbnail.png)] bg-cover bg-center " aria-hidden="true"></div>
-							<div className="w-1/3 h-full marquee-item bg-[url(/ddd-thumbnail.png)] bg-cover bg-top " aria-hidden="true"></div>
+							<div className="w-1/3 h-full marquee-item bg-[url(/race-thumbnail.png)] lg:bg-[url(/race-thumbnail-lg.png)] bg-cover bg-bottom " aria-hidden="true"></div>
+							<div className="w-1/3 h-full marquee-item bg-[url(/fight-thumbnail.png)] lg:bg-[url(/fight-thumbnail-lg.png)] bg-cover bg-center " aria-hidden="true"></div>
+							<div className="w-1/3 h-full marquee-item bg-[url(/ddd-thumbnail.png)] lg:bg-[url(/ddd-thumbnail-lg.png)] bg-cover bg-top " aria-hidden="true"></div>
 						</div>
 					</div>
 					{/*Black screen*/}
