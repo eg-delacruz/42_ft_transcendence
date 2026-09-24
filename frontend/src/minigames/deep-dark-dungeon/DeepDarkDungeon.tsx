@@ -57,6 +57,8 @@ import trap2Image from './Resources/Trampa2.png';
 import trap3Image from './Resources/Trampa3.png';
 
 import hallway1Image from './Resources/Pasillo1.png';
+import dungeonBackground from './Resources/Fondo.jpg';
+import monedasImage from './Resources/Monedas.png';
 
 /*
  * ============================================================
@@ -72,6 +74,9 @@ import rogue1Image from './Resources/Rogue1.png';
 import rogue2Image from './Resources/Rogue2.png';
 import rogue3Image from './Resources/Rogue3.png';
 
+import magueClassImage from './Resources/Mague.png';
+import warriorClassImage from './Resources/Guerrero.png';
+import rogueClassImage from './Resources/Rogue.png';
 import mague1Image from './Resources/Mague1.png';
 import mague2Image from './Resources/Mague2.png';
 import mague3Image from './Resources/Mague3.png';
@@ -466,7 +471,12 @@ export function DeepDarkDungeon({
     <main style={styles.page}>
       <TopScores minigameId="deep-dark-dungeon" />
 
-      <section style={styles.board}>
+      <section
+        style={{
+          ...styles.board,
+          backgroundImage: `url(${dungeonBackground})`,
+        }}
+      >
         <header style={styles.header}>
           <p style={styles.kicker}>Minigame</p>
 
@@ -486,8 +496,6 @@ export function DeepDarkDungeon({
             dungeonState={dungeonState}
           />
         </section>
-
-        <div style={styles.boardDivider} />
 
         <section style={styles.bottomGameArea}>
           {dungeonState.phase ===
@@ -712,19 +720,20 @@ function PlayerHud({
       />
 
       <div style={styles.hudRow}>
-        <span style={styles.hudLabel}>Vida:</span>
+        <span style={styles.hudLabel}>Puntos:</span>
 
-        <span style={styles.hearts}>
-          {renderHearts(
-            dungeonState.player.health,
-          )}
+        <span style={styles.scoreWithCoins}>
+          <span style={styles.hudValue}>
+            {dungeonState.player.score}
+          </span>
+
+          <img
+            src={monedasImage}
+            alt=""
+            style={styles.coinIcon}
+          />
         </span>
       </div>
-
-      <HudRow
-        label="Puntos"
-        value={String(dungeonState.player.score)}
-      />
 
       <HudRow
         label="Racha"
@@ -744,6 +753,16 @@ function PlayerHud({
           dungeonState.player.roundsSurvived,
         )}
       />
+
+      <div style={styles.hudRow}>
+        <span style={styles.hudLabel}>Vida:</span>
+
+        <span style={styles.hearts}>
+          {renderHearts(
+            dungeonState.player.health,
+          )}
+        </span>
+      </div>
     </aside>
   );
 }
@@ -816,9 +835,7 @@ function ActiveChallenge({
           </p>
 
           <p style={styles.challengeDescription}>
-            Elige una clase. Tu clase determinará las
-            cartas que podrás encontrar durante la
-            expedición.
+
           </p>
         </article>
       </section>
@@ -838,7 +855,7 @@ function ActiveChallenge({
           </p>
 
           <p style={styles.challengeDescription}>
-            Selecciona una clase para empezar la expedición.
+            
           </p>
         </article>
       </section>
@@ -972,23 +989,19 @@ function ClassOption({
 }: {
   dungeonClass: DungeonClass;
 }) {
+  const classImages: Record<DungeonClass, string> = {
+    mague: magueClassImage,
+    warrior: warriorClassImage,
+    rogue: rogueClassImage,
+  };
+
   return (
     <article style={styles.classCard}>
-      <p style={styles.classKey}>
-        {
-          DUNGEON_CLASS_CONTROL_LABELS[
-            dungeonClass
-          ]
-        }
-      </p>
-
-      <p style={styles.classIcon}>
-        {DUNGEON_CLASS_ICONS[dungeonClass]}
-      </p>
-
-      <p style={styles.className}>
-        {DUNGEON_CLASS_LABELS[dungeonClass]}
-      </p>
+      <img
+        src={classImages[dungeonClass]}
+        alt={DUNGEON_CLASS_LABELS[dungeonClass]}
+        style={styles.classCardImage}
+      />
     </article>
   );
 }

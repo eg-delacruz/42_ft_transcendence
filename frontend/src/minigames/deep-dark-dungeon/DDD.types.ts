@@ -79,23 +79,14 @@ export type DungeonState = {
  */
 
 export const DUNGEON_INITIAL_HEALTH = 5;
-
 export const DUNGEON_BETTING_COUNTDOWN_SECONDS = 5;
-
-export const DUNGEON_CLASS_SELECTION_SECONDS = 5;
-
+export const DUNGEON_CLASS_SELECTION_SECONDS = 20;
 export const DUNGEON_CARD_SELECTION_SECONDS = 3;
-
-export const DUNGEON_RESOLVE_SECONDS = 0.25;
-
+export const DUNGEON_RESOLVE_SECONDS = 0.2;
 export const DUNGEON_RESULTS_COUNTDOWN_SECONDS = 2;
-
 export const DUNGEON_ROOM_SCORE = 5;
-
 export const DUNGEON_STREAK_SCORE = 10;
-
 export const DUNGEON_DEATH_SCORE_PENALTY = 0.25;
-
 export const DUNGEON_HAND_SIZE = 3;
 
 /*
@@ -182,7 +173,7 @@ export const DUNGEON_DECKS: Record<
     {
       id: 'mague-fireball',
       name: 'Bola de fuego',
-      probability: 60,
+      probability: 50,
       effects: ['clearCombat'],
     },
     {
@@ -194,7 +185,7 @@ export const DUNGEON_DECKS: Record<
     {
       id: 'mague-invisibility',
       name: 'Invisibilidad',
-      probability: 10,
+      probability: 20,
       effects: ['clearTrap'],
     },
   ],

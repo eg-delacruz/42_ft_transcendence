@@ -13,19 +13,36 @@ export const styles: Record<string, CSSProperties> = {
     background: '#101018',
     color: '#f4f4f5',
     fontFamily: 'monospace',
-    padding: '36px 48px 40px',
+    padding: 0,
     boxSizing: 'border-box',
     position: 'relative',
+
+    display: 'flex',
+    justifyContent: 'center',
+
+    overflow: 'auto',
   },
 
   board: {
-    width: 'min(1280px, 100%)',
-    minHeight: 'calc(100vh - 80px)',
+    width: '1672px',
+    height: '1200px',
+
     margin: '0 auto',
+
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
     gap: '28px',
+
+    backgroundPosition: 'center top',
+    backgroundSize: '1672px 1200px',
+    backgroundRepeat: 'no-repeat',
+
+    padding: '36px 48px',
+    boxSizing: 'border-box',
+
+    position: 'relative',
+    overflow: 'hidden',
   },
 
   /*
@@ -112,11 +129,13 @@ export const styles: Record<string, CSSProperties> = {
     fontWeight: 700,
   },
 
-  hudValue: {
-    color: '#f4f4f5',
-    fontSize: '18px',
-    fontWeight: 700,
-  },
+hudValue: {
+  color: '#f4f4f5',
+  fontSize: '18px',
+  fontWeight: 700,
+  textAlign: 'center',
+  width: '100%',
+},
 
   hearts: {
     color: '#ef4444',
@@ -124,6 +143,19 @@ export const styles: Record<string, CSSProperties> = {
     letterSpacing: '0.16em',
     lineHeight: 1,
     textShadow: '0 1px 0 #000',
+  },
+
+  scoreWithCoins: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+  },
+
+  coinIcon: {
+    display: 'block',
+    width: '32px',
+    height: '32px',
+    objectFit: 'contain',
   },
 
   /*
@@ -148,10 +180,10 @@ export const styles: Record<string, CSSProperties> = {
 
   challengeCard: {
     width: '560px',
-    minHeight: '320px',
-    border: '2px solid #d4d4d8',
-    borderRadius: '8px',
-    background: 'rgba(24, 24, 31, 0.92)',
+    minHeight: '420px',
+    border: 'none',
+    borderRadius: 0,
+    background: 'transparent',
     padding: '10px',
     boxSizing: 'border-box',
     textAlign: 'center',
@@ -160,7 +192,7 @@ export const styles: Record<string, CSSProperties> = {
     alignItems: 'center',
     justifyContent: 'center',
     gap: '14px',
-    boxShadow: '0 0 0 1px rgba(255, 255, 255, 0.04)',
+    boxShadow: 'none',
   },
 
   /*
@@ -169,14 +201,14 @@ export const styles: Record<string, CSSProperties> = {
    * Para hacerla más grande o pequeña, cambia width.
    */
 
-  roomImage: {
-    display: 'block',
-    width: '300px',
-    maxHeight: '310px',
-    height: 'auto',
-    objectFit: 'contain',
-    margin: '0 auto',
-  },
+roomImage: {
+  display: 'block',
+  width: '330px',
+  maxHeight: '405px',
+  height: 'auto',
+  objectFit: 'contain',
+  margin: '0 auto',
+},
 
   bettingChallengeCard: {
     width: 'min(780px, 100%)',
@@ -273,19 +305,6 @@ export const styles: Record<string, CSSProperties> = {
 
   /*
    * ============================================================
-   * DIVISOR
-   * ============================================================
-   */
-
-  boardDivider: {
-    width: '100%',
-    height: '2px',
-    background: 'rgba(255, 255, 255, 0.65)',
-    margin: '2px 0',
-  },
-
-  /*
-   * ============================================================
    * ZONA INFERIOR
    * ============================================================
    */
@@ -356,44 +375,30 @@ export const styles: Record<string, CSSProperties> = {
   },
 
   classOptions: {
+    width: '100%',
     display: 'grid',
     gridTemplateColumns: 'repeat(3, 220px)',
     justifyContent: 'center',
-    gap: '24px',
-    width: '100%',
+    alignItems: 'center',
+    gap: '16px',
   },
 
   classCard: {
-    minHeight: '190px',
-    border: '2px solid #3f3f46',
-    borderRadius: '14px',
-    background: '#18181f',
-    padding: '18px',
-    boxSizing: 'border-box',
-    textAlign: 'center',
+    width: '220px',
     display: 'flex',
-    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '8px',
+    background: 'transparent',
+    border: 'none',
+    padding: 0,
+    margin: 0,
   },
 
-  classKey: {
-    margin: 0,
-    color: '#a1a1aa',
-    fontSize: '16px',
-  },
-
-  classIcon: {
-    margin: 0,
-    fontSize: '46px',
-    lineHeight: 1,
-  },
-
-  className: {
-    margin: 0,
-    fontSize: '18px',
-    fontWeight: 700,
+  classCardImage: {
+    display: 'block',
+    width: '100%',
+    height: 'auto',
+    objectFit: 'contain',
   },
 
   /*
@@ -435,6 +440,7 @@ export const styles: Record<string, CSSProperties> = {
     justifyContent: 'center',
     alignItems: 'center',
     gap: '12px',
+    background: 'transparent',
   },
 
   /*
@@ -443,7 +449,7 @@ export const styles: Record<string, CSSProperties> = {
    */
 
   gameCard: {
-    width: '220px',
+    width: '230px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -463,7 +469,7 @@ export const styles: Record<string, CSSProperties> = {
   controlsHint: {
     margin: 0,
     color: '#f4f4f5',
-    fontSize: '16px',
+    fontSize: '19px',
     letterSpacing: '0.08em',
     textAlign: 'center',
   },
