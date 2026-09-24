@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
-
+import { useAuthContext } from '@/context/context';
 import { TopScores } from '../components/TopScores';
+import { useMinigameContext } from '../context/minigameContext';
 import { updateMinigameTopScore } from '../components/TopScores.api';
 
 import {
@@ -21,21 +22,23 @@ import {
   type FightState,
 } from './Fight.types';
 
-import { getFightDisplayName, getFightUserId } from './Fight.users';
-import type { MatchRole } from '@/hooks/useMatchmaking';
+import type { MatchData, MatchRole } from '@/hooks/useMatchmaking';
 import { useGameSync, type RemoteGameAction } from '@/hooks/useGameSync';
+import type { MinigameId } from '../types';
 
 type FightFightProps = {
   onExitToMenu?: () => void;
+	onMinigameChange?: (minigameId: MinigameId) => void;
   playerRole?: MatchRole;
+  matchData?: MatchData | null;
 };
 
-export function FightFight({ onExitToMenu, playerRole }: FightFightProps) {
-  const [fightState, setFightState] = useState<FightState>(
-	createInitialFightState,
-  );
 
-  const hasSubmittedScore = useRef(false);
+export function FightFight({ onExitToMenu, onMinigameChange, playerRole, matchData }: FightFightProps) {
+	const { setActiveGame } = useMinigameContext();
+	const { user } = useAuthContext();
+	const [fightState, setFightState] = useState<FightState>(createInitialFightState,);
+	const hasSubmittedScore = useRef(false);
 
 	const { sendAction } = useGameSync(
 		'fight_fight',
@@ -43,8 +46,13 @@ export function FightFight({ onExitToMenu, playerRole }: FightFightProps) {
 		(state) => setFightState(state.state as FightState),
 	);
 
-  const player1Name = getFightDisplayName('player1');
-  const player2Name = getFightDisplayName('player2');
+	useEffect(() => {
+    	setActiveGame('fight-fight');
+    	return () => setActiveGame(null); // clear when it unmounts
+  	}, [setActiveGame]);
+
+	const player1Name = getParticipantName(matchData, 'player1', 'Jugador 1');
+	const player2Name = getParticipantName(matchData, 'player2', 'Jugador 2');
 
   useEffect(() => {
 	if (fightState.phase !== 'finished') {
@@ -66,7 +74,8 @@ export function FightFight({ onExitToMenu, playerRole }: FightFightProps) {
 		? fightState.player1
 		: fightState.player2;
 
-	const winnerUserId = getFightUserId(fightState.winnerId);
+	const winnerUserId = matchData?.players.find((player) => player.role === fightState.winnerId)?.userId ?? user?.id ?? user?._id;
+	if (!winnerUserId) return;
 
 	updateMinigameTopScore('fight-fight', winner.score, winnerUserId).catch(
 	  (error) => {
@@ -78,6 +87,8 @@ export function FightFight({ onExitToMenu, playerRole }: FightFightProps) {
 	fightState.winnerId,
 	fightState.player1,
 	fightState.player2,
+	matchData,
+	user,
   ]);
 
   useEffect(() => {
@@ -137,7 +148,6 @@ export function FightFight({ onExitToMenu, playerRole }: FightFightProps) {
 
 return (
 	<main className="w-full h-screen flex items-center justify-center font-pressstart p-0 relative">
-		<TopScores minigameId="fight-fight" />
 
 		<div className="w-full h-full relative overflow-hidden">
 			{/* TopHUD - payer status and timer */}
@@ -155,7 +165,7 @@ return (
 				/>
 			</section>
 			{/* Animations and prompt */}
-			<section className="w-full h-3/5 grid grid-cols-3 items-center justify-center gap-10 p-5 bg-cover bg-center bg-[url(../minigames/assets/fight-background.jpg)]">
+			<section className="w-full h-3/5 grid grid-cols-3 items-center justify-center gap-10 p-5 bg-cover bg-center bg-[url(../minigames/assets/fight-background.png)]">
 				<DecisionDisplay player={fightState.player1} phase={fightState.phase} />
 					<RoundResult
 					fightState={fightState}
@@ -514,6 +524,10 @@ function getFightWinnerDisplayName(
   return 'Sin ganador';
 }
 
+function getParticipantName(matchData: MatchData | null | undefined, role: 'player1' | 'player2', fallback: string): string {
+	return matchData?.players.find((player) => player.role === role)?.username ?? fallback;
+}
+
 function ActionKeyword({
   children,
   colorStyle,
@@ -521,5 +535,5 @@ function ActionKeyword({
   children: ReactNode;
   colorStyle: string;
 }) {
-  return <span className={['basitText uppercase text-md font-bold', colorStyle].filter(Boolean).join(' ')}>{children}</span>;
+  return <span className={['basicText uppercase text-md font-bold', colorStyle].filter(Boolean).join(' ')}>{children}</span>;
 }

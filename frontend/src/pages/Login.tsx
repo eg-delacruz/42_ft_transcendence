@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/context/context";
 import { PrivacyPolicy } from '@/pages/PrivacyPolicy';
 import { TermsOfService } from '@/pages/TermsOfService';
+import { useTranslation } from 'react-i18next';
 
 
 function Login() {
@@ -17,6 +18,7 @@ function Login() {
 	const [hoveredField, setHoveredField] = useState<string | null>(null);
 	const [showPrivacy, setShowPrivacy] = useState(false);
 	const [showTerms, setShowTerms] = useState(false);
+	const { t, i18n } = useTranslation();
 
     const handleSummit = async (e: React.FormEvent) => 
 	{
@@ -25,7 +27,7 @@ function Login() {
         const res = await login(email, password);
 
         if (res.error) 
-			setError(res.error || "Login failed");
+			setError(res.error || t("login.error.failed"));
         else 
 			navigate("/gameroom");
     };
@@ -45,14 +47,14 @@ function Login() {
 					<div className="row-start-1 col-start-1 md:row-start-2 md:col-start-2 h-auto w-auto flex items-center justify-center overflow-auto">
 						<div className="h-full md:h-4/5 w-full md:w-4/5 p-8 rounded-lg shadow-lg flex flex-col items-center justify-start text-neutral-100 bg-(--gradient-light) overflow-auto">
 							<form onSubmit={handleSummit} className="p-8 mx-2 flex flex-col items-center justify-start">
-								<h2 className="p-6 text-lg lg:text-4xl font-pressstart uppercase">ft_transcendance</h2>
+								<h2 className="p-6 text-lg lg:text-4xl font-pressstart uppercase">{t("home.title")}</h2>
 								<div className="p-4">
 									<div className="relative outline-none">
-										<label className="labelCustom">Email
+										<label className="labelCustom">{t("common.email")}
 											<input
 												className="arcadeform"
 												type="email"
-												placeholder="email"
+												placeholder={t("common.placeholder.email")}
 												value={email}
 												id="email"
 												autoComplete="true"
@@ -70,11 +72,11 @@ function Login() {
 								</div>
 								<div className="p-4">
 									<div className="relative outline-none">
-										<label className="labelCustom">Password
+										<label className="labelCustom">{t("common.password")}
 											<input
 												className="arcadeform"
 												type="password"
-												placeholder="password"
+												placeholder={t("common.placeholder.password")}
 												value={password}
 												id="password"
 												autoComplete="true"
@@ -97,25 +99,26 @@ function Login() {
   									onMouseLeave={() => setHoveredField(null)}
   									onFocus={() => setFocusedField("button")}
   									onBlur={() => setFocusedField(null)}
-								>Log in</button>
+								>
+									{t("login.button")}
+								</button>
 								{error && <div style={{ color: "red" }}>{error}</div>}
 								{(hoveredField === "button" || focusedField === "button") && (
   									<span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 animate-sidebounce text-3xl">◄</span>
 								)}
 							</form>
 							<div className="p-2 flex items-center">
-								<p className="font-aldrich opacity-70">Don't have an account? <a href="/register" className="text-blue-300">Sign in</a></p>
+								<p className="font-aldrich opacity-70">{t("login.noAccount")}<a href="/register" className="text-blue-300">{t("login.noAccount.link")}</a></p>
 							</div>
-							<div className="p-2 flex items-center text-center wrap-normal">
-								<p className="font-aldrich opacity-70">🛈 Before logging in, you should read our  
-									<button onClick={handleTerms} className="text-blue-300">
-										 terms and conditions
-									</button>
-								</p>		
+							<div className="p-2 flex items-center text-center wrap-normal gap-2">
+								<p className="font-aldrich opacity-70">{t("common.termsWarning")}</p>
+								<button onClick={handleTerms} className="text-blue-300 font-aldrich opacity-70">
+									{t("common.termsWarning.link")}
+								</button>
 									{showTerms && (
 										<div className="absolute inset-0 flex flex-col items-center justify-center z-50 animate-appear bg-black/60">
 											<TermsOfService></TermsOfService>
-											<button onClick={() => setShowTerms(false)} className="customButton mt-5">BACK</button>
+											<button onClick={() => setShowTerms(false)} className="customButton mt-5">{t("common.back")}</button>
 										</div>
 									)}
 							</div>

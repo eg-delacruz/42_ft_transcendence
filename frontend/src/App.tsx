@@ -9,7 +9,7 @@ import Home from '@/pages/Home';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import User from '@/pages/User';
-import SocketDebug from './pages/SocketDebug';
+import Chat from './pages/Chat';
 import GameRoom from './pages/GameRoom';
 import React, { useState } from "react";
 
@@ -26,10 +26,9 @@ const routes = [
   { path: "/", element: <Home></Home> },
   { path: "/login", element: <Login></Login> },
   { path: "/register", element: <Register></Register> },
-  { path: "/socket-debug", element: <ProtectedRoute><SocketDebug /></ProtectedRoute> },
   { path: "/user", element: <ProtectedRoute><User /></ProtectedRoute> },
   { path: "/gameroom", element: <ProtectedRoute><GameRoom /></ProtectedRoute>},
-  { path: "/socket-debug", element: <ProtectedRoute><SocketDebug /></ProtectedRoute> },
+  { path: "/chat", element: <ProtectedRoute><Chat /></ProtectedRoute> },
   { path: "/privacy", element: <PrivacyPolicy /> },
   { path: "/terms", element: <TermsOfService /> },
   { path: "/game", element: <GameCanvas /> },

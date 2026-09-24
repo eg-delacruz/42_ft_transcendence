@@ -4,6 +4,8 @@ type UpdateUserPointsResponse = {
     _id: string;
     email: string;
     role: string;
+	username: string;
+	avatarUrl: string;
     avatar_url?: string;
     display_name?: string;
     points: number;

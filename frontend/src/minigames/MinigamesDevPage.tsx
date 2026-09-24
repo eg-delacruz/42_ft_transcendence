@@ -6,7 +6,7 @@ import { MinigamesScoresList } from './MinigamesScoresList';
 import { TheRace } from './the-race/TheRace';
 
 import { styles } from './MinigamesDevPage.styles';
-import type { MatchGame, MatchRole } from '@/hooks/useMatchmaking';
+import type { MatchData, MatchGame, MatchRole } from '@/hooks/useMatchmaking';
 
 type DevMinigame =
   | 'menu'
@@ -18,6 +18,7 @@ type DevMinigame =
 type MinigamesDevPageProps = {
   matchGame?: MatchGame;
   matchRole?: MatchRole;
+  matchData?: MatchData | null;
 };
 
 function toDevMinigame(game: MatchGame): DevMinigame {
@@ -26,7 +27,7 @@ function toDevMinigame(game: MatchGame): DevMinigame {
   return 'deep-dark-dungeon';
 }
 
-export function MinigamesDevPage({ matchGame, matchRole }: MinigamesDevPageProps) {
+export function MinigamesDevPage({ matchGame, matchRole, matchData }: MinigamesDevPageProps) {
   const [activeGame, setActiveGame] = useState<DevMinigame>(
     matchGame ? toDevMinigame(matchGame) : 'menu',
   );
@@ -101,15 +102,15 @@ export function MinigamesDevPage({ matchGame, matchRole }: MinigamesDevPageProps
 
           <div className="w-full h-full">
             {activeGame === 'the-race' && (
-              <TheRace onExitToMenu={handleExitToMenu} playerRole={matchRole} />
+              <TheRace onExitToMenu={handleExitToMenu} playerRole={matchRole} matchData={matchData} />
             )}
 
             {activeGame === 'fight-fight' && (
-              <FightFight onExitToMenu={handleExitToMenu} playerRole={matchRole} />
+              <FightFight onExitToMenu={handleExitToMenu} playerRole={matchRole} matchData={matchData} />
             )}
 
             {activeGame === 'deep-dark-dungeon' && (
-              <DeepDarkDungeon onExitToMenu={handleExitToMenu} playerRole={matchRole} />
+              <DeepDarkDungeon onExitToMenu={handleExitToMenu} playerRole={matchRole} matchData={matchData} />
             )}
           </div>
         </section>

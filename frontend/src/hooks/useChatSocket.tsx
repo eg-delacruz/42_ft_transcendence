@@ -18,6 +18,8 @@ export type ChatSocketUser = {
   userId: string;
   email: string;
   role: SocketRole;
+  username: string;
+  avatarUrl?: string | null;
 };
 
 export type ChatRoomInfo = {
@@ -255,7 +257,7 @@ export function useChatSocket() {
       socketRef.current = null;
       setStatus("idle");
     };
-  }, [isAuthenticated, loading]);
+  }, [isAuthenticated, loading, user?.userId, user?.email, user?.username, user?.avatarUrl, user?.role]);
 
   const createRoom = async (payload: CreateRoomPayload) => {
     if (!socketRef.current) {

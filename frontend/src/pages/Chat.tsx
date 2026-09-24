@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useUser } from "@/hooks/useUser";
 import { useAuthContext } from "@/context/context";
 import { useChatSocket } from "@/hooks/useChatSocket";
+import { useTranslation } from 'react-i18next';
 
 
 type Status =
@@ -13,20 +14,31 @@ type Status =
     | "error";
 
 function StatusBadge({ status }: { status: Status }) {
-    const styles: Record<Status, React.CSSProperties> = {
-        connected: { background: "#EAF3DE", color: "#3B6D11" },
-        connecting: { background: "#FAEEDA", color: "#854F0B" },
-        reconnecting: { background: "#FAEEDA", color: "#854F0B" },
-        error: { background: "#FCEBEB", color: "#A32D2D" },
-        idle: {
-            background: "var(--color-background-secondary)",
-            color: "var(--color-text-secondary)",
-        },
-        disconnected: {
-            background: "var(--color-background-secondary)",
-            color: "var(--color-text-secondary)",
-        },
-    };
+	const { t } = useTranslation();
+	const styles: Record<Status, React.CSSProperties> = {
+		connected: { background: "#EAF3DE", color: "#3B6D11" },
+		connecting: { background: "#FAEEDA", color: "#854F0B" },
+		reconnecting: { background: "#FAEEDA", color: "#854F0B" },
+		error: { background: "#FCEBEB", color: "#A32D2D" },
+		idle: {
+			background: "var(--color-background-secondary)",
+			color: "var(--color-text-secondary)",
+		},
+		disconnected: {
+			background: "var(--color-background-secondary)",
+			color: "var(--color-text-secondary)",
+		},
+	};
+
+	const labels: Record<Status, string> = {
+		connected: t("chat.status.connected"),
+		connecting: t("chat.status.connecting"),
+		reconnecting: t("chat.status.reconnecting"),
+		error: t("chat.status.error"),
+		idle: t("chat.status.idle"),
+		disconnected: t("chat.status.disconnected"),
+	};
+
     return (
         <span className="flex items-center p-2 rounded-xs"
             style={{ ...styles[status],}}
@@ -45,9 +57,8 @@ function ErrorBox({ message }: { message: string }) {
 }
 
 
-function getSenderName(msg: any): string {
+function getSenderName(msg: any, t:TFunction): string {
 
-	console.log(msg);
     if (msg.sender?.username)
 		return msg.sender.username;
 	
@@ -59,7 +70,7 @@ function getSenderName(msg: any): string {
         return msg.user.email;
     }
 
-    return "Unknown";
+    return t("chat.unknownUser");
 }
 
 export function ChatRoomViewer({
@@ -75,14 +86,14 @@ export function ChatRoomViewer({
 	const { user, loading, error } = useUser();
 	const [displayName, setDisplayname] = useState(user?.username ?? "");
 
+	const { t } = useTranslation();
+
 	useEffect(() => {
 		setDisplayname(user?.username ?? "");
 	}, [user]);
 
-	// console.log("USER:", user);
-
     const filteredMessages = safeMessages.filter((msg) => {
-        const sender = getSenderName(msg);
+        const sender = getSenderName(msg, t);
 
         if (!userFilter) {
             return true;
@@ -102,7 +113,7 @@ export function ChatRoomViewer({
             <div className="fixed chatText text-sm font-bold uppercase mb-2 m-0 bg-slate-900">
                 <input className="p-1 w-full"
                     type="text"
-                    placeholder="Filter by user..."
+                    placeholder={t("chat.filterByUser")}
                     value={userFilter}
                     onChange={(e) => setUserFilter(e.target.value)}
                 />
@@ -111,31 +122,37 @@ export function ChatRoomViewer({
             <div className="flex flex-col mt-10 ">
                 {filteredMessages.length === 0 && (
                     <div className="chatText text-xs font-bold uppercase mb-2 m-0">
-                        No messages
+                        {t("chat.noMessages")}
                     </div>
                 )}
 
                 {filteredMessages.map((msg, index) => {
                     const sender = getSenderName(msg);
                     const text = msg.text ?? msg.content ?? msg.message ?? "";
+                    const avatarSrc = msg.sender?.avatarUrl || "/defaultavatar.png";
 
                     return (
-                        <div key={msg.id ?? index} className="border-b-2 border-slate-700 mb-2">
-                            <div className="flex flex-row justify-between chatText">
-                                <span className="chatText font-black uppercase mb-2 m-0">
-                                    {sender}
-                                </span>
-                                <span className="chatText font-bold uppercase mb-2 m-0">
-                                    {msg.createdAt
-                                        ? new Date(msg.createdAt).toLocaleTimeString()
-                                        : ""}
-                                </span>
+                        <div key={msg.id ?? index} className="flex flex-row w-full gap-4 items-start">
+                            <div className="h-10 w-10 shrink-0 overflow-hidden aspect-square rounded-full border-3 border-slate-300">
+                                <img src={avatarSrc} alt={`${sender} avatar`} className="h-full w-full object-cover" />
                             </div>
+                            <div className="min-w-0 flex-1 border-b-2 border-slate-700 p-2 wrap-break-word">
+                                <div className="flex flex-row justify-between chatText ">
+									<span className="chatText font-black uppercase mb-2 m-0 ">
+										{sender}
+									</span>
+									<span className="chatText font-bold uppercase mb-2 m-0">
+										{msg.createdAt
+											? new Date(msg.createdAt).toLocaleTimeString()
+											: ""}
+									</span>
+								</div>
 
-                            <div className="chatText mb-2 m-0">
-                                {text}
-                            </div>
-                        </div>
+								<div className="chatText mb-2 m-0">
+									{text}
+								</div>
+							</div>
+						</div>
                     );
                 })}
             </div>
@@ -154,7 +171,8 @@ export function SocketDebug() {
     } = useChatSocket();
 
     const [messageText, setMessageText] = useState("");
-    const [lastResult, setLastResult] = useState("No action yet");
+	const { t, i18n } = useTranslation();
+    const [lastResult, setLastResult] = useState(t("chat.noAction"));
 
     const runAction = async (action: () => Promise<unknown>) => {
         try {
@@ -165,13 +183,21 @@ export function SocketDebug() {
         }
     };
 
+	const handleSend = () => {
+		if (!messageText.trim()) return;
+			runAction(async () => {
+				await sendMessage({ text: messageText });
+				setMessageText("");
+		});
+	};
+
     return (
         <div className="h-full w-full flex flex-col items-stretch">
             {/* Header */}
             <div className="h-1/9 flex justify-between items-center">
                 <div>
                     <p className="chatText uppercase font-black p-2">
-                        {user ? `Logged in as ${user.username}` : "No user authenticated"}
+                        {user ? t("chat.loggedAs", { user: user.username}) : t("chat.noUser")}
                     </p>
                 </div>
                 <StatusBadge status={chatStatus as Status} />
@@ -195,17 +221,22 @@ export function SocketDebug() {
                         id="inp-msg"
                         value={messageText}
                         onChange={(e) => setMessageText(e.target.value)}
-                        placeholder="Type a message..."
+						onKeyDown={(e) => {
+							if (e.key === 'Enter' && !e.shiftKey) {
+								e.preventDefault();
+								handleSend();
+							}
+						}}
+						placeholder={t("chat.placeholder")}
+						maxLength={258}
                     />
                 </div>
                 <button className="customButton p-3 text-xs"
                     type="button"
-                    onClick={() =>
-                        runAction(() => sendMessage({ text: messageText }))
-                    }
+                    onClick={handleSend}
                     disabled={!messageText.trim()}
                 >
-                    Send
+                    {t("chat.send")}
                 </button>
             </div>
 

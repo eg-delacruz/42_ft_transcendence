@@ -1,11 +1,13 @@
-import fightPlayerOneDodge from '../assets/fight-playerone-dodge.png';
-import fightPlayerOneKick from '../assets/fight-playerone-kick.png';
-import fightPlayerOnePunch from '../assets/fight-playerone-punch.png';
-import fightPlayerOneIdle from '../assets/fight-playerone-idle.gif';
-import fightPlayerTwoDodge from '../assets/fight-playertwo-dodge.png';
-import fightPlayerTwoKick from '../assets/fight-playertwo-kick.png';
-import fightPlayerTwoPunch from '../assets/fight-playertwo-punch.png';
-import fightPlayerTwoIdle from '../assets/fight-playertwo-idle.gif';
+import playerOneIdle from '../assets/fight-playerone-idle.gif';
+import playerOneDodge from '../assets/fight-playerone-dodge.png';
+import playerOneKick from '../assets/fight-playerone-kick.png';
+import playerOnePunch from '../assets/fight-playerone-punch.png';
+import playerOneGrab from '../assets/fight-playerone-grab.png';
+import playerTwoIdle from '../assets/fight-playertwo-idle.gif';
+import playerTwoDodge from '../assets/fight-playertwo-dodge.png';
+import playerTwoKick from '../assets/fight-playertwo-kick.png';
+import playerTwoPunch from '../assets/fight-playertwo-punch.png';
+import playerTwoGrab from '../assets/fight-playertwo-grab.png';
 
 export type FightAction =
   | 'punch'
@@ -91,21 +93,21 @@ export const FIGHT_ACTION_ICONS: Record<FightAction, string> = {
 };
 
 export const FIGHT_PLAYER_1_ACTION_ICONS: Record<FightAction, string> = {
-  punch: fightPlayerOnePunch,
-  kick: fightPlayerOneKick,
-  grab: '🤼',
-  dodge: fightPlayerOneDodge,
+  punch: playerOnePunch,
+  kick: playerOneKick,
+  grab: playerOneGrab,
+  dodge: playerOneDodge,
 };
 
 export const FIGHT_PLAYER_2_ACTION_ICONS: Record<FightAction, string> = {
-  punch: fightPlayerTwoPunch,
-  kick: fightPlayerTwoKick,
-  grab: '🤼',
-  dodge: fightPlayerTwoDodge,
+  punch: playerTwoPunch,
+  kick: playerTwoKick,
+  grab: playerTwoGrab,
+  dodge: playerTwoDodge,
 };
 
-export const FIGHT_PLAYER_1_IDLE_ICON = fightPlayerOneIdle;
-export const FIGHT_PLAYER_2_IDLE_ICON = fightPlayerTwoIdle;
+export const FIGHT_PLAYER_1_IDLE_ICON = playerOneIdle;
+export const FIGHT_PLAYER_2_IDLE_ICON = playerTwoIdle;
 
 export const FIGHT_PLAYER_IDLE_ICONS: Record<FightPlayerId, string> = {
   player1: FIGHT_PLAYER_1_IDLE_ICON,

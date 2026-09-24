@@ -256,3 +256,20 @@ La implementacion actual cubre la entrada automatica a la sala global, la selecc
 aleatoria del juego, la asignacion aleatoria de roles, la visualizacion automatica y
 la restriccion local de controles. Todavia no constituye multiplayer sincronizado de
 produccion hasta que el backend controle y distribuya el estado de cada minijuego.
+
+
+  ====================
+
+  COSAS QUE HACER COSAS 
+
+  1-  Loop principal -> resolucion de partidas y nueva cuenta atras. -> JAVI
+
+  2-  Top scores estilo -> PEX
+
+  3-  Pantalla ganar jugador (cambiar jugador 1 o 2 por el nombre del usuario)
+
+  4-  TERCER IDIOMA
+
+  5-  HTTPS certificado (GERARDO?)
+
+  6-  TERTO COSAS?

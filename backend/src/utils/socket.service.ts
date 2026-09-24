@@ -169,7 +169,7 @@ export class SocketService {
             const presence: UserPresence = {
                 userId: user.userId,
                 email: user.email,
-                username: user.email,
+                username: user.username,
                 rooms,
                 connectedAt: new Date(),
                 lastSeen: new Date(),
@@ -206,7 +206,7 @@ export class SocketService {
             const presence: UserPresence = {
                 userId: user.userId,
                 email: user.email,
-                username: user.email,
+                username: user.username,
                 rooms,
                 connectedAt: new Date(),
                 lastSeen: new Date(),
@@ -488,6 +488,9 @@ export class SocketService {
             }
             const nextState = { ...currentState, state: raceState, timestamp: Date.now() };
             await this.redis.set(GAME_STATE_KEY, JSON.stringify(nextState));
+                if (raceState.phase === 'finished') {
+                    void this.recycleFinishedMatch(nextState);
+                }
             return { action, state: nextState };
         } finally {
             const currentToken = await this.redis.get(GAME_STATE_LOCK_KEY);
@@ -498,8 +501,20 @@ export class SocketService {
     async tickGameState(): Promise<GameStatePayload | null> {
         const currentState = await this.getGameState();
         if (!currentState) return null;
-        if (currentState.game === 'fight_fight') return this.tickFightState(currentState);
-        if (currentState.game === 'deep_&_dark') return this.tickDungeonState(currentState);
+        if (currentState.game === 'fight_fight') {
+            const nextState = this.tickFightState(currentState);
+            if (nextState && this.isTerminalGameState(nextState)) {
+                void this.recycleFinishedMatch(nextState);
+            }
+            return nextState;
+        }
+        if (currentState.game === 'deep_&_dark') {
+            const nextState = this.tickDungeonState(currentState);
+            if (nextState && this.isTerminalGameState(nextState)) {
+                void this.recycleFinishedMatch(nextState);
+            }
+            return nextState;
+        }
         if (currentState.game !== 'the_race') return null;
         const raceState = currentState.state as {
             phase: string;
@@ -523,6 +538,9 @@ export class SocketService {
         }
         const nextState = { ...currentState, state: raceState, timestamp: Date.now() };
         await this.redis.set(GAME_STATE_KEY, JSON.stringify(nextState));
+        if (raceState.phase === 'finished') {
+            void this.recycleFinishedMatch(nextState);
+        }
         return nextState;
     }
 
@@ -700,6 +718,78 @@ export class SocketService {
         return nextState;
     }
 
+    private isTerminalGameState(state: GameStatePayload): boolean {
+        if (state.game === 'the_race') {
+            return (state.state as { phase?: string }).phase === 'finished';
+        }
+
+        if (state.game === 'fight_fight') {
+            return (state.state as { phase?: string }).phase === 'finished';
+        }
+
+        if (state.game === 'deep_&_dark') {
+            const phase = (state.state as { phase?: string }).phase;
+            return phase === 'escaped' || phase === 'dead' || phase === 'finished';
+        }
+
+        return false;
+    }
+
+    private async recycleFinishedMatch(state: GameStatePayload): Promise<void> {
+        const activeMatch = await this.getActiveGame();
+        if (!activeMatch || activeMatch.game !== state.game) return;
+
+        const participantIds = [...new Set([
+            ...activeMatch.players.map((player) => player.userId),
+            ...activeMatch.spectators,
+        ])];
+
+        const presence = participantIds.length > 0
+            ? await this.redis.mget(...participantIds.map((userId) => `${PRESENCE_PREFIX}${userId}`))
+            : [];
+
+        const requeueIds: string[] = [];
+        for (let index = 0; index < participantIds.length; index += 1) {
+            if (presence[index]) {
+                requeueIds.push(participantIds[index]);
+            }
+        }
+
+        await this.redis.del(ACTIVE_MATCH_KEY, GAME_STATE_KEY);
+
+        for (const userId of requeueIds) {
+            await this.addUserToRoom(userId, GAME_ROOM_ID);
+            await this.enqueueForMatchmaking(userId);
+        }
+
+        this.broadcastMatchmakingLog('Partida finalizada, reencolando usuarios', {
+            game: state.game,
+            users: requeueIds,
+            playerCount: activeMatch.players.length,
+            spectatorCount: activeMatch.spectators.length,
+        });
+
+        void this.tryCreateMatch();
+    }
+
+    private async enqueueForMatchmaking(userId: string): Promise<void> {
+        const queueItems = await this.redis.lrange(MATCHMAKING_QUEUE_KEY, 0, -1);
+        const alreadyQueued = queueItems.some((item) => {
+            try {
+                return (JSON.parse(item) as { userId?: string }).userId === userId;
+            } catch {
+                return false;
+            }
+        });
+
+        if (alreadyQueued) return;
+
+        await this.redis.rpush(
+            MATCHMAKING_QUEUE_KEY,
+            JSON.stringify({ userId, socketId: 'requeue', timestamp: Date.now() }),
+        );
+    }
+
     private createDungeonRoom(): DungeonRoom {
         const type = Math.random() < 0.5 ? 'combat' : Math.random() < 0.8 ? 'trap' : 'empty';
         return { type, name: type === 'combat' ? 'Combate' : type === 'trap' ? 'Trampa' : 'Sala vacía', probability: 1, icon: type === 'combat' ? '⚔️' : type === 'trap' ? '🪤' : '🚪' };
@@ -780,11 +870,22 @@ export class SocketService {
             userIds.sort(() => Math.random() - 0.5);
 
             const game = this.getRandomGame();
+            const participantDetails = userIds.length > 0
+                ? await this.redis.mget(...userIds.map((userId) => `${PRESENCE_PREFIX}${userId}`))
+                : [];
+            const usernamesByUserId = new Map(
+                userIds.map((userId, index) => {
+                    const rawPresence = participantDetails[index];
+                    const username = rawPresence ? (JSON.parse(rawPresence) as UserPresence).username : userId;
+                    return [userId, username] as const;
+                }),
+            );
+
             const players = game === 'deep_&_dark'
-                ? [{ userId: userIds[0], role: 'solo' as const }]
+                ? [{ userId: userIds[0], username: usernamesByUserId.get(userIds[0]) ?? userIds[0], role: 'solo' as const }]
                 : [
-                    { userId: userIds[0], role: 'player1' as const },
-                    { userId: userIds[1], role: 'player2' as const },
+                    { userId: userIds[0], username: usernamesByUserId.get(userIds[0]) ?? userIds[0], role: 'player1' as const },
+                    { userId: userIds[1], username: usernamesByUserId.get(userIds[1]) ?? userIds[1], role: 'player2' as const },
                 ];
             const spectators = game === 'deep_&_dark' ? [userIds[1]] : [];
             const payload: MatchFoundPayload = {
@@ -884,12 +985,19 @@ export class SocketService {
             const activeRemaining = remainingPresence.filter(Boolean).length;
             if (activeRemaining < 2) {
                 await this.redis.del(ACTIVE_MATCH_KEY, GAME_STATE_KEY);
+                for (const remainingId of remainingIds) {
+                    if ((await this.redis.exists(`${PRESENCE_PREFIX}${remainingId}`)) === 1) {
+                        await this.addUserToRoom(remainingId, GAME_ROOM_ID);
+                        await this.enqueueForMatchmaking(remainingId);
+                    }
+                }
                 await this.leaveMatchmaking(userId);
                 this.broadcastMatchmakingLog('Partida cancelada por desconexión', {
                     userId,
                     remainingIds,
                     activeRemaining,
                 });
+                void this.tryCreateMatch();
                 return;
             }
 

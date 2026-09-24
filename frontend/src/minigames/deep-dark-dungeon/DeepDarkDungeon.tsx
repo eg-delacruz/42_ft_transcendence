@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-
+import { useAuthContext } from '@/context/context';
 import { TopScores } from '../components/TopScores';
+import { useMinigameContext } from '../context/minigameContext';
 import { updateMinigameTopScore } from '../components/TopScores.api';
 
 import {
@@ -26,31 +27,38 @@ import {
   DUNGEON_EFFECT_LABELS,
   DUNGEON_INITIAL_HEALTH,
   DUNGEON_RESOLVE_SECONDS,
+  type MinigameId,
   type DungeonClass,
   type DungeonState,
 } from './DDD.types';
 
-import { getDungeonUserId } from './DDD.users';
-import type { MatchRole } from '@/hooks/useMatchmaking';
+import type { MatchData, MatchRole } from '@/hooks/useMatchmaking';
 import { useGameSync, type RemoteGameAction } from '@/hooks/useGameSync';
 
 type DeepDarkDungeonProps = {
   onExitToMenu?: () => void;
+  onMinigameChange?: (minigameId: MinigameId) => void;
   playerRole?: MatchRole;
+  matchData?: MatchData | null;
 };
 
-export function DeepDarkDungeon({ onExitToMenu, playerRole }: DeepDarkDungeonProps) {
-  const [dungeonState, setDungeonState] = useState<DungeonState>(
-    createInitialDungeonState,
-  );
 
-  const hasSubmittedScore = useRef(false);
+export function DeepDarkDungeon({ onExitToMenu, onMinigameChange, playerRole, matchData }: DeepDarkDungeonProps) {
+	const { setActiveGame } = useMinigameContext();
+	const { user } = useAuthContext();
+	const [dungeonState, setDungeonState] = useState<DungeonState>(createInitialDungeonState,);
+	const hasSubmittedScore = useRef(false);
 
   const { sendAction } = useGameSync(
     'deep_&_dark',
     (_action: RemoteGameAction) => undefined,
     (state) => setDungeonState(state.state as DungeonState),
   );
+
+	useEffect(() => {
+    	setActiveGame('deep-dark-dungeon');
+    	return () => setActiveGame(null); // clear when it unmounts
+  	}, [setActiveGame]);
 
   useEffect(() => {
     if (dungeonState.phase !== 'bettingCountdown') {
@@ -199,14 +207,19 @@ export function DeepDarkDungeon({ onExitToMenu, playerRole }: DeepDarkDungeonPro
 
     hasSubmittedScore.current = true;
 
+    const scoreUserId = matchData?.players.find((player) => player.role === 'solo')?.userId ?? user?.id ?? user?._id;
+    if (!scoreUserId) {
+      return;
+    }
+
     updateMinigameTopScore(
       'deep-dark-dungeon',
       dungeonState.player.score,
-      getDungeonUserId(),
+      scoreUserId,
     ).catch((error) => {
       console.error('Error updating Deep & Dark Dungeon top score:', error);
     });
-  }, [dungeonState.phase, dungeonState.player.score]);
+  }, [dungeonState.phase, dungeonState.player.score, matchData, user]);
 
   useEffect(() => {
     const shouldCountResults =
@@ -286,7 +299,6 @@ export function DeepDarkDungeon({ onExitToMenu, playerRole }: DeepDarkDungeonPro
 
   return (
     <main style={styles.page}>
-      <TopScores minigameId="deep-dark-dungeon" />
 
       <section style={styles.board}>
         <header style={styles.header}>
@@ -298,7 +310,7 @@ export function DeepDarkDungeon({ onExitToMenu, playerRole }: DeepDarkDungeonPro
         </header>
 
         <section style={styles.topGameArea}>
-          <PlayerHud dungeonState={dungeonState} />
+          <PlayerHud dungeonState={dungeonState} playerName={getDungeonPlayerName(matchData, user)} />
           <ActiveChallenge dungeonState={dungeonState} />
         </section>
 
@@ -400,11 +412,13 @@ export function DeepDarkDungeon({ onExitToMenu, playerRole }: DeepDarkDungeonPro
   );
 }
 
-function PlayerHud({ dungeonState }: { dungeonState: DungeonState }) {
+function PlayerHud({ dungeonState, playerName }: { dungeonState: DungeonState; playerName: string }) {
   const selectedClass = dungeonState.player.class;
 
   return (
     <aside style={styles.playerHud}>
+      <HudRow label="Jugador" value={playerName} />
+
       <HudRow
         label="Clase"
         value={
@@ -449,6 +463,10 @@ function HudRow({ label, value }: { label: string; value: string }) {
       <span style={styles.hudValue}>{value}</span>
     </div>
   );
+}
+
+function getDungeonPlayerName(matchData: MatchData | null | undefined, user: ReturnType<typeof useAuthContext>['user']): string {
+  return matchData?.players.find((player) => player.role === 'solo')?.username ?? user?.username ?? 'Jugador';
 }
 
 function ActiveChallenge({ dungeonState }: { dungeonState: DungeonState }) {

@@ -16,7 +16,7 @@ export const getGameByName = async (
     const game = await Game.findOne({ name: game_name as any })
       .populate({
         path: "top_1_user top_2_user top_3_user",
-        select: "email display_name avatar_url points",
+        select: "email username avatarUrl display_name avatar_url points",
       });
 
     if (!game) {
@@ -99,7 +99,7 @@ export const updateGameScores = async (
     const populated = await Game.findById(game._id)
       .populate({
         path: "top_1_user top_2_user top_3_user",
-        select: "email display_name avatar_url points",
+        select: "email username avatarUrl display_name avatar_url points",
       });
 
     return successResponse(res, populated, "Scores updated successfully");

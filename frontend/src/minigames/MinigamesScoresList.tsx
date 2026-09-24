@@ -13,6 +13,8 @@ type PortalUser = {
   _id: string;
   email: string;
   role: string;
+  username?: string;
+  avatarUrl?: string;
   display_name?: string;
   avatar_url?: string;
   points?: number;

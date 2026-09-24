@@ -9,6 +9,7 @@ import { Socket } from 'socket.io';
 
 import env from '@config/env';
 import { logger } from '@config/logger';
+import { User } from '@modules/user/user.model';
 import { SocketUser } from '@interfaces/socket';
 
 export function jwtSocketMiddleware(socket: Socket, next: (err?: Error) => void): void {
@@ -39,22 +40,38 @@ export function jwtSocketMiddleware(socket: Socket, next: (err?: Error) => void)
 
         const decoded = jwt.verify(token, env.JWT_SECRET) as jwt.JwtPayload;
         const userId = typeof decoded.userId === 'string' ? decoded.userId : null;
-        const email  = typeof decoded.email  === 'string' ? decoded.email  : null;
-        const role   = typeof decoded.role   === 'string' ? decoded.role   : null;
-
+        const email = typeof decoded.email === 'string' ? decoded.email : null;
+        const role = typeof decoded.role === 'string' ? decoded.role : null;
 
         if (!userId || !email || !role) {
             return next(new Error('Unauthorized: invalid token payload'));
         }
 
-        socket.data.user = {
-            userId,
-            email,
-            role: role as SocketUser['role'],
-        } satisfies SocketUser;
+        User.findById(userId)
+            .select('username avatarUrl email role')
+            .lean()
+            .then((dbUser) => {
+                const username = dbUser?.username ?? (typeof decoded.username === 'string' ? decoded.username : null);
+                const avatarUrl = dbUser?.avatarUrl ?? (typeof decoded.avatarUrl === 'string' ? decoded.avatarUrl : null);
 
-        logger.debug(`[socket-auth] OK socket=${socket.id} user=${userId} ns=${socket.nsp.name}`);
-        next();
+                if (!username) {
+                    return next(new Error('Unauthorized: invalid token payload'));
+                }
+
+                socket.data.user = {
+                    userId,
+                    email: dbUser?.email ?? email,
+                    username,
+                    avatarUrl,
+                    role: (dbUser?.role ?? role) as SocketUser['role'],
+                } satisfies SocketUser;
+
+                logger.debug(`[socket-auth] OK socket=${socket.id} user=${userId} ns=${socket.nsp.name}`);
+                next();
+            })
+            .catch(() => {
+                next(new Error('Unauthorized: invalid or expired token'));
+            });
     } catch {
         next(new Error('Unauthorized: invalid or expired token'));
     }

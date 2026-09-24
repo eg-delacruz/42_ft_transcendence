@@ -9,6 +9,8 @@ import type { GameName } from '@/types/games';
 export interface SocketUser {
     userId: string;
     email: string;
+    username: string;
+    avatarUrl?: string | null;
     role: UserRole;
 }
 
@@ -21,6 +23,7 @@ export type GamePlayerRole = 'player1' | 'player2' | 'solo' | 'spectator';
 
 export interface MatchParticipant {
     userId: string;
+    username: string;
     role: GamePlayerRole;
 }
 

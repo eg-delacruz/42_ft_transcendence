@@ -43,7 +43,7 @@ const userSchema: Schema<IUser> = new Schema(
     },
     avatarUrl: { 
       type: String, 
-      default: '/uploads/default-avatar.png' 
+      default: './defaultavatar.png'
     },
     points: { 
       type: Number, 

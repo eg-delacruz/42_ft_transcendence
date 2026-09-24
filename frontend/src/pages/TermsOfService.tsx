@@ -1,30 +1,27 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export const TermsOfService: React.FC = () => {
+	const { t, i18n } = useTranslation();
+
 	return (
 		<div className="max-w-3xl h-auto my-0 mx-auto p-8 flex flex-col text-center items-center font-aldrich text-slate-200 bg-(--gradient-light) shadow-2xl">
-			<h1 className="font-black text-2xl">Términos de Servicio</h1>
-			<p>Última actualización: August 2026</p>
+			<h1 className="font-black text-2xl">{t("legal.terms.title")}</h1>
+			<p>{t("legal.terms.updated")}</p>
 
 			<section className="mt-5">
-				<h2 className="font-bold text-lg underline">1. Aceptación de los términos</h2>
-				<p>
-				Al acceder y utilizar esta aplicación, aceptas cumplir con los presentes términos y condiciones de servicio.
-				</p>
+				<h2 className="font-bold text-lg underline">{t("legal.terms.section1.title")}</h2>
+				<p>{t("legal.terms.section1.text")}</p>
 			</section>
 
 			<section className="mt-5">
-				<h2 className="font-bold text-lg underline">2. Conducta del usuario</h2>
-				<p>
-				Queda prohibido cualquier comportamiento abusivo, trampas dentro del juego o uso malintencionado de las funcionalidades del sistema.
-				</p>
+				<h2 className="font-bold text-lg underline">{t("legal.terms.section2.title")}</h2>
+				<p>{t("legal.terms.section2.text")}</p>
 			</section>
 
 			<section className="mt-5">
-				<h2 className="font-bold text-lg underline">3. Cuentas y Puntos</h2>
-				<p>
-				Los puntos o monedas asignados dentro de la aplicación son virtuales y carecen de valor monetario real. El sistema se reserva el derecho de modificar o resetear puntuaciones en caso de fallos o conductas antideportivas.
-				</p>
+				<h2 className="font-bold text-lg underline">{t("legal.terms.section3.title")}</h2>
+				<p>{t("legal.terms.section3.text")}</p>
 			</section>
 		</div>
 	);

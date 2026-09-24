@@ -8,7 +8,7 @@ export type MatchRole = 'player1' | 'player2' | 'solo' | 'spectator';
 export type MatchData = {
   roomId: string;
   game: MatchGame;
-  players: { userId: string; role: MatchRole }[];
+  players: { userId: string; username: string; role: MatchRole }[];
   spectators: string[];
   role: MatchRole;
 };
@@ -38,11 +38,15 @@ export const useMatchmaking = () => {
     const handleMatchFound = (data: Omit<MatchData, 'role'>) => {
       console.info('[matchmaking] partida encontrada', data);
       const userId = user?.id ?? user?._id;
-      const participant = data.players.find((player) => player.userId === userId);
+      const normalizedPlayers = data.players.map((player) => ({
+        ...player,
+        username: player.username ?? player.userId,
+      }));
+      const participant = normalizedPlayers.find((player) => player.userId === userId);
       const role = participant?.role ?? 'spectator';
 
       setInQueue(false);
-      setMatchData({ ...data, role });
+      setMatchData({ ...data, players: normalizedPlayers, role });
     };
 
     socket.on('queue_status', handleQueueStatus);
