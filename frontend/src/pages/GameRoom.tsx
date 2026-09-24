@@ -6,6 +6,31 @@ import { useNavigate } from "react-router-dom";
 import { MinigamesDevPage } from "../minigames/MinigamesDevPage";
 import { ChatPanel } from "../components/ChatPanel";
 
+function formatMatchPlayersLabel(matchData?: { players?: { userId: string; role: string }[]; spectators?: string[] }) {
+    if (!matchData?.players?.length) return 'Sin jugadores';
+
+    const players = matchData.players.map((player) => ({
+        ...player,
+        label: player.role === 'player1' ? 'Jugador 1' : player.role === 'player2' ? 'Jugador 2' : player.role === 'solo' ? 'Jugador solo' : 'Espectador',
+    }));
+
+    const ordered = [...players].sort((a, b) => {
+        const order = { player1: 0, player2: 1, solo: 2, spectator: 3 } as Record<string, number>;
+        return (order[a.role] ?? 99) - (order[b.role] ?? 99);
+    });
+
+    const playerSummary = ordered
+        .filter((player) => player.role === 'player1' || player.role === 'player2' || player.role === 'solo')
+        .map((player) => `${player.label}: ${player.userId}`)
+        .join(' • ');
+
+    const spectators = (matchData.spectators ?? []).length
+        ? ` • Espectadores: ${matchData.spectators.join(', ')}`
+        : '';
+
+    return `${playerSummary}${spectators}`;
+}
+
 function GameRoom() {
     const { user, loading, error } = useUser();
     const { logout } = useAuthContext();
@@ -37,9 +62,14 @@ function GameRoom() {
                     {matchData ? (
                         <div className="flex items-center space-x-4">
                             <span className="w-3 h-3 bg-green-500 rounded-full animate-ping" />
-                            <p className="text-lg text-green-400">
-                                {matchData.role === 'spectator' ? 'Espectador' : 'Partida encontrada'}: {matchData.game}
-                            </p>
+                            <div className="flex flex-col">
+                                <p className="text-lg text-green-400">
+                                    {matchData.role === 'spectator' ? 'Espectador' : 'Partida encontrada'}: {matchData.game}
+                                </p>
+                                <p className="text-[11px] text-amber-200">
+                                    {formatMatchPlayersLabel(matchData)}
+                                </p>
+                            </div>
                         </div>
                     ) : inQueue ? (
                         <div className="flex items-center space-x-4">
@@ -59,9 +89,18 @@ function GameRoom() {
                     )}
                     {logs.length > 0 && (
                         <div className="ml-4 max-w-xl overflow-hidden text-xs text-slate-400">
-                            {logs.slice(0, 2).map((log) => (
-                                <p key={`${log.timestamp}-${log.message}`}>{log.message}</p>
-                            ))}
+                            {logs.slice(0, 2).map((log) => {
+                                const details = log.details as { player1?: string; player2?: string; players?: Array<{ userId: string; role: string }>; spectators?: string[] } | undefined;
+                                const player1 = details?.player1 ?? details?.players?.find((player) => player.role === 'player1')?.userId;
+                                const player2 = details?.player2 ?? details?.players?.find((player) => player.role === 'player2')?.userId;
+                                const spectators = details?.spectators?.join(', ') ?? '';
+
+                                const label = player1 && player2
+                                    ? `Jugador 1: ${player1} | Jugador 2: ${player2}${spectators ? ` | Espectadores: ${spectators}` : ''}`
+                                    : log.message;
+
+                                return <p key={`${log.timestamp}-${log.message}`}>{label}</p>;
+                            })}
                         </div>
                     )}
                 </div>

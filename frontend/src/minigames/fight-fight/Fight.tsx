@@ -133,7 +133,7 @@ export function FightFight({ onExitToMenu, playerRole }: FightFightProps) {
 	return () => {
 	  window.removeEventListener('keydown', handleKeyDown);
 	};
-  }, []);
+  }, [playerRole, sendAction]);
 
 return (
 	<main className="w-full h-screen flex items-center justify-center font-pressstart p-0 relative">

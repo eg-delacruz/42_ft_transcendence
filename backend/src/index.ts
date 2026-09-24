@@ -155,7 +155,7 @@ async function startServer() {
 
         socket.on('disconnect', async (reason) => {
             if (user && socketService) {
-                await socketService.leaveMatchmaking(user.userId);
+                await socketService.handlePlayerDeparture(user.userId);
                 await socketService.removeUserPresence(user.userId);
             }
             logger.info(`[ws:/] disconnected socket=${socket.id} reason=${reason}`);

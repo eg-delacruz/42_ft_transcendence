@@ -794,12 +794,18 @@ export class SocketService {
                 spectators,
             };
 
+            const playerOneId = players[0]?.userId ?? 'N/A';
+            const playerTwoId = players[1]?.userId ?? 'N/A';
+            const logMessage = game === 'deep_&_dark'
+                ? `Partida iniciada: Jugador 1: ${playerOneId}${spectators.length ? ` | Espectador: ${spectators.join(', ')}` : ''}`
+                : `Partida iniciada: Jugador 1: ${playerOneId} | Jugador 2: ${playerTwoId}${spectators.length ? ` | Espectadores: ${spectators.join(', ')}` : ''}`;
+
             await this.redis.set(ACTIVE_MATCH_KEY, JSON.stringify(payload));
             for (const userId of userIds) {
                 await this.addUserToRoom(userId, GAME_ROOM_ID);
             }
             logger.info(`Global match created: ${game} (${userIds.join(', ')})`);
-            this.broadcastMatchmakingLog('Partida iniciada', { game, roomId: GAME_ROOM_ID, players, spectators });
+            this.broadcastMatchmakingLog(logMessage, { game, roomId: GAME_ROOM_ID, players, spectators, player1: playerOneId, player2: playerTwoId });
             return { payload, created: true };
         } finally {
             const currentToken = await this.redis.get(MATCHMAKING_LOCK_KEY);
@@ -836,6 +842,62 @@ export class SocketService {
             if ((await this.redis.exists(`${PRESENCE_PREFIX}${userId}`)) === 1) activeUsers.push(userId);
         }
         return activeUsers;
+    }
+
+    /**
+     * Matchmaking lifecycle: a player left the active match or disconnected.
+     * If the session no longer keeps at least two active participants, the match
+     * is invalidated and the server clears the game state.
+     */
+    async handlePlayerDeparture(userId: string): Promise<void> {
+        try {
+            const activeMatch = await this.getActiveGame();
+            if (!activeMatch) {
+                await this.leaveMatchmaking(userId);
+                return;
+            }
+
+            const participantIds = new Set([
+                ...activeMatch.players.map((player) => player.userId),
+                ...(activeMatch.spectators ?? []),
+            ]);
+
+            if (!participantIds.has(userId)) {
+                await this.leaveMatchmaking(userId);
+                return;
+            }
+
+            const remainingIds = [...participantIds].filter((id) => id !== userId);
+            if (remainingIds.length < 2) {
+                await this.redis.del(ACTIVE_MATCH_KEY, GAME_STATE_KEY);
+                await this.leaveMatchmaking(userId);
+                this.broadcastMatchmakingLog('Partida cancelada por desconexión', {
+                    userId,
+                    remainingIds,
+                });
+                return;
+            }
+
+            const remainingPresence = await this.redis.mget(
+                ...remainingIds.map((id) => `${PRESENCE_PREFIX}${id}`),
+            );
+            const activeRemaining = remainingPresence.filter(Boolean).length;
+            if (activeRemaining < 2) {
+                await this.redis.del(ACTIVE_MATCH_KEY, GAME_STATE_KEY);
+                await this.leaveMatchmaking(userId);
+                this.broadcastMatchmakingLog('Partida cancelada por desconexión', {
+                    userId,
+                    remainingIds,
+                    activeRemaining,
+                });
+                return;
+            }
+
+            await this.leaveMatchmaking(userId);
+            logger.debug(`User ${userId} left an active match while the session remains valid`);
+        } catch (error) {
+            logger.error(`Error handling player departure for user ${userId}:`, error);
+        }
     }
 
     /**
