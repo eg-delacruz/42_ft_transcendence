@@ -301,14 +301,14 @@ function RoundResult({
   player1Name: string;
   player2Name: string;
 }) {
-//   if (fightState.phase === 'bettingCountdown') {
-// 	return (
-// 	  <section className="flex flex-col items-center justify-center gap-6 text-center">
-// 		<p className="basicText text-2xl">Apuestas</p>
-// 		<p className="basicText text-lg">El combate empezará automáticamente.</p>
-// 	  </section>
-// 	);
-//   }
+  if (fightState.phase === 'bettingCountdown') {
+	return (
+	  <section className="flex flex-col items-center justify-center gap-6 text-center">
+		<p className="basicText text-2xl">Apuestas</p>
+		<p className="basicText text-lg">El combate empezará automáticamente.</p>
+	  </section>
+	);
+  }
 
   if (fightState.phase === 'selecting') {
 	return (

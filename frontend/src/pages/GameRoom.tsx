@@ -59,7 +59,7 @@ function GameRoomContent() {
     };
 
     return (
-        <div className="w-screen h-screen flex flex-row items-start bg-linear-to-br from-(--gradient-dark) to-(--gradient-light) relative">
+        <div className="w-screen h-screen flex flex-row items-start bg-linear-to-br from-(--gradient-dark) to-(--gradient-light) relative overflow-hidden">
             {/* Game screen */}
             <div className="w-2/3 h-full border-r-6 border-amber-100 hidden lg:block">
                 <MinigamesDevPage matchGame={matchData?.game} matchRole={matchData?.role} matchData={matchData} />
@@ -114,8 +114,8 @@ function GameRoomContent() {
             </div>
 
             {/* Bets and chat column */}
-           <div className="w-full lg:w-1/3 h-full">
-				<div className="h-1/9 w-full flex flex-row items-center bg-slate-900/70">
+           <div className="w-full lg:w-1/3 h-full flex flex-col">
+				<div className="flex-none w-full flex flex-row items-center bg-slate-900/70">
 					<div className="w-1/2 mx-auto flex flex-row items-center p-4">
 						<div className="size-20 aspect-square overflow-hidden rounded-full outline-4 outline-slate-300">
 							<img src={avatarUrl} alt="user avatar" className="block h-full w-full object-cover"></img>
@@ -164,16 +164,15 @@ function GameRoomContent() {
 						</Menu>
 					</div>
 				</div>
-				<div className="h-1/9 p-4 w-full flex flex-col items-center border-b-6 border-amber-100">
-
-					<div className="h-full w-full bg-slate-900 opacity-70">
+				<div className="flex-none p-4 w-full flex flex-col items-center border-b-6 border-amber-100">
+					<div className=" w-full bg-slate-900 opacity-70">
 						{/* Scores component */}
                         {activeGame ? <TopScores minigameId={activeGame} currentPlayers={matchData?.players} /> : null}
 					</div>
 				</div>
-				<div className="h-7/9 p-4 w-full flex flex-col items-center bg-slate-900 opacity-70">
+				<div className="flex-1 p-4 w-full flex flex-col items-center bg-slate-900 opacity-70">
 					<h2 className="text-center font-aldrich font-bold text-xl text-transparent bg-clip-text bg-linear-to-r from-amber-200 to-amber-500">CHAT</h2>
-					<div className="h-9/10 w-full m-4 overflow-hidden">
+					<div className="flex-1 w-full m-4 overflow-hidden">
                         <SocketDebug />
 					</div>
 				</div>
