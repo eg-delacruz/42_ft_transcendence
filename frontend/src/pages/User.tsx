@@ -12,6 +12,11 @@ const avatarOptions = [
 	{ src: "/avatar02.png", alt: "Blue avatar" },
 	{ src: "/avatar03.png", alt: "Retro avatar" },
 	{ src: "/avatar04.png", alt: "Icon avatar" },
+	{ src: "/avatar05.png", alt: "Arcade avatar" },
+	{ src: "/avatar06.png", alt: "Blue avatar" },
+	{ src: "/avatar07.png", alt: "Retro avatar" },
+	{ src: "/avatar08.png", alt: "Icon avatar" },
+	{ src: "/avatar09.png", alt: "Icon avatar" },
 ];
 
 
@@ -99,30 +104,27 @@ function User() {
 			<div className="absolute inset-0 bg-[url(/arcadePatternRepeat.png)] bg-auto animate-diagonal opacity-10 pointer-events-none z-0" aria-hidden="true"></div>
 			{showAvatarPicker && (
 				<div className="absolute inset-0 z-50 flex items-start justify-center bg-black/60 pt-24">
-					<div className="w-[min(92vw,30rem)] rounded-3xl border border-white/10 bg-slate-950/95 p-5 shadow-2xl backdrop-blur-md">
+					<div className="w-[min(92vw,30rem)] rounded-3xl border border-white/10 bg-(--gradient-light) p-5 shadow-2xl backdrop-blur-md">
 						<div className="mb-4 flex items-center justify-between">
 							<p className="font-aldrich text-2xl text-slate-100">{t("user.banner.changePfp")}</p>
 							<button
 								type="button"
 								onClick={() => setShowAvatarPicker(false)}
-								className="rounded-full bg-white/10 px-3 py-1 text-sm text-slate-100 hover:bg-white/20"
+								className="customButton text-xs"
 							>
 								{t("common.close")}
 							</button>
 						</div>
-						<div className="grid grid-cols-2 gap-3">
+						<div className="grid grid-cols-3 gap-3">
 							{avatarOptions.map((option) => (
 								<button
 									key={option.src}
 									type="button"
 									onClick={() => changeUser({ avatarUrl: option.src })}
 									disabled={isSaving}
-									className={`overflow-hidden rounded-2xl border-2 transition hover:scale-[1.02] ${avatarUrl === option.src ? "border-amber-300" : "border-white/10"}`}
+									className={`overflow-hidden rounded-2xl border-2 transition hover:scale-[1.02] ${avatarUrl === option.src ? "border-slate-300" : "border-white/10"}`}
 								>
 									<img src={option.src} alt={option.alt} className="h-32 w-full object-cover" />
-									<div className="bg-slate-900/80 px-3 py-2 text-left text-sm text-slate-100">
-										{option.alt}
-									</div>
 								</button>
 							))}
 						</div>
@@ -130,21 +132,20 @@ function User() {
 				</div>
 			)}
 			{/* Top part / banner */}
-			<div id="userBanner" className="relative min-h-1/3 h-fit w-full flex flex-row bg-(--gradient-light) shadow-2xs rounded-4xl items-center justify-center overflow-auto">
-				<div className="w-1/4 flex flex-col items-center justify-center p-4">
+			<div id="userBanner" className="relative min-h-1/3 h-fit w-full flex flex-row bg-(--gradient-light) shadow-2xs rounded-4xl items-center justify-evenly overflow-auto p-2">
+				<div className="w-1/4 flex flex-col items-center justify-center p-4 gap-4">
 					<div className="relative h-50 md:h-full aspect-square overflow-hidden rounded-full outline-4 outline-slate-300 shadow-md flex items-end justify-end">
 						<img src={avatarUrl || "/defaultAvatar.png"} alt="User avatar" className="h-full w-full object-cover" />
 					</div>
-					<button
+					<button className="customButton text-sm"
 						id="changeProfilePic"
 						type="button"
 						onClick={() => setShowAvatarPicker(true)}
-						className="absolute h-12 w-12 bg-black/50 rounded-sm bottom-2 right-2 flex items-center justify-center text-white text-xl">
-							<FontAwesomeIcon icon={faPenToSquare}/>
-					</button>
-					<label htmlFor="changeProfilePic" className="labelCustom">{t("user.avatarPicker.title")}</label>	
+					>
+						{t("user.avatarPicker.title")}
+					</button>	
 				</div>
-				<div className="w-auto flex flex-col lg:flex-row">
+				<div className="w-auto flex flex-col lg:flex-row gap-8">
 					<div className="w-full p-6 flex items-center gap-4 text-left font-aldrich text-md text-slate-200">
 						<div className="outline-none w-full">
 							<label className="labelCustom"> {t("user.banner.displayName")} 
@@ -157,11 +158,6 @@ function User() {
 								placeholder="display"
 							/></label>
 						</div>
-						{/* Button to change display name. */}
-						<button id="changeDisplayName" type="button" onClick={() => changeUser({ displayName })} disabled={isSaving} className="h-14 w-14 flex items-center justify-center bg-black/50 rounded-sm text-white text-2xl">
-							<FontAwesomeIcon className="" icon={faArrowsRotate}/>
-						</button>
-						<label htmlFor="changeDisplayName" className="labelCustom">{t("user.banner.changeName")}</label>
 					</div>
 					<div className="hidden lg:flex lg:p-12 flex-col text-left font-aldrich text-2xl text-slate-200">
 						{/* <p className="font-bold p-2">ID: </p>
