@@ -75,7 +75,8 @@ export function TopScores({ minigameId, currentPlayers }: TopScoresProps) {
 }
 
 function getPlayerName(topScore: MinigameTopScore): string {
-  return topScore.user?.display_name ?? 'Jugador';
+  const user = topScore.user;
+  return user?.display_name?.trim() || user?.username?.trim() || user?.email?.trim() || 'Jugador';
 }
 
 function getRoleLabel(role: string): string {

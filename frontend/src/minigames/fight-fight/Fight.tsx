@@ -3,6 +3,7 @@ import { useAuthContext } from '@/context/context';
 import { TopScores } from '../components/TopScores';
 import { useMinigameContext } from '../context/minigameContext';
 import { updateMinigameTopScore } from '../components/TopScores.api';
+import { useTranslation } from 'react-i18next';
 
 import {
   createInitialFightState,
@@ -39,6 +40,7 @@ export function FightFight({ onExitToMenu, onMinigameChange, playerRole, matchDa
 	const { user } = useAuthContext();
 	const [fightState, setFightState] = useState<FightState>(createInitialFightState,);
 	const hasSubmittedScore = useRef(false);
+	const { t, i18n } = useTranslation();
 
 	const { sendAction } = useGameSync(
 		'fight_fight',
@@ -183,10 +185,10 @@ return (
 
 		{fightState.phase === 'finished' && (
 		<section className="absolute left-1/2 top-1/2 -translate-1/2 z-10 flex flex-col align-center justify-center text-center gap-3">
-			<h2 className="basicText text-4xl text-amber-50 text-shadow-lg text-shadow-zinc-900">Combate terminado</h2>
+			<h2 className="basicText text-4xl text-amber-50 text-shadow-lg text-shadow-zinc-900">{t("fight.combatEnded")}</h2>
 
 			<p className="m-0 text-xl">
-			  Ganador: {getFightWinnerDisplayName(
+			  {t("game.winner")}{getFightWinnerDisplayName(
 				fightState,
 				player1Name,
 				player2Name,
@@ -194,7 +196,7 @@ return (
 			</p>
 
 			<p className="basicText text-lg">
-			  Volviendo al menú en {fightState.resultsCountdown}...
+			  {t("game.backToMenu")}{fightState.resultsCountdown}...
 			</p>
 		</section>
 		)}
@@ -251,12 +253,12 @@ function FighterStatus({
 
 function FightClock({ fightState }: { fightState: FightState }) {
   return (
-	<div className="h-2/3 my-auto flex flex-col items-center bg-cover bg-no-repeat bg-center bg-[url(../minigames/assets/fight-sign.png)]">
+	<div className="h-2/3 my-auto flex flex-col items-center bg-repeat bg-[url(../minigames/assets/fight-sign.png)] border-slate-100 border-8 rounded-xl">
 	  <div className="w-full h-full flex flex-col items-center justify-center">
 		<p className="basicText text-md">{getClockLabel(fightState)}</p>
 		<p className="basicText text-2xl">{getClockValue(fightState)}</p>
 	  </div>
-	  <p className="basicText text-lg p-2">Ronda {fightState.round}</p>
+	  <p className="basicText text-lg p-2">{t("fight.round")}{fightState.round}</p>
 	</div>
   );
 }
@@ -287,7 +289,7 @@ function DecisionDisplay({
 				? FIGHT_ACTION_LABELS[displayedAction]
 				: 'Sin acción'}
 		</p>
-		<p className="basicText text-sm">Racha: {player.consecutiveWins}</p>
+		<p className="basicText text-sm">{t("fight.streak")}{player.consecutiveWins}</p>
 	</div>
   );
 }
@@ -304,8 +306,8 @@ function RoundResult({
   if (fightState.phase === 'bettingCountdown') {
 	return (
 	  <section className="flex flex-col items-center justify-center gap-6 text-center">
-		<p className="basicText text-2xl">Apuestas</p>
-		<p className="basicText text-lg">El combate empezará automáticamente.</p>
+		<p className="basicText text-2xl">{t("game.bets")}</p>
+		<p className="basicText text-lg">{t("fight.bets")}</p>
 	  </section>
 	);
   }
@@ -313,8 +315,8 @@ function RoundResult({
   if (fightState.phase === 'selecting') {
 	return (
 	  <section className="flex flex-col items-center justify-center gap-6 text-center">
-		<p className="basicText text-2xl">Elige acción</p>
-		<p className="basicText text-lg">Tienes {fightState.selectionTimeLeft}s.</p>
+		<p className="basicText text-2xl">{t("fight.chooseAction")}</p>
+		<p className="basicText text-lg">{t("fight.timer")}{fightState.selectionTimeLeft}s.</p>
 	  </section>
 	);
   }
@@ -322,14 +324,14 @@ function RoundResult({
   if (fightState.phase === 'resolving') {
 	return (
 	  <section className="flex flex-col items-center justify-center gap-6 text-center">
-		<p className="basicText text-2xl">Resolviendo</p>
+		<p className="basicText text-2xl">{t("fight.resolving")}</p>
 
 		{fightState.lastRoundResult ? (
 		  <p className="basicText text-lg">
 			{fightState.lastRoundResult.message}
 		  </p>
 		) : (
-		  <p className="basicText text-lg">Comparando acciones...</p>
+		  <p className="basicText text-lg">{t("fight.comparing")}</p>
 		)}
 	  </section>
 	);
@@ -360,11 +362,11 @@ function ActionGuide() {
 		rule={
 		  <>
 			<ActionKeyword colorStyle="text-blue-500">
-			  Puñetazo
+			  {t("fight.punch")}
 			</ActionKeyword>{' '}
-			gana a{' '}
+			{t("fight.wins")}{' '}
 			<ActionKeyword colorStyle="text-green-500">
-			  Agarre
+			  {t("fight.grab")}
 			</ActionKeyword>
 		  </>
 		}
@@ -377,11 +379,11 @@ function ActionGuide() {
 		rule={
 		  <>
 			<ActionKeyword colorStyle="text-green-500">
-			  Agarre
+			  {t("fight.grab")}
 			</ActionKeyword>{' '}
-			gana a{' '}
+			{t("fight.wins")}{' '}
 			<ActionKeyword colorStyle="text-red-500">
-			  Patada
+			  {t("fight.kick")}
 			</ActionKeyword>
 		  </>
 		}
@@ -394,11 +396,11 @@ function ActionGuide() {
 		rule={
 		  <>
 			<ActionKeyword colorStyle="text-red-500">
-			  Patada
+			  {t("fight.kick")}
 			</ActionKeyword>{' '}
-			gana a{' '}
+			{t("fight.wins")}{' '}
 			<ActionKeyword colorStyle="text-blue-500">
-			  Puñetazo
+			  {t("fight.punch")}
 			</ActionKeyword>
 		  </>
 		}
@@ -411,9 +413,9 @@ function ActionGuide() {
 		rule={
 		  <>
 			<ActionKeyword colorStyle="text-yellow-500">
-			  Esquiva
+			  {t("fight.dodge")}
 			</ActionKeyword>{' '}
-			evita daño
+			{t("fight.avoids")}
 		  </>
 		}
 	  />

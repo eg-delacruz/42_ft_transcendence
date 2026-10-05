@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { Request, Response, NextFunction } from "express";
 
 import { Game } from "@modules/game/game.model";
+import { User } from "@modules/user/user.model";
 
 import { successResponse, errorResponse } from "@utils/response";
 
@@ -43,6 +44,9 @@ export const updateGameScores = async (
   }
   if (!user_id || typeof user_id !== "string") {
     return errorResponse(res, "user_id is required and must be a string", 400);
+  }
+  if (!mongoose.Types.ObjectId.isValid(user_id)) {
+    return errorResponse(res, "user_id must be a valid Mongo ObjectId", 400);
   }
 
   try {
@@ -94,6 +98,12 @@ export const updateGameScores = async (
     game.top_3_score = top3[2]?.score ?? 0;
 
     await game.save();
+
+    const user = await User.findById(user_id);
+    if (user) {
+      user.points = Math.max(user.points ?? 0, new_score);
+      await user.save();
+    }
 
     // Re-fetch with populated users for the response
     const populated = await Game.findById(game._id)

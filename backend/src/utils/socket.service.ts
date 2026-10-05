@@ -316,6 +316,7 @@ export class SocketService {
             if (activeMatch) {
                 await this.redis.sadd(MATCHMAKING_MEMBERS_KEY, user.userId);
                 await this.addUserToRoom(user.userId, GAME_ROOM_ID);
+                await this.addUserToActiveMatchSpectators(user.userId);
                 const users = await this.getActiveMatchmakingUsers();
                 this.broadcastMatchmakingLog('Usuario entra como espectador de la partida activa', { userId: user.userId, users });
                 return { payload: activeMatch, created: false };
@@ -379,10 +380,12 @@ export class SocketService {
 
     async ensureGameState(): Promise<GameStatePayload | null> {
         const activeMatch = await this.getActiveGame();
-        if (!activeMatch) return null;
+        if (!activeMatch) 
+			return null;
 
         const currentState = await this.getGameState();
-        if (currentState?.game === activeMatch.game) return currentState;
+        if (currentState?.game === activeMatch.game) 
+			return currentState;
 
         if (activeMatch.game === 'fight_fight') {
             const state: GameStatePayload = {
@@ -406,7 +409,8 @@ export class SocketService {
             return state;
         }
 
-        if (activeMatch.game !== 'the_race') return null;
+        if (activeMatch.game !== 'the_race') 
+			return null;
 
         const state: GameStatePayload = {
             roomId: GAME_ROOM_ID,
@@ -432,15 +436,19 @@ export class SocketService {
         state?: GameStatePayload;
     } | null> {
         const action = await this.validateGameAction(userId, payload);
-        if (!action) return null;
+        if (!action) 
+			return null;
 
             if (payload.game === 'fight_fight') {
                 const currentState = await this.ensureGameState();
-                if (!currentState) return null;
+                if (!currentState) 
+					return null;
                 const fightState = currentState.state as FightState;
-                if (fightState.phase !== 'selecting') return null;
+                if (fightState.phase !== 'selecting') 
+					return null;
                 const player = action.role === 'player1' ? fightState.player1 : fightState.player2;
-                if (payload.action === 'dodge' && player.previousAction === 'dodge') return null;
+                if (payload.action === 'dodge' && player.previousAction === 'dodge') 
+					return null;
                 player.selectedAction = payload.action as FightAction;
                 const nextState = { ...currentState, state: fightState, timestamp: Date.now() };
                 await this.redis.set(GAME_STATE_KEY, JSON.stringify(nextState));
@@ -449,24 +457,34 @@ export class SocketService {
 
             if (payload.game === 'deep_&_dark') {
                 const currentState = await this.ensureGameState();
-                if (!currentState) return null;
+                if (!currentState) 
+					return null;
                 const dungeonState = currentState.state as DungeonState;
                 const nextState = this.applyDungeonAction(dungeonState, payload.action as string);
-                if (!nextState) return null;
+                if (!nextState) 
+					return null;
                 const state = { ...currentState, state: nextState, timestamp: Date.now() };
                 await this.redis.set(GAME_STATE_KEY, JSON.stringify(state));
+
+                if (this.isTerminalGameState(state)) {
+                    void this.recycleFinishedMatch(state);
+                }
+
                 return { action, state };
             }
 
-            if (payload.game !== 'the_race') return { action };
+            if (payload.game !== 'the_race') 
+				return { action };
 
         const lockToken = `${Date.now()}-${Math.random()}`;
         const lockAcquired = await this.redis.set(GAME_STATE_LOCK_KEY, lockToken, 'EX', 5, 'NX');
-        if (!lockAcquired) return null;
+        if (!lockAcquired) 
+			return null;
 
         try {
             const currentState = await this.ensureGameState();
-            if (!currentState) return null;
+            if (!currentState) 
+				return null;
             const raceState = currentState.state as {
                 phase: string;
                 players: { id: 'player1' | 'player2'; name: string; progress: number }[];
@@ -475,11 +493,13 @@ export class SocketService {
                 gameCountdown: number;
                 resultsCountdown: number;
             };
-            if (raceState.phase !== 'running') return null;
+            if (raceState.phase !== 'running') 
+				return null;
 
             const playerId = action.role === 'player1' ? 'player1' : 'player2';
             const player = raceState.players.find((candidate) => candidate.id === playerId);
-            if (!player) return null;
+            if (!player) 
+				return null;
             player.progress = Math.min(player.progress + 1, 100);
             if (player.progress >= 100) {
                 raceState.phase = 'finished';
@@ -500,7 +520,8 @@ export class SocketService {
 
     async tickGameState(): Promise<GameStatePayload | null> {
         const currentState = await this.getGameState();
-        if (!currentState) return null;
+        if (!currentState) 
+			return null;
         if (currentState.game === 'fight_fight') {
             const nextState = this.tickFightState(currentState);
             if (nextState && this.isTerminalGameState(nextState)) {
@@ -515,7 +536,8 @@ export class SocketService {
             }
             return nextState;
         }
-        if (currentState.game !== 'the_race') return null;
+        if (currentState.game !== 'the_race') 
+			return null;
         const raceState = currentState.state as {
             phase: string;
             bettingCountdown: number;
@@ -672,16 +694,21 @@ export class SocketService {
     private applyDungeonAction(state: DungeonState, key: string): DungeonState | null {
         if (state.phase === 'choosingClass') {
             const dungeonClass = key === 'ArrowLeft' ? 'mague' : key === 'ArrowRight' ? 'rogue' : key === 'ArrowUp' ? 'warrior' : null;
-            if (!dungeonClass) return null;
+            if (!dungeonClass) 
+				return null;
             return { ...state, phase: 'choosingCard', player: { ...state.player, class: dungeonClass }, currentRoom: this.createDungeonRoom(), hand: this.createDungeonHand() };
         }
-        if (state.phase !== 'choosingCard') return null;
-        if (key === 'ArrowDown') return { ...state, phase: 'escaped', resultsCountdown: 2 };
+        if (state.phase !== 'choosingCard') 
+			return null;
+        if (key === 'ArrowDown') 
+			return { ...state, phase: 'escaped', resultsCountdown: 2 };
         const cardIndex = key === 'ArrowLeft' ? 0 : key === 'ArrowRight' ? 1 : key === 'ArrowUp' ? 2 : -1;
-        if (cardIndex < 0) return null;
+        if (cardIndex < 0) 
+			return null;
         const card = state.hand[cardIndex] ?? state.hand[0];
         const room = state.currentRoom;
-        if (!card || !room) return null;
+        if (!card || !room) 
+			return null;
         const cleared = room.type === 'empty' || card.effects.includes('clearAll') || card.effects.includes(`clear${room.type === 'combat' ? 'Combat' : 'Trap'}`);
         const damage = cleared ? 0 : 1;
         const health = Math.max(state.player.health - damage, 0);
@@ -702,10 +729,12 @@ export class SocketService {
             if (state.bettingCountdown <= 0) { state.phase = 'choosingClass'; state.bettingCountdown = 0; }
         } else if (state.phase === 'choosingClass') {
             state.classSelectionCountdown -= 1;
-            if (state.classSelectionCountdown <= 0) return this.persistDungeonState(currentState, { ...state, phase: 'choosingCard', player: { ...state.player, class: 'warrior' }, currentRoom: this.createDungeonRoom(), hand: this.createDungeonHand() });
+            if (state.classSelectionCountdown <= 0) 
+				return this.persistDungeonState(currentState, { ...state, phase: 'choosingCard', player: { ...state.player, class: 'warrior' }, currentRoom: this.createDungeonRoom(), hand: this.createDungeonHand() });
         } else if (state.phase === 'resolvingRoom') {
             state.resolveCountdown -= 1;
-            if (state.resolveCountdown <= 0) return this.persistDungeonState(currentState, { ...state, phase: 'choosingCard', currentRoom: this.createDungeonRoom(), hand: this.createDungeonHand(), cardSelectionCountdown: 3 });
+            if (state.resolveCountdown <= 0) 
+				return this.persistDungeonState(currentState, { ...state, phase: 'choosingCard', currentRoom: this.createDungeonRoom(), hand: this.createDungeonHand(), cardSelectionCountdown: 3 });
         } else {
             return null;
         }
@@ -737,7 +766,8 @@ export class SocketService {
 
     private async recycleFinishedMatch(state: GameStatePayload): Promise<void> {
         const activeMatch = await this.getActiveGame();
-        if (!activeMatch || activeMatch.game !== state.game) return;
+        if (!activeMatch || activeMatch.game !== state.game)
+			return;
 
         const participantIds = [...new Set([
             ...activeMatch.players.map((player) => player.userId),
@@ -769,7 +799,7 @@ export class SocketService {
             spectatorCount: activeMatch.spectators.length,
         });
 
-        void this.tryCreateMatch();
+        void this.tryCreateMatch(true);
     }
 
     private async enqueueForMatchmaking(userId: string): Promise<void> {
@@ -782,12 +812,35 @@ export class SocketService {
             }
         });
 
-        if (alreadyQueued) return;
+        if (alreadyQueued) 
+			return;
 
         await this.redis.rpush(
             MATCHMAKING_QUEUE_KEY,
             JSON.stringify({ userId, socketId: 'requeue', timestamp: Date.now() }),
         );
+    }
+
+    private async addUserToActiveMatchSpectators(userId: string): Promise<void> {
+        const rawMatch = await this.redis.get(ACTIVE_MATCH_KEY);
+        if (!rawMatch) {
+            return;
+        }
+
+        const activeMatch = JSON.parse(rawMatch) as MatchFoundPayload;
+        if (activeMatch.players.some((player) => player.userId === userId)) {
+            return;
+        }
+
+        const spectators = new Set(activeMatch.spectators);
+        spectators.add(userId);
+
+        const nextMatch: MatchFoundPayload = {
+            ...activeMatch,
+            spectators: [...spectators],
+        };
+
+        await this.redis.set(ACTIVE_MATCH_KEY, JSON.stringify(nextMatch));
     }
 
     private createDungeonRoom(): DungeonRoom {
@@ -820,8 +873,11 @@ export class SocketService {
 
     async getActiveGame(): Promise<MatchFoundPayload | null> {
         const rawMatch = await this.redis.get(ACTIVE_MATCH_KEY);
-        if (!rawMatch) return null;
-        const match = JSON.parse(rawMatch) as MatchFoundPayload;
+        
+		if (!rawMatch) 
+			return null;
+        
+		const match = JSON.parse(rawMatch) as MatchFoundPayload;
         const participantIds = [...new Set([
             ...match.players.map((player) => player.userId),
             ...match.spectators,
@@ -830,46 +886,76 @@ export class SocketService {
             ? await this.redis.mget(...participantIds.map((userId) => `${PRESENCE_PREFIX}${userId}`))
             : [];
         const activeUsers = presence.filter(Boolean).length;
-        if (participantIds.length < 2 || activeUsers < 2) {
+        const minimumUsers = match.game === 'deep_&_dark' ? 1 : 2;
+
+        if (participantIds.length < minimumUsers || activeUsers < minimumUsers) {
             await this.redis.del(ACTIVE_MATCH_KEY, GAME_STATE_KEY);
-            this.broadcastMatchmakingLog('Partida activa descartada: no hay dos usuarios activos', { participantIds, activeUsers });
+            this.broadcastMatchmakingLog('Partida activa descartada: no hay suficientes usuarios activos para este modo', { game: match.game, participantIds, activeUsers, minimumUsers });
             return null;
         }
         return match;
     }
 
-    private async tryCreateMatch(): Promise<MatchmakingResult | null> {
+    private async tryCreateMatch(shouldBroadcast = false): Promise<MatchmakingResult | null> {
         const lockToken = `${Date.now()}-${Math.random()}`;
         const lockAcquired = await this.redis.set(MATCHMAKING_LOCK_KEY, lockToken, 'EX', 15, 'NX');
-        if (!lockAcquired) return null;
+        if (!lockAcquired) 
+			return null;
 
         try {
             const existingMatch = await this.getActiveGame();
-            if (existingMatch) return { payload: existingMatch, created: false };
+            if (existingMatch) 
+				return { payload: existingMatch, created: false };
 
-            const queueUsers = await this.cleanMatchmakingQueue();
-            if (queueUsers.length < 2) {
-                this.broadcastMatchmakingLog('Esperando al menos dos usuarios activos', { users: queueUsers });
+            let queueUsers = await this.cleanMatchmakingQueue();
+            if (queueUsers.length === 0) {
+                this.broadcastMatchmakingLog('Esperando usuarios en la cola', { users: queueUsers });
                 return null;
             }
 
-            this.broadcastMatchmakingLog('Cuenta atras de matchmaking iniciada', { seconds: 5, users: queueUsers });
-            for (let seconds = 5; seconds > 0; seconds -= 1) {
-                this.broadcastMatchmakingLog(`Matchmaking comienza en ${seconds}`, { users: await this.getActiveMatchmakingUsers() });
-                await new Promise((resolve) => setTimeout(resolve, 1000));
-                if ((await this.cleanMatchmakingQueue()).length < 2) {
-                    this.broadcastMatchmakingLog('Cuenta atras cancelada: un usuario se desconecto');
-                    return null;
+            if (queueUsers.length === 1) {
+                this.broadcastMatchmakingLog('Esperando un segundo jugador...', {
+                    users: queueUsers,
+                    seconds: 10,
+                });
+
+                for (let seconds = 5; seconds > 0; seconds -= 1) {
+                    await new Promise((resolve) => setTimeout(resolve, 1000));
+                    queueUsers = await this.cleanMatchmakingQueue();
+
+                    if (queueUsers.length >= 2) {
+                        break;
+                    }
                 }
             }
 
-            const rawPlayers = await this.redis.lpop(MATCHMAKING_QUEUE_KEY, 2);
-            if (!rawPlayers || rawPlayers.length < 2) return null;
+            const soloModeAvailable = queueUsers.length === 1;
+            const game = this.getRandomGame(soloModeAvailable ? ['deep_&_dark'] : undefined);
+            const requiredPlayers = game === 'deep_&_dark' && soloModeAvailable ? 1 : 2;
+
+            if (queueUsers.length < requiredPlayers) {
+                this.broadcastMatchmakingLog('Esperando usuarios suficientes para iniciar la partida', { users: queueUsers, requiredPlayers, game });
+                return null;
+            }
+
+            if (queueUsers.length >= 2) {
+                this.broadcastMatchmakingLog('Cuenta atras de matchmaking iniciada', { seconds: 5, users: queueUsers });
+                for (let seconds = 5; seconds > 0; seconds -= 1) {
+                    this.broadcastMatchmakingLog(`Matchmaking comienza en ${seconds}`, { users: await this.getActiveMatchmakingUsers() });
+                    await new Promise((resolve) => setTimeout(resolve, 1000));
+                    if ((await this.cleanMatchmakingQueue()).length < requiredPlayers) {
+                        this.broadcastMatchmakingLog('Cuenta atras cancelada: un usuario se desconecto');
+                        return null;
+                    }
+                }
+            }
+
+            const rawPlayers = await this.redis.lpop(MATCHMAKING_QUEUE_KEY, requiredPlayers);
+            if (!rawPlayers || rawPlayers.length < requiredPlayers) return null;
 
             const userIds = rawPlayers.map((rawPlayer) => JSON.parse(rawPlayer).userId as string);
             userIds.sort(() => Math.random() - 0.5);
 
-            const game = this.getRandomGame();
             const participantDetails = userIds.length > 0
                 ? await this.redis.mget(...userIds.map((userId) => `${PRESENCE_PREFIX}${userId}`))
                 : [];
@@ -887,7 +973,7 @@ export class SocketService {
                     { userId: userIds[0], username: usernamesByUserId.get(userIds[0]) ?? userIds[0], role: 'player1' as const },
                     { userId: userIds[1], username: usernamesByUserId.get(userIds[1]) ?? userIds[1], role: 'player2' as const },
                 ];
-            const spectators = game === 'deep_&_dark' ? [userIds[1]] : [];
+            const spectators = game === 'deep_&_dark' && userIds.length > 1 ? [userIds[1]] : [];
             const payload: MatchFoundPayload = {
                 roomId: GAME_ROOM_ID,
                 game,
@@ -907,6 +993,11 @@ export class SocketService {
             }
             logger.info(`Global match created: ${game} (${userIds.join(', ')})`);
             this.broadcastMatchmakingLog(logMessage, { game, roomId: GAME_ROOM_ID, players, spectators, player1: playerOneId, player2: playerTwoId });
+
+            if (shouldBroadcast) {
+                this.broadcastToRoom(GAME_ROOM_ID, 'match_found', payload);
+            }
+
             return { payload, created: true };
         } finally {
             const currentToken = await this.redis.get(MATCHMAKING_LOCK_KEY);
@@ -916,8 +1007,8 @@ export class SocketService {
         }
     }
 
-    private getRandomGame(): GameName {
-        const games: GameName[] = ['the_race', 'fight_fight', 'deep_&_dark'];
+    private getRandomGame(gamesOverride?: GameName[]): GameName {
+        const games = gamesOverride ?? ['the_race', 'fight_fight', 'deep_&_dark'];
         return games[Math.floor(Math.random() * games.length)];
     }
 
@@ -997,7 +1088,7 @@ export class SocketService {
                     remainingIds,
                     activeRemaining,
                 });
-                void this.tryCreateMatch();
+                void this.tryCreateMatch(true);
                 return;
             }
 
