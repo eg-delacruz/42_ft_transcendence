@@ -321,8 +321,7 @@ export class SocketService {
 
                 await this.redis.sadd(MATCHMAKING_MEMBERS_KEY, user.userId);
                 await this.addUserToRoom(user.userId, GAME_ROOM_ID);
-                // Quien llega con una partida en curso y no participa en ella se pone en cola;
-                // antes solo se añadía a "members" y nunca volvía a entrar en el matchmaking.
+
                 if (!isParticipant) {
                     await this.enqueueForMatchmaking(user.userId, socketId);
                 }
@@ -472,6 +471,11 @@ export class SocketService {
 					return null;
                 const state = { ...currentState, state: nextState, timestamp: Date.now() };
                 await this.redis.set(GAME_STATE_KEY, JSON.stringify(state));
+
+                if (this.isTerminalGameState(state)) {
+                    void this.recycleFinishedMatch(state);
+                }
+
                 return { action, state };
             }
 
@@ -524,8 +528,7 @@ export class SocketService {
         const currentState = await this.getGameState();
         if (!currentState) 
 			return null;
-        // Un estado terminal alcanzado por una acción del jugador (p. ej. dungeon 'escaped'/'dead')
-        // nunca lo produce un tick, así que había que reciclarlo aquí o la partida no terminaba nunca.
+
         if (this.isTerminalGameState(currentState)) {
             void this.recycleFinishedMatch(currentState);
             return null;
@@ -1068,7 +1071,7 @@ export class SocketService {
                     { userId: userIds[0], username: usernamesByUserId.get(userIds[0]) ?? userIds[0], role: 'player1' as const },
                     { userId: userIds[1], username: usernamesByUserId.get(userIds[1]) ?? userIds[1], role: 'player2' as const },
                 ];
-            const spectators = game === 'deep_&_dark' ? [userIds[1]] : [];
+            const spectators = game === 'deep_&_dark' && userIds.length > 1 ? [userIds[1]] : [];
             const payload: MatchFoundPayload = {
                 roomId: GAME_ROOM_ID,
                 game,
@@ -1105,8 +1108,8 @@ export class SocketService {
         }
     }
 
-    private getRandomGame(): GameName {
-        const games: GameName[] = ['the_race', 'fight_fight', 'deep_&_dark'];
+    private getRandomGame(gamesOverride?: GameName[]): GameName {
+        const games = gamesOverride ?? ['the_race', 'fight_fight', 'deep_&_dark'];
         return games[Math.floor(Math.random() * games.length)];
     }
 

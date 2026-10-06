@@ -3,6 +3,7 @@ import { useAuthContext } from '@/context/context';
 import { TopScores } from '../components/TopScores';
 import { useMinigameContext } from '../context/minigameContext';
 import { updateMinigameTopScore } from '../components/TopScores.api';
+import { useTranslation } from 'react-i18next';
 
 import {
   chooseClass,
@@ -23,17 +24,67 @@ import {
   DUNGEON_CLASS_ICONS,
   DUNGEON_CLASS_LABELS,
   DUNGEON_CLASS_SELECTION_SECONDS,
-  DUNGEON_EFFECT_ICONS,
-  DUNGEON_EFFECT_LABELS,
   DUNGEON_INITIAL_HEALTH,
   DUNGEON_RESOLVE_SECONDS,
+  type DungeonCard,
   type MinigameId,
   type DungeonClass,
+  type DungeonRoomType,
   type DungeonState,
 } from './DDD.types';
 
 import type { MatchData, MatchRole } from '@/hooks/useMatchmaking';
 import { useGameSync, type RemoteGameAction } from '@/hooks/useGameSync';
+import { getDungeonUserId } from './DDD.users';
+
+/*
+ * ============================================================
+ * IMÁGENES DEL TUTORIAL
+ * ============================================================
+ */
+
+import tutorialSuccessImage from './Resources/1.png';
+import tutorialDamageImage from './Resources/2.png';
+import tutorialProtectionImage from './Resources/3.png';
+
+/*
+ * ============================================================
+ * IMÁGENES DE RETOS
+ * ============================================================
+ */
+
+import combat1Image from './Resources/Combate1.png';
+import combat2Image from './Resources/Combate2.png';
+import combat3Image from './Resources/Combate3.png';
+
+import trap1Image from './Resources/Trampa1.png';
+import trap2Image from './Resources/Trampa2.png';
+import trap3Image from './Resources/Trampa3.png';
+
+import hallway1Image from './Resources/Pasillo1.png';
+import dungeonBackground from './Resources/Fondo.jpg';
+import monedasImage from './Resources/Monedas.png';
+
+/*
+ * ============================================================
+ * IMÁGENES DE CARTAS
+ * ============================================================
+ */
+
+import warrior1Image from './Resources/Guerrero1.png';
+import warrior2Image from './Resources/Guerrero2.png';
+import warrior3Image from './Resources/Guerrero3.png';
+
+import rogue1Image from './Resources/Rogue1.png';
+import rogue2Image from './Resources/Rogue2.png';
+import rogue3Image from './Resources/Rogue3.png';
+
+import magueClassImage from './Resources/Mague.png';
+import warriorClassImage from './Resources/Guerrero.png';
+import rogueClassImage from './Resources/Rogue.png';
+import mague1Image from './Resources/Mague1.png';
+import mague2Image from './Resources/Mague2.png';
+import mague3Image from './Resources/Mague3.png';
 
 type DeepDarkDungeonProps = {
   onExitToMenu?: () => void;
@@ -43,11 +94,56 @@ type DeepDarkDungeonProps = {
 };
 
 
+/*
+ * ============================================================
+ * ASOCIACIÓN DE CARTAS CON SUS PNG
+ * ============================================================
+ */
+
+const CARD_IMAGES: Record<string, string> = {
+  'warrior-fight': warrior1Image,
+  'warrior-block': warrior2Image,
+  'warrior-healing-potion': warrior3Image,
+
+  'rogue-fight': rogue1Image,
+  'rogue-stealth': rogue2Image,
+  'rogue-loot': rogue3Image,
+
+  'mague-fireball': mague1Image,
+  'mague-magic-shield': mague2Image,
+  'mague-invisibility': mague3Image,
+};
+
+/*
+ * ============================================================
+ * VARIANTES VISUALES DE LOS RETOS
+ * ============================================================
+ */
+
+const ROOM_IMAGES: Record<DungeonRoomType, string[]> = {
+  combat: [
+    combat1Image,
+    combat2Image,
+    combat3Image,
+  ],
+
+  trap: [
+    trap1Image,
+    trap2Image,
+    trap3Image,
+  ],
+
+  empty: [
+    hallway1Image,
+  ],
+};
+
 export function DeepDarkDungeon({ onExitToMenu, onMinigameChange, playerRole, matchData }: DeepDarkDungeonProps) {
 	const { setActiveGame } = useMinigameContext();
 	const { user } = useAuthContext();
 	const [dungeonState, setDungeonState] = useState<DungeonState>(createInitialDungeonState,);
 	const hasSubmittedScore = useRef(false);
+	const { t } = useTranslation();
 
   const { sendAction } = useGameSync(
     'deep_&_dark',
@@ -59,6 +155,12 @@ export function DeepDarkDungeon({ onExitToMenu, onMinigameChange, playerRole, ma
     	setActiveGame('deep-dark-dungeon');
     	return () => setActiveGame(null); // clear when it unmounts
   	}, [setActiveGame]);
+
+  /*
+   * ============================================================
+   * CUENTA ATRÁS INICIAL
+   * ============================================================
+   */
 
   useEffect(() => {
     if (dungeonState.phase !== 'bettingCountdown') {
@@ -76,19 +178,30 @@ export function DeepDarkDungeon({ onExitToMenu, onMinigameChange, playerRole, ma
             ...currentState,
             phase: 'choosingClass',
             bettingCountdown: 0,
-            classSelectionCountdown: DUNGEON_CLASS_SELECTION_SECONDS,
+            classSelectionCountdown:
+              DUNGEON_CLASS_SELECTION_SECONDS,
           };
         }
 
         return {
           ...currentState,
-          bettingCountdown: currentState.bettingCountdown - 1,
+          bettingCountdown:
+            currentState.bettingCountdown - 1,
         };
       });
     }, 1000);
 
     return () => window.clearTimeout(timeoutId);
-  }, [dungeonState.phase, dungeonState.bettingCountdown]);
+  }, [
+    dungeonState.phase,
+    dungeonState.bettingCountdown,
+  ]);
+
+  /*
+   * ============================================================
+   * SELECCIÓN DE CLASE
+   * ============================================================
+   */
 
   useEffect(() => {
     if (dungeonState.phase !== 'choosingClass') {
@@ -107,13 +220,23 @@ export function DeepDarkDungeon({ onExitToMenu, onMinigameChange, playerRole, ma
 
         return {
           ...currentState,
-          classSelectionCountdown: currentState.classSelectionCountdown - 1,
+          classSelectionCountdown:
+            currentState.classSelectionCountdown - 1,
         };
       });
     }, 1000);
 
     return () => window.clearTimeout(timeoutId);
-  }, [dungeonState.phase, dungeonState.classSelectionCountdown]);
+  }, [
+    dungeonState.phase,
+    dungeonState.classSelectionCountdown,
+  ]);
+
+  /*
+   * ============================================================
+   * ROBAR CARTAS
+   * ============================================================
+   */
 
   useEffect(() => {
     if (dungeonState.phase !== 'drawingCards') {
@@ -133,6 +256,12 @@ export function DeepDarkDungeon({ onExitToMenu, onMinigameChange, playerRole, ma
     return () => window.clearTimeout(timeoutId);
   }, [dungeonState.phase]);
 
+  /*
+   * ============================================================
+   * SELECCIÓN DE CARTA
+   * ============================================================
+   */
+
   useEffect(() => {
     if (dungeonState.phase !== 'choosingCard') {
       return;
@@ -150,13 +279,23 @@ export function DeepDarkDungeon({ onExitToMenu, onMinigameChange, playerRole, ma
 
         return {
           ...currentState,
-          cardSelectionCountdown: currentState.cardSelectionCountdown - 1,
+          cardSelectionCountdown:
+            currentState.cardSelectionCountdown - 1,
         };
       });
     }, 1000);
 
     return () => window.clearTimeout(timeoutId);
-  }, [dungeonState.phase, dungeonState.cardSelectionCountdown]);
+  }, [
+    dungeonState.phase,
+    dungeonState.cardSelectionCountdown,
+  ]);
+
+  /*
+   * ============================================================
+   * RESOLUCIÓN DE SALA
+   * ============================================================
+   */
 
   useEffect(() => {
     if (dungeonState.phase !== 'resolvingRoom') {
@@ -183,13 +322,23 @@ export function DeepDarkDungeon({ onExitToMenu, onMinigameChange, playerRole, ma
 
         return {
           ...currentState,
-          resolveCountdown: currentState.resolveCountdown - 1,
+          resolveCountdown:
+            currentState.resolveCountdown - 1,
         };
       });
     }, 1000);
 
     return () => window.clearTimeout(timeoutId);
-  }, [dungeonState.phase, dungeonState.resolveCountdown]);
+  }, [
+    dungeonState.phase,
+    dungeonState.resolveCountdown,
+  ]);
+
+  /*
+   * ============================================================
+   * SCORE
+   * ============================================================
+   */
 
   useEffect(() => {
     const shouldSubmitScore =
@@ -217,9 +366,21 @@ export function DeepDarkDungeon({ onExitToMenu, onMinigameChange, playerRole, ma
       dungeonState.player.score,
       scoreUserId,
     ).catch((error) => {
-      console.error('Error updating Deep & Dark Dungeon top score:', error);
+      console.error(
+        'Error updating Deep & Dark Dungeon top score:',
+        error,
+      );
     });
-  }, [dungeonState.phase, dungeonState.player.score, matchData, user]);
+  }, [
+    dungeonState.phase,
+    dungeonState.player.score,
+  ]);
+
+  /*
+   * ============================================================
+   * CUENTA ATRÁS DE RESULTADOS
+   * ============================================================
+   */
 
   useEffect(() => {
     const shouldCountResults =
@@ -227,7 +388,10 @@ export function DeepDarkDungeon({ onExitToMenu, onMinigameChange, playerRole, ma
       dungeonState.phase === 'dead' ||
       dungeonState.phase === 'finished';
 
-    if (!shouldCountResults || dungeonState.resultsCountdown <= 0) {
+    if (
+      !shouldCountResults ||
+      dungeonState.resultsCountdown <= 0
+    ) {
       return;
     }
 
@@ -243,13 +407,23 @@ export function DeepDarkDungeon({ onExitToMenu, onMinigameChange, playerRole, ma
 
         return {
           ...currentState,
-          resultsCountdown: currentState.resultsCountdown - 1,
+          resultsCountdown:
+            currentState.resultsCountdown - 1,
         };
       });
     }, 1000);
 
     return () => window.clearTimeout(timeoutId);
-  }, [dungeonState.phase, dungeonState.resultsCountdown]);
+  }, [
+    dungeonState.phase,
+    dungeonState.resultsCountdown,
+  ]);
+
+  /*
+   * ============================================================
+   * SALIDA AL MENÚ
+   * ============================================================
+   */
 
   useEffect(() => {
     const shouldExit =
@@ -261,7 +435,17 @@ export function DeepDarkDungeon({ onExitToMenu, onMinigameChange, playerRole, ma
     if (shouldExit) {
       onExitToMenu?.();
     }
-  }, [dungeonState.phase, dungeonState.resultsCountdown, onExitToMenu]);
+  }, [
+    dungeonState.phase,
+    dungeonState.resultsCountdown,
+    onExitToMenu,
+  ]);
+
+  /*
+   * ============================================================
+   * CONTROLES
+   * ============================================================
+   */
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -276,7 +460,12 @@ export function DeepDarkDungeon({ onExitToMenu, onMinigameChange, playerRole, ma
         return;
       }
 
-      if (!handleDungeonKey(dungeonState, event.code)) {
+      const nextState = handleDungeonKey(
+        dungeonState,
+        event.code,
+      );
+
+      if (!nextState) {
         return;
       }
 
@@ -287,64 +476,82 @@ export function DeepDarkDungeon({ onExitToMenu, onMinigameChange, playerRole, ma
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener(
+        'keydown',
+        handleKeyDown,
+      );
     };
-  }, [dungeonState]);
+  }, [dungeonState.phase, playerRole, sendAction]);
 
-  const shouldShowClassSelection = dungeonState.phase === 'choosingClass';
+  const shouldShowClassSelection =
+    dungeonState.phase === 'choosingClass';
 
   const shouldShowHand =
     dungeonState.phase === 'choosingCard' ||
     dungeonState.phase === 'resolvingRoom';
 
   return (
-    <main style={styles.page}>
+  <main className="min-h-screen w-full overflow-auto bg-slate-950 text-zinc-100 flex justify-center font-mono">
+    <section
+      className="relative flex w-full flex-col gap-1 overflow-hidden bg-cover bg-center bg-no-repeat px-12 py-9"
+      style={{ backgroundImage: `url(${dungeonBackground})` }}
+    >
+      <header className="mt-6 text-center">
+        <p className="m-0 text-sm uppercase tracking-[0.28em] text-zinc-400">Minigame</p>
 
-      <section style={styles.board}>
-        <header style={styles.header}>
-          <p style={styles.kicker}>Minigame</p>
-          <h1 style={styles.title}>Deep & Dark Dungeon</h1>
-          <p style={styles.subtitle}>
-            Elige clase, supera salas y escapa antes de morir.
-          </p>
-        </header>
+        <h1 className="mt-2 mb-1 text-[40px] leading-none text-zinc-50">
+          Deep & Dark Dungeon
+        </h1>
 
-        <section style={styles.topGameArea}>
-          <PlayerHud dungeonState={dungeonState} playerName={getDungeonPlayerName(matchData, user)} />
-          <ActiveChallenge dungeonState={dungeonState} />
-        </section>
+        <p className="m-0 text-base text-zinc-200">
+			{t("ddd.header")}
+        </p>
+      </header>
 
-        <div style={styles.boardDivider} />
+      <section className="grid w-full grid-cols-[360px_minmax(520px,1fr)] items-start gap-8">
+        <PlayerHud
+          dungeonState={dungeonState}
+          playerName={getDungeonPlayerName(matchData, user)}
+        />
 
-        <section style={styles.bottomGameArea}>
-          {dungeonState.phase === 'bettingCountdown' && (
-            <section style={styles.bottomMessageBox}>
-              <h2 style={styles.phaseTitle}>Preparando expedición</h2>
-              <p style={styles.text}>
-                La exploración empezará cuando termine el tiempo de apuestas.
-              </p>
-            </section>
+        <ActiveChallenge dungeonState={dungeonState} />
+      </section>
+
+      <section className="flex w-full flex-1 items-center justify-evenly text-center">
+          {dungeonState.phase ===
+            'bettingCountdown' && (
+            <DungeonTutorial />
           )}
 
           {shouldShowClassSelection && (
-            <section style={styles.classSelectionArea}>
-              <p style={styles.handSideLabel}>Clases disponibles</p>
+          <section className="w-full rounded-xl border border-zinc-300/40 bg-zinc-950/80 p-6 text-center shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
+            <p className="m-0 mb-5 text-sm uppercase tracking-[0.16em] text-zinc-400">
+                {t("ddd.classes")}
+              </p>
 
-              <section style={styles.classOptions}>
+            <section className="flex flex-wrap items-center justify-center gap-4">
                 <ClassOption dungeonClass="mague" />
                 <ClassOption dungeonClass="warrior" />
                 <ClassOption dungeonClass="rogue" />
               </section>
 
-              <p style={styles.controlsHint}>{DUNGEON_CLASS_CONTROL_TEXT}</p>
-              <p style={styles.text}>Si no eliges, se seleccionará Warrior.</p>
+            <p className="mt-4 text-sm text-zinc-300">
+                {DUNGEON_CLASS_CONTROL_TEXT}
+              </p>
+
+            <p className="mt-2 text-sm text-zinc-200">
+                {t("ddd.defClassWarn")}
+              </p>
             </section>
           )}
 
           {dungeonState.phase === 'drawingCards' && (
-            <section style={styles.bottomMessageBox}>
-              <h2 style={styles.phaseTitle}>Robando cartas...</h2>
-              <p style={styles.text}>
+          <section className="w-full max-w-4xl rounded-xl border border-zinc-300/40 bg-zinc-950/80 p-6 text-center shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
+            <h2 className="m-0 text-2xl text-zinc-50">
+                Robando cartas...
+              </h2>
+
+            <p className="mt-3 text-sm text-zinc-200">
                 {isContinuingCurrentRoom(dungeonState)
                   ? 'El reto continúa. Robando nuevas cartas para intentarlo de nuevo.'
                   : 'Preparando la siguiente sala.'}
@@ -353,56 +560,44 @@ export function DeepDarkDungeon({ onExitToMenu, onMinigameChange, playerRole, ma
           )}
 
           {shouldShowHand && (
-            <section style={styles.handArea}>
-              <div style={styles.handHeader}>
-                <p style={styles.handSideLabel}>Cartas del jugador</p>
-                <span style={styles.handArrow}>→</span>
-              </div>
-
-              <section style={styles.cards}>
-                {getVisualCardSlots(dungeonState.hand).map(
-                  ({ card, originalIndex, label }) => (
-                    <article
+          <section className="flex flex-col w-full max-w-4xl">
+            <section className="flex flex-row w-full max-w-4xl items-center">
+                {getVisualCardSlots(
+                  dungeonState.hand,
+                ).map(
+                  ({
+                    card,
+                    originalIndex,
+                  }) => (
+                    <DungeonCardImage 
                       key={`${card.id}-${originalIndex}`}
-                      style={styles.card}
-                    >
-                      <p style={styles.cardKey}>{label}</p>
-                      <h3 style={styles.cardTitle}>{card.name}</h3>
-                      <p style={styles.cardIcon}>{card.icon}</p>
-
-                      <div style={styles.effectList}>
-                        {card.effects.map((effect) => (
-                          <p key={effect} style={styles.effectText}>
-                            <span style={styles.effectIcon}>
-                              {DUNGEON_EFFECT_ICONS[effect]}
-                            </span>{' '}
-                            {DUNGEON_EFFECT_LABELS[effect]}
-                          </p>
-                        ))}
-                      </div>
-                    </article>
+                      card={card}
+                    />
                   ),
                 )}
               </section>
 
-              <p style={styles.controlsHint}>{DUNGEON_CARD_CONTROL_TEXT}</p>
+              <p className="text-sm text-zinc-300">
+                {DUNGEON_CARD_CONTROL_TEXT}
+              </p>
             </section>
           )}
 
           {(dungeonState.phase === 'escaped' ||
             dungeonState.phase === 'dead' ||
             dungeonState.phase === 'finished') && (
-            <section style={styles.bottomMessageBox}>
-              <h2 style={styles.phaseTitle}>
-                {getResultTitle(dungeonState)}
+            <section className="w-full max-w-4xl rounded-xl border border-zinc-300/40 bg-zinc-950/80 p-6 text-center shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
+              <h2 className="m-0 text-2xl text-zinc-50">
+                {t("ddd.score")}{getResultTitle(dungeonState)}
               </h2>
 
-              <p style={styles.winnerText}>
-                Score final: {dungeonState.player.score}
+              <p className="mt-3 text-lg text-zinc-100">
+                {dungeonState.player.score}
               </p>
 
-              <p style={styles.text}>
-                Volviendo al menú en {dungeonState.resultsCountdown}...
+              <p className="mt-2 text-sm text-zinc-200">
+                {t("game.backToMenu")}{' '}
+                {dungeonState.resultsCountdown}...
               </p>
             </section>
           )}
@@ -412,55 +607,196 @@ export function DeepDarkDungeon({ onExitToMenu, onMinigameChange, playerRole, ma
   );
 }
 
-function PlayerHud({ dungeonState, playerName }: { dungeonState: DungeonState; playerName: string }) {
-  const selectedClass = dungeonState.player.class;
+/*
+ * ============================================================
+ * CARTA VISUAL
+ * ============================================================
+ */
+
+function DungeonCardImage({
+  card,
+}: {
+  card: DungeonCard;
+}) {
+  const image = CARD_IMAGES[card.id];
+
+  if (!image) {
+    return null;
+  }
 
   return (
-    <aside style={styles.playerHud}>
-      <HudRow label="Jugador" value={playerName} />
+      <article className="flex h-fit w-auto items-center justify-center p-2 text-center">
+      <img
+        src={image}
+        alt={card.name}
+          className="block h-auto max-h-101.25 w-82.5 object-contain"
+      />
+    </article>
+  );
+}
+
+/*
+ * ============================================================
+ * TUTORIAL VISUAL
+ * ============================================================
+ */
+
+function DungeonTutorial() {
+	const { t } = useTranslation();
+  return (
+      <section className="w-full max-w-6xl rounded-xl border border-zinc-300/40 bg-zinc-950/80 p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
+        <div className="grid gap-5 md:grid-cols-3">
+          <article className="rounded-lg border border-zinc-300/20 bg-zinc-900/70 p-5 text-center">
+            <h3 className="m-0 text-xl text-zinc-50">
+            	{t("ddd.tutorial.success.title")}
+          	</h3>
+            <p className="mt-3 text-sm text-zinc-200">
+            	{t("ddd.tutorial.success.explanation")}
+          	</p>
+            <img
+				src={tutorialSuccessImage}
+				alt="Carta que supera un reto"
+				className="mx-auto mt-4 h-auto w-full max-w-55 object-contain"
+          	/>
+        </article>
+
+        <article className="rounded-lg border border-zinc-300/20 bg-zinc-900/70 p-5 text-center">
+            <h3 className="m-0 text-xl text-zinc-50">
+            	{t("ddd.tutorial.dmg.title")}
+          	</h3>
+            <p className="mt-3 text-sm text-zinc-200">
+            	{t("ddd.tutorial.dmg.explanation")}
+          	</p>
+            <img
+				src={tutorialDamageImage}
+				alt="Carta que no supera el reto y provoca pérdida de vida"
+				className="mx-auto mt-4 h-auto w-full max-w-55 object-contain"
+			/>
+        </article>
+
+        <article className="rounded-lg border border-zinc-300/20 bg-zinc-900/70 p-5 text-center">
+            <h3 className="m-0 text-xl text-zinc-50">
+				{t("ddd.tutorial.protection.title")}
+			</h3>
+            <p className="mt-3 text-sm text-zinc-200">
+				{t("ddd.tutorial.protection.explanation")}
+			</p>
+            <img
+				src={tutorialProtectionImage}
+				alt="Carta que previene el daño"
+				className="mx-auto mt-4 h-auto w-full max-w-55 object-contain"
+			/>
+        </article>
+      </div>
+
+        <div className="mt-5 rounded-lg border border-zinc-300/20 bg-zinc-900/70 p-4 text-center">
+          <p className="m-0 text-sm text-zinc-200">
+			{t("ddd.objective")}
+        </p>
+      </div>
+    </section>
+  );
+}
+
+/*
+ * ============================================================
+ * HUD DEL JUGADOR
+ * ============================================================
+ */
+
+function PlayerHud({
+  dungeonState,
+  playerName,
+}: {
+  dungeonState: DungeonState;
+  playerName: string;
+}) {
+  const selectedClass = dungeonState.player.class;
+  const { t } = useTranslation();
+
+  return (
+      <aside className="flex min-h-65 w-full flex-col justify-center gap-3 rounded-lg border-2 border-zinc-300 bg-zinc-900/95 px-5 py-4 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
+	      <HudRow label={t("ddd.HUD.player")} value={playerName} />
 
       <HudRow
-        label="Clase"
+        label={t("ddd.HUD.class")}
         value={
           selectedClass
             ? `${DUNGEON_CLASS_ICONS[selectedClass]} ${
                 DUNGEON_CLASS_LABELS[selectedClass]
               }`
-            : 'Sin elegir'
+            : 'N/A'
         }
       />
 
-      <div style={styles.hudRow}>
-        <span style={styles.hudLabel}>Vida:</span>
-        <span style={styles.hearts}>
-          {renderHearts(dungeonState.player.health)}
+        <div className="grid grid-cols-[118px_1fr] items-center gap-3 border-b border-white/30 pb-2">
+          <span className="text-[18px] font-bold uppercase tracking-[0.12em] text-zinc-100">
+            {t("ddd.points")}
+          </span>
+
+          <span className="flex items-center gap-2">
+            <span className="w-full text-center text-[18px] font-bold text-zinc-100">
+            {dungeonState.player.score}
+          </span>
+
+          <img
+            src={monedasImage}
+            alt=""
+              className="block h-8 w-8 object-contain"
+          />
         </span>
       </div>
 
-      <HudRow label="Puntos" value={String(dungeonState.player.score)} />
-
       <HudRow
-        label="Racha"
+        label={t("ddd.HUD.streak")}
         value={`${dungeonState.player.streak} ${
           dungeonState.player.streak > 0 ? '🔥' : ''
         }`}
       />
 
-      <HudRow label="Tiempo" value={getDungeonTimeText(dungeonState)} />
+      <HudRow
+        label={t("ddd.HUD.time")}
+        value={getDungeonTimeText(dungeonState)}
+      />
 
       <HudRow
-        label="Salas"
-        value={String(dungeonState.player.roundsSurvived)}
+        label={t("ddd.HUD.rooms")}
+        value={String(
+          dungeonState.player.roundsSurvived,
+        )}
       />
+
+        <div className="grid grid-cols-[118px_1fr] items-center gap-3 border-b border-white/30 pb-2">
+          <span className="text-[18px] font-bold uppercase tracking-[0.12em] text-zinc-100">
+            {t("ddd.HUD.health")}
+          </span>
+
+          <span className="text-[22px] leading-none tracking-[0.16em] text-red-500 [text-shadow:0_1px_0_#000]">
+          {renderHearts(
+            dungeonState.player.health,
+          )}
+        </span>
+      </div>
     </aside>
   );
 }
 
-function HudRow({ label, value }: { label: string; value: string }) {
+function HudRow({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
   return (
-    <div style={styles.hudRow}>
-      <span style={styles.hudLabel}>{label}:</span>
-      <span style={styles.hudValue}>{value}</span>
+      <div className="grid grid-cols-[118px_1fr] items-center gap-3 border-b border-white/30 pb-2">
+        <span className="text-[18px] font-bold uppercase tracking-[0.12em] text-zinc-100">
+        {label}:
+      </span>
+
+        <span className="w-full text-center text-[18px] font-bold text-zinc-100">
+        {value}
+      </span>
     </div>
   );
 }
@@ -469,22 +805,54 @@ function getDungeonPlayerName(matchData: MatchData | null | undefined, user: Ret
   return matchData?.players.find((player) => player.role === 'solo')?.username ?? user?.username ?? 'Jugador';
 }
 
-function ActiveChallenge({ dungeonState }: { dungeonState: DungeonState }) {
-  if (dungeonState.phase === 'bettingCountdown') {
-    return (
-      <section style={styles.challengeArea}>
-        <p style={styles.challengeLabel}>Reto activo</p>
+/*
+ * ============================================================
+ * RETO ACTIVO
+ * ============================================================
+ */
 
-        <article style={styles.challengeCard}>
-          <h2 style={styles.challengeTitle}>Apuestas</h2>
-          <p style={styles.bigNumber}>{dungeonState.bettingCountdown}</p>
-          <p style={styles.challengeDescription}>
-            Elige una clase y adéntrate en la mazmorra. Cada ronda te enfrentarás a una
-            sala de combate, trampa o sala vacía, y robarás 3 cartas para intentar
-            superarla. Si la carta no resuelve el reto, la sala continuará y tendrás que
-            seguir intentándolo con nuevas cartas. Algunas cartas evitan daño, curan o dan
-            puntos extra, pero no siempre superan la sala. Puedes abandonar usando ↓ para
-            conservar tu puntuación; si mueres, perderás parte del score acumulado.
+function ActiveChallenge({
+  dungeonState,
+}: {
+  dungeonState: DungeonState;
+}) {
+  /*
+   * La variante visual se conserva mientras el tipo de
+   * habitación no cambie.
+   */
+  const { t } = useTranslation();
+  const roomType =
+    dungeonState.currentRoom?.type;
+
+  const [roomImage, setRoomImage] =
+    useState<string | null>(null);
+
+  useEffect(() => {
+    if (!roomType) {
+      setRoomImage(null);
+      return;
+    }
+
+    setRoomImage(
+      getRandomRoomImage(roomType),
+    );
+  }, [roomType]);
+
+  if ( dungeonState.phase === 'bettingCountdown') 
+  {
+    return (
+        <section className="flex min-h-80 w-full flex-col items-center justify-start gap-3">
+          <article className="flex min-h-105 w-140 flex-col items-center justify-center gap-3 p-2 text-center">
+            <h2 className="m-0 text-2xl text-zinc-50">
+				{t("ddd.ready")}
+          </h2>
+
+            <p className="m-0 text-7xl font-bold text-zinc-50">
+            {dungeonState.bettingCountdown}
+          </p>
+
+            <p className="m-0 text-sm text-zinc-200">
+
           </p>
         </article>
       </section>
@@ -493,16 +861,18 @@ function ActiveChallenge({ dungeonState }: { dungeonState: DungeonState }) {
 
   if (dungeonState.phase === 'choosingClass') {
     return (
-      <section style={styles.challengeArea}>
-        <p style={styles.challengeLabel}>Reto activo</p>
+        <section className="flex min-h-80 w-full flex-col items-center justify-start gap-3">
+          <article className="flex min-h-105 w-140 flex-col items-center justify-center gap-3 p-2 text-center">
+            <h2 className="m-0 text-2xl text-zinc-50">
+            {t("ddd.chooseClass")}
+          </h2>
 
-        <article style={styles.challengeCard}>
-          <h2 style={styles.challengeTitle}>Elige clase</h2>
-          <p style={styles.bigNumber}>
+            <p className="m-0 text-7xl font-bold text-zinc-50">
             {dungeonState.classSelectionCountdown}
           </p>
-          <p style={styles.challengeDescription}>
-            Selecciona una clase para empezar la expedición.
+
+            <p className="m-0 text-sm text-zinc-200">
+            
           </p>
         </article>
       </section>
@@ -510,70 +880,71 @@ function ActiveChallenge({ dungeonState }: { dungeonState: DungeonState }) {
   }
 
   if (dungeonState.phase === 'drawingCards') {
-    const shouldContinueRoom = isContinuingCurrentRoom(dungeonState);
+    const shouldContinueRoom =
+      isContinuingCurrentRoom(dungeonState);
 
     return (
-      <section style={styles.challengeArea}>
-        <p style={styles.challengeLabel}>Reto activo</p>
-
-        <article style={styles.challengeCard}>
-          <h2 style={styles.challengeTitle}>
-            {shouldContinueRoom && dungeonState.currentRoom
-              ? dungeonState.currentRoom.name
-              : 'Nueva sala'}
-          </h2>
-
-          <p style={styles.roomIcon}>
-            {shouldContinueRoom && dungeonState.currentRoom
-              ? dungeonState.currentRoom.icon
-              : '🃏'}
-          </p>
-
-          <p style={styles.challengeDescription}>
-            {shouldContinueRoom && dungeonState.currentRoom
-              ? 'El reto no se ha superado todavía. Robando nuevas cartas.'
-              : 'Robando cartas y preparando el siguiente reto.'}
-          </p>
+        <section className="flex min-h-80 w-full flex-col items-center justify-start gap-3">
+          <article className="flex min-h-105 w-140 flex-col items-center justify-center gap-3 p-2 text-center">
+          {shouldContinueRoom &&
+          dungeonState.currentRoom &&
+          roomImage ? (
+            <img
+              src={roomImage}
+              alt={dungeonState.currentRoom.name}
+                className="block h-auto max-h-101.25 w-82.5 object-contain"
+            />
+          ) : (
+			<>
+				<h2 className="m-0 text-2xl text-zinc-50">
+					{t("ddd.newRoom")}
+				</h2>
+				<p className="m-0 text-sm text-zinc-200">
+					{t("ddd.ready")}
+				</p>
+            </>
+          )}
         </article>
       </section>
     );
   }
 
-  if (
-    (dungeonState.phase === 'choosingCard' ||
-      dungeonState.phase === 'resolvingRoom') &&
-    dungeonState.currentRoom
-  ) {
+  if ((dungeonState.phase === 'choosingCard' || dungeonState.phase === 'resolvingRoom') && dungeonState.currentRoom) {
     return (
-      <section style={styles.challengeArea}>
-        <p style={styles.challengeLabel}>Reto activo</p>
+      <section className="flex min-h-80 w-full flex-col items-center justify-start gap-3">
+        <article className="flex min-h-105 w-140 flex-col items-center justify-center gap-3 p-2 text-center">
+          {roomImage && (
+            <img
+              src={roomImage}
+              alt={dungeonState.currentRoom.name}
+              className="block h-auto max-h-101.25 w-82.5 object-contain"
+            />
+          )}
 
-        <article style={styles.challengeCard}>
-          <h2 style={styles.challengeTitle}>
-            {dungeonState.currentRoom.name}
-          </h2>
-
-          <p style={styles.roomIcon}>{dungeonState.currentRoom.icon}</p>
-
-          <p style={styles.challengeDescription}>
-            {getRoomDescription(dungeonState.currentRoom.name)}
-          </p>
-
-          {dungeonState.phase === 'choosingCard' && (
-            <p style={styles.challengeTimer}>
-              {dungeonState.cardSelectionCountdown}s para elegir carta
+          {dungeonState.phase ===
+            'choosingCard' && (
+            <p className="m-0 text-lg text-zinc-100">
+              {
+                dungeonState.cardSelectionCountdown
+              }
+              {t("ddd.choosingPhase")}
             </p>
           )}
 
-          {dungeonState.phase === 'resolvingRoom' && (
+          {dungeonState.phase ===
+            'resolvingRoom' && (
             <>
-              <p style={styles.challengeTimer}>
-                {dungeonState.resolveCountdown}s resolviendo
+              <p className="m-0 text-lg text-zinc-100">
+                {dungeonState.resolveCountdown}s
+                {t("ddd.resolving")}
               </p>
 
               {dungeonState.lastTurnResult && (
-                <p style={styles.resultText}>
-                  {dungeonState.lastTurnResult.message}
+                <p className="m-0 text-sm text-zinc-200">
+                  {
+                    dungeonState.lastTurnResult
+                      .message
+                  }
                 </p>
               )}
             </>
@@ -583,26 +954,16 @@ function ActiveChallenge({ dungeonState }: { dungeonState: DungeonState }) {
     );
   }
 
-  if (
-    dungeonState.phase === 'escaped' ||
-    dungeonState.phase === 'dead' ||
-    dungeonState.phase === 'finished'
-  ) {
+  if (dungeonState.phase === 'escaped' || dungeonState.phase === 'dead' || dungeonState.phase === 'finished') {
     return (
-      <section style={styles.challengeArea}>
-        <p style={styles.challengeLabel}>Reto activo</p>
-
-        <article style={styles.challengeCard}>
-          <h2 style={styles.challengeTitle}>
+      <section className="flex min-h-80 w-full flex-col items-center justify-start gap-3">
+        <article className="flex min-h-105 w-140 flex-col items-center justify-center gap-3 p-2 text-center">
+          <h2 className="m-0 text-2xl text-zinc-50">
             {getResultTitle(dungeonState)}
           </h2>
 
-          <p style={styles.roomIcon}>
-            {dungeonState.phase === 'escaped' ? '🚪' : '💀'}
-          </p>
-
-          <p style={styles.challengeDescription}>
-            Score final: {dungeonState.player.score}
+          <p className="m-0 text-sm text-zinc-200">
+            {t("ddd.score")}{dungeonState.player.score}
           </p>
         </article>
       </section>
@@ -610,43 +971,84 @@ function ActiveChallenge({ dungeonState }: { dungeonState: DungeonState }) {
   }
 
   return (
-    <section style={styles.challengeArea}>
-      <p style={styles.challengeLabel}>Reto activo</p>
+    <section className="flex min-h-80 w-full flex-col items-center justify-start gap-3">
+      <article className="flex min-h-105 w-140 flex-col items-center justify-center gap-3 p-2 text-center">
+        <h2 className="m-0 text-2xl text-zinc-50">
+          {t("ddd.dungeon")}
+        </h2>
 
-      <article style={styles.challengeCard}>
-        <h2 style={styles.challengeTitle}>Mazmorra</h2>
-        <p style={styles.challengeDescription}>
-          Preparando la expedición.
+        <p className="m-0 text-sm text-zinc-200">
+         	{t("ddd.preparingPhase")}
         </p>
       </article>
     </section>
   );
 }
 
-function ClassOption({ dungeonClass }: { dungeonClass: DungeonClass }) {
+/*
+ * ============================================================
+ * SELECCIÓN DE CLASE
+ * ============================================================
+ */
+
+function ClassOption({
+  dungeonClass,
+}: {
+  dungeonClass: DungeonClass;
+}) {
+  const classImages: Record<DungeonClass, string> = {
+    mague: magueClassImage,
+    warrior: warriorClassImage,
+    rogue: rogueClassImage,
+  };
+
   return (
-    <article style={styles.classCard}>
-      <p style={styles.classKey}>
-        {DUNGEON_CLASS_CONTROL_LABELS[dungeonClass]}
-      </p>
-
-      <p style={styles.classIcon}>{DUNGEON_CLASS_ICONS[dungeonClass]}</p>
-
-      <p style={styles.className}>{DUNGEON_CLASS_LABELS[dungeonClass]}</p>
+	    <article className="flex items-center justify-center rounded-lg border border-zinc-300/20 bg-zinc-900/70 p-2 transition-transform duration-150 hover:-translate-y-0.5">
+      <img
+        src={classImages[dungeonClass]}
+        alt={DUNGEON_CLASS_LABELS[dungeonClass]}
+	        className="block h-auto w-28 object-contain"
+      />
     </article>
   );
 }
 
+/*
+ * ============================================================
+ * HELPERS DE PRESENTACIÓN
+ * ============================================================
+ */
+
+function getRandomRoomImage(
+  roomType: DungeonRoomType,
+): string {
+  const images = ROOM_IMAGES[roomType];
+
+  const randomIndex = Math.floor(
+    Math.random() * images.length,
+  );
+
+  return images[randomIndex];
+}
+
 function renderHearts(health: number) {
   const safeHealth = Math.max(0, health);
-  const visibleSlots = Math.max(DUNGEON_INITIAL_HEALTH, safeHealth);
 
-  return Array.from({ length: visibleSlots }, (_, index) =>
-    index < safeHealth ? '♥' : '♡',
+  const visibleSlots = Math.max(
+    DUNGEON_INITIAL_HEALTH,
+    safeHealth,
+  );
+
+  return Array.from(
+    { length: visibleSlots },
+    (_, index) =>
+      index < safeHealth ? '♥' : '♡',
   ).join(' ');
 }
 
-function getDungeonTimeText(dungeonState: DungeonState): string {
+function getDungeonTimeText(
+  dungeonState: DungeonState,
+): string {
   switch (dungeonState.phase) {
     case 'bettingCountdown':
       return `${dungeonState.bettingCountdown}s apuestas`;
@@ -675,28 +1077,9 @@ function getDungeonTimeText(dungeonState: DungeonState): string {
   }
 }
 
-function getRoomDescription(roomName: string): string {
-  const normalizedRoomName = roomName.toLowerCase();
-
-  if (normalizedRoomName.includes('combate')) {
-    return 'Si no superas esta sala pierdes 1 punto de vida al final del turno.';
-  }
-
-  if (normalizedRoomName.includes('trampa')) {
-    return 'Si no superas esta sala pierdes 1 punto de vida al final del turno.';
-  }
-
-  if (
-    normalizedRoomName.includes('vacía') ||
-    normalizedRoomName.includes('vacia')
-  ) {
-    return 'Esta sala se supera automáticamente. No se puede perder vida aquí.';
-  }
-
-  return 'Supera el reto usando una de tus cartas.';
-}
-
-function getResultTitle(dungeonState: DungeonState): string {
+function getResultTitle(
+  dungeonState: DungeonState,
+): string {
   if (dungeonState.phase === 'escaped') {
     return 'Has escapado';
   }
@@ -708,7 +1091,9 @@ function getResultTitle(dungeonState: DungeonState): string {
   return 'Partida finalizada';
 }
 
-function isContinuingCurrentRoom(dungeonState: DungeonState): boolean {
+function isContinuingCurrentRoom(
+  dungeonState: DungeonState,
+): boolean {
   return Boolean(
     dungeonState.currentRoom &&
       dungeonState.lastTurnResult &&
