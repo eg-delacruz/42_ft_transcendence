@@ -2,6 +2,7 @@ import '@/App.css'; // styles
 import 'tailwindcss';
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom"; // react-router
 import { AuthProvider } from '@/context/context';
+import { SocketProvider } from '@/hooks/useSocket';
 
 import ProtectedRoute from '@components/ProtectedRoute';
 
@@ -44,17 +45,19 @@ function App() {
   return (
 	<div className={showPage ? "page-enter page-enter-active" : "page-exit page-exit-active"}>
 		<AuthProvider>
-		<BrowserRouter>
-		<Routes>
-			<Route path="/" element={<Home />} />
-			<Route path="/login" element={<Login />} />
-			<Route path="/register" element={<Register />} />
-			<Route path="/user" element={<User />} />
-			<Route path="/gameroom" element={<GameRoom />} />
-			<Route path="/privacy" element={<PrivacyPolicy />} />
-			<Route path="/terms" element={<TermsOfService />} />
-		</Routes>
-		</BrowserRouter>
+			<SocketProvider>
+				<BrowserRouter>
+				<Routes>
+					<Route path="/" element={<Home />} />
+					<Route path="/login" element={<Login />} />
+					<Route path="/register" element={<Register />} />
+					<Route path="/user" element={<User />} />
+					<Route path="/gameroom" element={<GameRoom />} />
+					<Route path="/privacy" element={<PrivacyPolicy />} />
+					<Route path="/terms" element={<TermsOfService />} />
+				</Routes>
+				</BrowserRouter>
+			</SocketProvider>
 		</AuthProvider>
 	</div>
   );

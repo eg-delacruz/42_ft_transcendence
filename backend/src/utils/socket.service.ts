@@ -6,6 +6,7 @@
 
 import { Namespace, Server, Socket } from 'socket.io';
 import { Redis } from 'ioredis';
+import { randomUUID } from 'crypto';
 import {
     MatchFoundPayload,
     GameActionPayload,
@@ -260,7 +261,7 @@ export class SocketService {
     }
 
     broadcastMatchmakingLog(message: string, details: Record<string, unknown> = {}): void {
-        const payload = { message, details, timestamp: new Date().toISOString() };
+        const payload = { id: randomUUID(), message, details, timestamp: new Date().toISOString() };
         logger.info(`[matchmaking] ${message} ${JSON.stringify(details)}`);
         this.broadcastToRoom(GAME_ROOM_ID, 'matchmaking:log', payload);
     }
@@ -314,23 +315,30 @@ export class SocketService {
         try {
             const activeMatch = await this.getActiveGame();
             if (activeMatch) {
+                const isParticipant =
+                    activeMatch.players.some((player) => player.userId === user.userId) ||
+                    (activeMatch.spectators ?? []).includes(user.userId);
+
                 await this.redis.sadd(MATCHMAKING_MEMBERS_KEY, user.userId);
                 await this.addUserToRoom(user.userId, GAME_ROOM_ID);
+                // Quien llega con una partida en curso y no participa en ella se pone en cola;
+                // antes solo se añadía a "members" y nunca volvía a entrar en el matchmaking.
+                if (!isParticipant) {
+                    await this.enqueueForMatchmaking(user.userId, socketId);
+                }
                 const users = await this.getActiveMatchmakingUsers();
                 this.broadcastMatchmakingLog('Usuario entra como espectador de la partida activa', { userId: user.userId, users });
+                await this.logQueueState('joinMatchmaking:partida-activa', { userId: user.userId, isParticipant });
                 return { payload: activeMatch, created: false };
             }
 
-            const isNewMember = (await this.redis.sadd(MATCHMAKING_MEMBERS_KEY, user.userId)) === 1;
-            if (isNewMember) {
-                await this.redis.rpush(
-                    MATCHMAKING_QUEUE_KEY,
-                    JSON.stringify({ userId: user.userId, socketId, timestamp: Date.now() }),
-                );
-            }
+            // enqueueForMatchmaking es idempotente: si el usuario ya estaba en "members" pero
+            // no en la cola (estado huérfano) lo vuelve a encolar.
+            await this.enqueueForMatchmaking(user.userId, socketId);
 
             const users = await this.getActiveMatchmakingUsers();
             this.broadcastMatchmakingLog('Usuario entra en la sala global', { userId: user.userId, users });
+            await this.logQueueState('joinMatchmaking:encolado', { userId: user.userId });
             const match = await this.tryCreateMatch();
             if (match) {
                 await this.addUserToRoom(user.userId, GAME_ROOM_ID);
@@ -379,10 +387,12 @@ export class SocketService {
 
     async ensureGameState(): Promise<GameStatePayload | null> {
         const activeMatch = await this.getActiveGame();
-        if (!activeMatch) return null;
+        if (!activeMatch) 
+			return null;
 
         const currentState = await this.getGameState();
-        if (currentState?.game === activeMatch.game) return currentState;
+        if (currentState?.game === activeMatch.game) 
+			return currentState;
 
         if (activeMatch.game === 'fight_fight') {
             const state: GameStatePayload = {
@@ -406,7 +416,8 @@ export class SocketService {
             return state;
         }
 
-        if (activeMatch.game !== 'the_race') return null;
+        if (activeMatch.game !== 'the_race') 
+			return null;
 
         const state: GameStatePayload = {
             roomId: GAME_ROOM_ID,
@@ -432,15 +443,19 @@ export class SocketService {
         state?: GameStatePayload;
     } | null> {
         const action = await this.validateGameAction(userId, payload);
-        if (!action) return null;
+        if (!action) 
+			return null;
 
             if (payload.game === 'fight_fight') {
                 const currentState = await this.ensureGameState();
-                if (!currentState) return null;
+                if (!currentState) 
+					return null;
                 const fightState = currentState.state as FightState;
-                if (fightState.phase !== 'selecting') return null;
+                if (fightState.phase !== 'selecting') 
+					return null;
                 const player = action.role === 'player1' ? fightState.player1 : fightState.player2;
-                if (payload.action === 'dodge' && player.previousAction === 'dodge') return null;
+                if (payload.action === 'dodge' && player.previousAction === 'dodge') 
+					return null;
                 player.selectedAction = payload.action as FightAction;
                 const nextState = { ...currentState, state: fightState, timestamp: Date.now() };
                 await this.redis.set(GAME_STATE_KEY, JSON.stringify(nextState));
@@ -449,24 +464,29 @@ export class SocketService {
 
             if (payload.game === 'deep_&_dark') {
                 const currentState = await this.ensureGameState();
-                if (!currentState) return null;
+                if (!currentState) 
+					return null;
                 const dungeonState = currentState.state as DungeonState;
                 const nextState = this.applyDungeonAction(dungeonState, payload.action as string);
-                if (!nextState) return null;
+                if (!nextState) 
+					return null;
                 const state = { ...currentState, state: nextState, timestamp: Date.now() };
                 await this.redis.set(GAME_STATE_KEY, JSON.stringify(state));
                 return { action, state };
             }
 
-            if (payload.game !== 'the_race') return { action };
+            if (payload.game !== 'the_race') 
+				return { action };
 
         const lockToken = `${Date.now()}-${Math.random()}`;
         const lockAcquired = await this.redis.set(GAME_STATE_LOCK_KEY, lockToken, 'EX', 5, 'NX');
-        if (!lockAcquired) return null;
+        if (!lockAcquired) 
+			return null;
 
         try {
             const currentState = await this.ensureGameState();
-            if (!currentState) return null;
+            if (!currentState) 
+				return null;
             const raceState = currentState.state as {
                 phase: string;
                 players: { id: 'player1' | 'player2'; name: string; progress: number }[];
@@ -475,11 +495,13 @@ export class SocketService {
                 gameCountdown: number;
                 resultsCountdown: number;
             };
-            if (raceState.phase !== 'running') return null;
+            if (raceState.phase !== 'running') 
+				return null;
 
             const playerId = action.role === 'player1' ? 'player1' : 'player2';
             const player = raceState.players.find((candidate) => candidate.id === playerId);
-            if (!player) return null;
+            if (!player) 
+				return null;
             player.progress = Math.min(player.progress + 1, 100);
             if (player.progress >= 100) {
                 raceState.phase = 'finished';
@@ -500,7 +522,14 @@ export class SocketService {
 
     async tickGameState(): Promise<GameStatePayload | null> {
         const currentState = await this.getGameState();
-        if (!currentState) return null;
+        if (!currentState) 
+			return null;
+        // Un estado terminal alcanzado por una acción del jugador (p. ej. dungeon 'escaped'/'dead')
+        // nunca lo produce un tick, así que había que reciclarlo aquí o la partida no terminaba nunca.
+        if (this.isTerminalGameState(currentState)) {
+            void this.recycleFinishedMatch(currentState);
+            return null;
+        }
         if (currentState.game === 'fight_fight') {
             const nextState = this.tickFightState(currentState);
             if (nextState && this.isTerminalGameState(nextState)) {
@@ -515,7 +544,8 @@ export class SocketService {
             }
             return nextState;
         }
-        if (currentState.game !== 'the_race') return null;
+        if (currentState.game !== 'the_race') 
+			return null;
         const raceState = currentState.state as {
             phase: string;
             bettingCountdown: number;
@@ -672,16 +702,21 @@ export class SocketService {
     private applyDungeonAction(state: DungeonState, key: string): DungeonState | null {
         if (state.phase === 'choosingClass') {
             const dungeonClass = key === 'ArrowLeft' ? 'mague' : key === 'ArrowRight' ? 'rogue' : key === 'ArrowUp' ? 'warrior' : null;
-            if (!dungeonClass) return null;
+            if (!dungeonClass) 
+				return null;
             return { ...state, phase: 'choosingCard', player: { ...state.player, class: dungeonClass }, currentRoom: this.createDungeonRoom(), hand: this.createDungeonHand() };
         }
-        if (state.phase !== 'choosingCard') return null;
-        if (key === 'ArrowDown') return { ...state, phase: 'escaped', resultsCountdown: 2 };
+        if (state.phase !== 'choosingCard') 
+			return null;
+        if (key === 'ArrowDown') 
+			return { ...state, phase: 'escaped', resultsCountdown: 2 };
         const cardIndex = key === 'ArrowLeft' ? 0 : key === 'ArrowRight' ? 1 : key === 'ArrowUp' ? 2 : -1;
-        if (cardIndex < 0) return null;
+        if (cardIndex < 0) 
+			return null;
         const card = state.hand[cardIndex] ?? state.hand[0];
         const room = state.currentRoom;
-        if (!card || !room) return null;
+        if (!card || !room) 
+			return null;
         const cleared = room.type === 'empty' || card.effects.includes('clearAll') || card.effects.includes(`clear${room.type === 'combat' ? 'Combat' : 'Trap'}`);
         const damage = cleared ? 0 : 1;
         const health = Math.max(state.player.health - damage, 0);
@@ -702,10 +737,12 @@ export class SocketService {
             if (state.bettingCountdown <= 0) { state.phase = 'choosingClass'; state.bettingCountdown = 0; }
         } else if (state.phase === 'choosingClass') {
             state.classSelectionCountdown -= 1;
-            if (state.classSelectionCountdown <= 0) return this.persistDungeonState(currentState, { ...state, phase: 'choosingCard', player: { ...state.player, class: 'warrior' }, currentRoom: this.createDungeonRoom(), hand: this.createDungeonHand() });
+            if (state.classSelectionCountdown <= 0) 
+				return this.persistDungeonState(currentState, { ...state, phase: 'choosingCard', player: { ...state.player, class: 'warrior' }, currentRoom: this.createDungeonRoom(), hand: this.createDungeonHand() });
         } else if (state.phase === 'resolvingRoom') {
             state.resolveCountdown -= 1;
-            if (state.resolveCountdown <= 0) return this.persistDungeonState(currentState, { ...state, phase: 'choosingCard', currentRoom: this.createDungeonRoom(), hand: this.createDungeonHand(), cardSelectionCountdown: 3 });
+            if (state.resolveCountdown <= 0) 
+				return this.persistDungeonState(currentState, { ...state, phase: 'choosingCard', currentRoom: this.createDungeonRoom(), hand: this.createDungeonHand(), cardSelectionCountdown: 3 });
         } else {
             return null;
         }
@@ -735,28 +772,58 @@ export class SocketService {
         return false;
     }
 
-    private async recycleFinishedMatch(state: GameStatePayload): Promise<void> {
-        const activeMatch = await this.getActiveGame();
-        if (!activeMatch || activeMatch.game !== state.game) return;
+    /**
+     * Fin de partida: limpia el estado y devuelve a todos al FINAL de la cola.
+     * Orden resultante: [los que ya esperaban] + [los que acaban de jugar].
+     * `excludeIds` = usuarios que se han ido voluntariamente y no deben reencolarse.
+     */
+    private async recycleFinishedMatch(state: GameStatePayload, excludeIds: string[] = []): Promise<void> {
+        const activeMatch = await this.getRawActiveMatch();
+        if (!activeMatch || activeMatch.game !== state.game)
+            return;
+
+        // Borrado atómico: si dos ticks/acciones llegan a la vez, solo uno continúa.
+        const deleted = await this.redis.del(ACTIVE_MATCH_KEY);
+        if (deleted === 0)
+            return;
+        await this.redis.del(GAME_STATE_KEY);
 
         const participantIds = [...new Set([
             ...activeMatch.players.map((player) => player.userId),
-            ...activeMatch.spectators,
+            ...(activeMatch.spectators ?? []),
         ])];
+        await this.logQueueState('recycleFinishedMatch:inicio', { game: state.game, participantIds, excludeIds });
 
         const presence = participantIds.length > 0
             ? await this.redis.mget(...participantIds.map((userId) => `${PRESENCE_PREFIX}${userId}`))
             : [];
 
         const requeueIds: string[] = [];
-        for (let index = 0; index < participantIds.length; index += 1) {
-            if (presence[index]) {
-                requeueIds.push(participantIds[index]);
+        const goneIds: string[] = [];
+        participantIds.forEach((userId, index) => {
+            if (presence[index] && !excludeIds.includes(userId)) requeueIds.push(userId);
+            else goneIds.push(userId);
+        });
+
+        for (const userId of goneIds) {
+            await this.leaveMatchmaking(userId);
+        }
+
+        // Red de seguridad: usuarios conectados en "members" que no están en la cola ni jugaron
+        // (p. ej. entraron durante la partida). Van ANTES que los que acaban de jugar.
+        const participantSet = new Set(participantIds);
+        const members = [...new Set([
+            ...(await this.redis.smembers(MATCHMAKING_MEMBERS_KEY)),
+            ...(await this.redis.smembers(`${ROOM_USERS_PREFIX}${GAME_ROOM_ID}`)),
+        ])];
+        for (const memberId of members) {
+            if (participantSet.has(memberId)) continue;
+            if ((await this.redis.exists(`${PRESENCE_PREFIX}${memberId}`)) === 1) {
+                await this.enqueueForMatchmaking(memberId);
             }
         }
 
-        await this.redis.del(ACTIVE_MATCH_KEY, GAME_STATE_KEY);
-
+        // Los que han jugado, al final de la cola.
         for (const userId of requeueIds) {
             await this.addUserToRoom(userId, GAME_ROOM_ID);
             await this.enqueueForMatchmaking(userId);
@@ -765,29 +832,37 @@ export class SocketService {
         this.broadcastMatchmakingLog('Partida finalizada, reencolando usuarios', {
             game: state.game,
             users: requeueIds,
+            gone: goneIds,
             playerCount: activeMatch.players.length,
-            spectatorCount: activeMatch.spectators.length,
+            spectatorCount: (activeMatch.spectators ?? []).length,
         });
+        await this.logQueueState('recycleFinishedMatch:fin', { requeueIds, goneIds });
 
-        void this.tryCreateMatch();
+        void this.tryCreateMatch(true);
     }
 
-    private async enqueueForMatchmaking(userId: string): Promise<void> {
-        const queueItems = await this.redis.lrange(MATCHMAKING_QUEUE_KEY, 0, -1);
-        const alreadyQueued = queueItems.some((item) => {
-            try {
-                return (JSON.parse(item) as { userId?: string }).userId === userId;
-            } catch {
-                return false;
-            }
-        });
+    /**
+     * Mete al usuario al final de la cola si no estaba ya. Devuelve true si lo ha añadido.
+     */
+    private async enqueueForMatchmaking(userId: string, socketId = 'requeue'): Promise<boolean> {
+        await this.redis.sadd(MATCHMAKING_MEMBERS_KEY, userId);
 
-        if (alreadyQueued) return;
+        const queued = await this.getQueueUserIds();
+        if (queued.includes(userId))
+            return false;
 
         await this.redis.rpush(
             MATCHMAKING_QUEUE_KEY,
-            JSON.stringify({ userId, socketId: 'requeue', timestamp: Date.now() }),
+            JSON.stringify({ userId, socketId, timestamp: Date.now() }),
         );
+        return true;
+    }
+
+    private async requeueUsers(userIds: string[]): Promise<void> {
+        for (const userId of userIds) {
+            await this.addUserToRoom(userId, GAME_ROOM_ID);
+            await this.enqueueForMatchmaking(userId);
+        }
     }
 
     private createDungeonRoom(): DungeonRoom {
@@ -820,8 +895,11 @@ export class SocketService {
 
     async getActiveGame(): Promise<MatchFoundPayload | null> {
         const rawMatch = await this.redis.get(ACTIVE_MATCH_KEY);
-        if (!rawMatch) return null;
-        const match = JSON.parse(rawMatch) as MatchFoundPayload;
+        
+		if (!rawMatch) 
+			return null;
+        
+		const match = JSON.parse(rawMatch) as MatchFoundPayload;
         const participantIds = [...new Set([
             ...match.players.map((player) => player.userId),
             ...match.spectators,
@@ -831,23 +909,99 @@ export class SocketService {
             : [];
         const activeUsers = presence.filter(Boolean).length;
         if (participantIds.length < 2 || activeUsers < 2) {
-            await this.redis.del(ACTIVE_MATCH_KEY, GAME_STATE_KEY);
+            // await this.redis.del(ACTIVE_MATCH_KEY, GAME_STATE_KEY);
             this.broadcastMatchmakingLog('Partida activa descartada: no hay dos usuarios activos', { participantIds, activeUsers });
             return null;
         }
         return match;
     }
 
-    private async tryCreateMatch(): Promise<MatchmakingResult | null> {
+    /**
+     * Lee ACTIVE_MATCH_KEY tal cual, sin filtrar por presencia.
+     * getActiveGame() devuelve null si hay <2 conectados pero NO borra la clave, y
+     * quienes limpian el estado (reciclado / desconexión) necesitan ver la partida real.
+     */
+    private async getRawActiveMatch(): Promise<MatchFoundPayload | null> {
+        const rawMatch = await this.redis.get(ACTIVE_MATCH_KEY);
+        if (!rawMatch)
+            return null;
+        try {
+            return JSON.parse(rawMatch) as MatchFoundPayload;
+        } catch {
+            return null;
+        }
+    }
+
+    private async getQueueUserIds(): Promise<string[]> {
+        const entries = await this.redis.lrange(MATCHMAKING_QUEUE_KEY, 0, -1);
+        const ids: string[] = [];
+        for (const entry of entries) {
+            try {
+                const parsed = JSON.parse(entry) as { userId?: string };
+                if (parsed.userId) ids.push(parsed.userId);
+            } catch {
+                // entrada corrupta: la ignoramos aquí, cleanMatchmakingQueue la elimina
+            }
+        }
+        return ids;
+    }
+
+    /**
+     * Log de diagnóstico: foto de la cola en orden, del set de members y de la partida activa.
+     * `membersOutsideQueue` es lo que más interesa: usuarios en members que no están en la cola
+     * (jugando ahora o "huérfanos", que son los que se quedan sin volver a entrar).
+     */
+    private async logQueueState(label: string, extra: Record<string, unknown> = {}): Promise<void> {
+        try {
+            const [queue, members, rawMatch, rawState] = await Promise.all([
+                this.getQueueUserIds(),
+                this.redis.smembers(MATCHMAKING_MEMBERS_KEY),
+                this.redis.get(ACTIVE_MATCH_KEY),
+                this.redis.get(GAME_STATE_KEY),
+            ]);
+            const match = rawMatch ? JSON.parse(rawMatch) as MatchFoundPayload : null;
+            const gameState = rawState ? JSON.parse(rawState) as GameStatePayload : null;
+            const queueSet = new Set(queue);
+
+            logger.info(`[matchmaking][cola] ${label} ` + JSON.stringify({
+                queue,
+                queueSize: queue.length,
+                duplicatesInQueue: queue.length - queueSet.size,
+                members,
+                membersOutsideQueue: members.filter((id) => !queueSet.has(id)),
+                activeMatch: match
+                    ? { game: match.game, players: match.players.map((p) => p.userId), spectators: match.spectators ?? [] }
+                    : null,
+                gameState: gameState
+                    ? { game: gameState.game, phase: (gameState.state as { phase?: string }).phase, terminal: this.isTerminalGameState(gameState) }
+                    : null,
+                ...extra,
+            }));
+        } catch (error) {
+            logger.error(`[matchmaking][cola] error generando log "${label}":`, error);
+        }
+    }
+
+    /**
+     * @param notify true cuando la partida se crea en segundo plano (reciclado, cancelación,
+     * reintento): nadie espera el resultado, así que hay que avisar a la sala con `match_found`.
+     * Desde joinMatchmaking va en false porque el gateway ya emite el evento con el resultado.
+     */
+    private async tryCreateMatch(notify = false): Promise<MatchmakingResult | null> {
         const lockToken = `${Date.now()}-${Math.random()}`;
         const lockAcquired = await this.redis.set(MATCHMAKING_LOCK_KEY, lockToken, 'EX', 15, 'NX');
-        if (!lockAcquired) return null;
+        if (!lockAcquired) {
+            logger.debug('[matchmaking] tryCreateMatch omitido: ya hay otro intento en curso (lock)');
+            return null;
+        }
 
         try {
             const existingMatch = await this.getActiveGame();
-            if (existingMatch) return { payload: existingMatch, created: false };
+            if (existingMatch)
+                return { payload: existingMatch, created: false };
 
-            const queueUsers = await this.cleanMatchmakingQueue();
+            let queueUsers = await this.cleanMatchmakingQueue();
+            await this.logQueueState('tryCreateMatch:inicio', { queueUsers });
             if (queueUsers.length < 2) {
                 this.broadcastMatchmakingLog('Esperando al menos dos usuarios activos', { users: queueUsers });
                 return null;
@@ -857,22 +1011,49 @@ export class SocketService {
             for (let seconds = 5; seconds > 0; seconds -= 1) {
                 this.broadcastMatchmakingLog(`Matchmaking comienza en ${seconds}`, { users: await this.getActiveMatchmakingUsers() });
                 await new Promise((resolve) => setTimeout(resolve, 1000));
-                if ((await this.cleanMatchmakingQueue()).length < 2) {
-                    this.broadcastMatchmakingLog('Cuenta atras cancelada: un usuario se desconecto');
+                queueUsers = await this.cleanMatchmakingQueue();
+                if (queueUsers.length < 2) {
+                    this.broadcastMatchmakingLog('Cuenta atras cancelada: un usuario se desconecto', { users: queueUsers });
+                    await this.logQueueState('tryCreateMatch:cuenta-atras-cancelada', { seconds, queueUsers });
                     return null;
                 }
             }
 
-            const rawPlayers = await this.redis.lpop(MATCHMAKING_QUEUE_KEY, 2);
-            if (!rawPlayers || rawPlayers.length < 2) return null;
+            const rawPlayers = (await this.redis.lpop(MATCHMAKING_QUEUE_KEY, 2)) ?? [];
+            const popped = rawPlayers.map((raw) => ({ raw, userId: (JSON.parse(raw) as { userId: string }).userId }));
+            await this.logQueueState('tryCreateMatch:tras-lpop', { popped: popped.map((p) => p.userId) });
 
-            const userIds = rawPlayers.map((rawPlayer) => JSON.parse(rawPlayer).userId as string);
+            // Validar que los dos sigan conectados y sean distintos. Antes, si fallaba, los
+            // usuarios extraídos se perdían (fuera de la cola pero aún en "members").
+            const valid: typeof popped = [];
+            for (const entry of popped) {
+                const connected = (await this.redis.exists(`${PRESENCE_PREFIX}${entry.userId}`)) === 1;
+                if (connected && !valid.some((v) => v.userId === entry.userId)) {
+                    valid.push(entry);
+                } else if (!connected) {
+                    await this.redis.srem(MATCHMAKING_MEMBERS_KEY, entry.userId);
+                }
+            }
+            if (valid.length < 2) {
+                // Devolver a los válidos a la cabeza de la cola, en su orden original.
+                for (const entry of [...valid].reverse()) {
+                    await this.redis.lpush(MATCHMAKING_QUEUE_KEY, entry.raw);
+                }
+                this.broadcastMatchmakingLog('Matchmaking abortado: un jugador se desconectó justo antes de empezar', {
+                    popped: popped.map((p) => p.userId),
+                    returnedToQueue: valid.map((v) => v.userId),
+                });
+                await this.logQueueState('tryCreateMatch:abortado-tras-lpop');
+                // El lock aún está tomado; reintentamos un poco después de liberarlo.
+                setTimeout(() => void this.tryCreateMatch(true), 500);
+                return null;
+            }
+
+            const userIds = valid.map((entry) => entry.userId);
             userIds.sort(() => Math.random() - 0.5);
 
             const game = this.getRandomGame();
-            const participantDetails = userIds.length > 0
-                ? await this.redis.mget(...userIds.map((userId) => `${PRESENCE_PREFIX}${userId}`))
-                : [];
+            const participantDetails = await this.redis.mget(...userIds.map((userId) => `${PRESENCE_PREFIX}${userId}`));
             const usernamesByUserId = new Map(
                 userIds.map((userId, index) => {
                     const rawPresence = participantDetails[index];
@@ -901,12 +1082,20 @@ export class SocketService {
                 ? `Partida iniciada: Jugador 1: ${playerOneId}${spectators.length ? ` | Espectador: ${spectators.join(', ')}` : ''}`
                 : `Partida iniciada: Jugador 1: ${playerOneId} | Jugador 2: ${playerTwoId}${spectators.length ? ` | Espectadores: ${spectators.join(', ')}` : ''}`;
 
+            // Limpiar cualquier estado de una partida anterior: si no, ensureGameState() reutiliza
+            // un estado terminal viejo cuando el juego sorteado coincide con el anterior.
+            await this.redis.del(GAME_STATE_KEY);
             await this.redis.set(ACTIVE_MATCH_KEY, JSON.stringify(payload));
             for (const userId of userIds) {
                 await this.addUserToRoom(userId, GAME_ROOM_ID);
             }
             logger.info(`Global match created: ${game} (${userIds.join(', ')})`);
             this.broadcastMatchmakingLog(logMessage, { game, roomId: GAME_ROOM_ID, players, spectators, player1: playerOneId, player2: playerTwoId });
+            await this.logQueueState('tryCreateMatch:partida-creada', { game, notify });
+            if (notify) {
+                this.broadcastToRoom(GAME_ROOM_ID, 'match_found', payload);
+            }
+
             return { payload, created: true };
         } finally {
             const currentToken = await this.redis.get(MATCHMAKING_LOCK_KEY);
@@ -921,19 +1110,38 @@ export class SocketService {
         return games[Math.floor(Math.random() * games.length)];
     }
 
+    /**
+     * Elimina de la cola a desconectados, duplicados y entradas corruptas.
+     * Devuelve los userIds válidos en orden de cola.
+     */
     private async cleanMatchmakingQueue(): Promise<string[]> {
         const entries = await this.redis.lrange(MATCHMAKING_QUEUE_KEY, 0, -1);
+        const seen = new Set<string>();
         const activeUsers: string[] = [];
+
         for (const entry of entries) {
-            const parsed = JSON.parse(entry) as { userId: string };
-            if ((await this.redis.exists(`${PRESENCE_PREFIX}${parsed.userId}`)) === 1) {
-                activeUsers.push(parsed.userId);
-            } else {
-                await this.redis.lrem(MATCHMAKING_QUEUE_KEY, 1, entry);
-                await this.redis.srem(MATCHMAKING_MEMBERS_KEY, parsed.userId);
+            let userId: string | undefined;
+            try {
+                userId = (JSON.parse(entry) as { userId?: string }).userId;
+            } catch {
+                userId = undefined;
+            }
+
+            const connected = userId ? (await this.redis.exists(`${PRESENCE_PREFIX}${userId}`)) === 1 : false;
+            if (userId && connected && !seen.has(userId)) {
+                seen.add(userId);
+                activeUsers.push(userId);
+                continue;
+            }
+
+            await this.redis.lrem(MATCHMAKING_QUEUE_KEY, 1, entry);
+            if (userId && !connected) {
+                await this.redis.srem(MATCHMAKING_MEMBERS_KEY, userId);
             }
         }
-        return [...new Set(activeUsers)];
+
+        logger.debug(`[matchmaking] cleanMatchmakingQueue ${JSON.stringify({ activeUsers, queueSize: activeUsers.length })}`);
+        return activeUsers;
     }
 
     private async getActiveMatchmakingUsers(): Promise<string[]> {
@@ -947,12 +1155,17 @@ export class SocketService {
 
     /**
      * Matchmaking lifecycle: a player left the active match or disconnected.
-     * If the session no longer keeps at least two active participants, the match
-     * is invalidated and the server clears the game state.
+     * - Partida terminada: se recicla y todos los demás vuelven al final de la cola.
+     * - Partida en curso que se queda sin 2 participantes conectados: se cancela
+     *   (se borra ACTIVE_MATCH + GAME_STATE) y los que quedan se reencolan.
      */
     async handlePlayerDeparture(userId: string): Promise<void> {
         try {
-            const activeMatch = await this.getActiveGame();
+            await this.logQueueState('handlePlayerDeparture:inicio', { userId });
+
+            // Raw: getActiveGame() devuelve null en cuanto el usuario que se va pierde la presencia,
+            // y entonces nadie limpiaba la partida ni reencolaba al que se quedaba.
+            const activeMatch = await this.getRawActiveMatch();
             if (!activeMatch) {
                 await this.leaveMatchmaking(userId);
                 return;
@@ -968,41 +1181,45 @@ export class SocketService {
                 return;
             }
 
+            const currentState = await this.getGameState();
+            const matchFinished = currentState !== null &&
+                currentState.game === activeMatch.game &&
+                this.isTerminalGameState(currentState);
+
+            if (matchFinished && currentState) {
+                await this.leaveMatchmaking(userId);
+                await this.recycleFinishedMatch(currentState, [userId]);
+                return;
+            }
+
             const remainingIds = [...participantIds].filter((id) => id !== userId);
-            if (remainingIds.length < 2) {
-                await this.redis.del(ACTIVE_MATCH_KEY, GAME_STATE_KEY);
+            const remainingPresence = remainingIds.length > 0
+                ? await this.redis.mget(...remainingIds.map((id) => `${PRESENCE_PREFIX}${id}`))
+                : [];
+            const activeRemainingIds = remainingIds.filter((_, index) => Boolean(remainingPresence[index]));
+
+            if (activeRemainingIds.length >= 2) {
                 await this.leaveMatchmaking(userId);
-                this.broadcastMatchmakingLog('Partida cancelada por desconexión', {
-                    userId,
-                    remainingIds,
-                });
+                logger.debug(`User ${userId} left an active match while the session remains valid`);
+                await this.logQueueState('handlePlayerDeparture:partida-continua', { userId, activeRemainingIds });
                 return;
             }
 
-            const remainingPresence = await this.redis.mget(
-                ...remainingIds.map((id) => `${PRESENCE_PREFIX}${id}`),
-            );
-            const activeRemaining = remainingPresence.filter(Boolean).length;
-            if (activeRemaining < 2) {
-                await this.redis.del(ACTIVE_MATCH_KEY, GAME_STATE_KEY);
-                for (const remainingId of remainingIds) {
-                    if ((await this.redis.exists(`${PRESENCE_PREFIX}${remainingId}`)) === 1) {
-                        await this.addUserToRoom(remainingId, GAME_ROOM_ID);
-                        await this.enqueueForMatchmaking(remainingId);
-                    }
-                }
-                await this.leaveMatchmaking(userId);
-                this.broadcastMatchmakingLog('Partida cancelada por desconexión', {
-                    userId,
-                    remainingIds,
-                    activeRemaining,
-                });
-                void this.tryCreateMatch();
-                return;
-            }
-
+            // La partida ya no puede continuar: limpiar estado y reencolar a los que quedan.
+            await this.redis.del(ACTIVE_MATCH_KEY, GAME_STATE_KEY);
             await this.leaveMatchmaking(userId);
-            logger.debug(`User ${userId} left an active match while the session remains valid`);
+            for (const id of remainingIds) {
+                if (!activeRemainingIds.includes(id)) await this.leaveMatchmaking(id);
+            }
+            await this.requeueUsers(activeRemainingIds);
+
+            this.broadcastMatchmakingLog('Partida cancelada por desconexión', {
+                userId,
+                remainingIds,
+                activeRemainingIds,
+            });
+            await this.logQueueState('handlePlayerDeparture:partida-cancelada', { userId, activeRemainingIds });
+            void this.tryCreateMatch(true);
         } catch (error) {
             logger.error(`Error handling player departure for user ${userId}:`, error);
         }
@@ -1015,13 +1232,17 @@ export class SocketService {
         try {
             const queueItems = await this.redis.lrange(MATCHMAKING_QUEUE_KEY, 0, -1);
             for (const item of queueItems) {
-                const parsed = JSON.parse(item);
-                if (parsed.userId === userId) {
+                try {
+                    if ((JSON.parse(item) as { userId?: string }).userId === userId) {
+                        await this.redis.lrem(MATCHMAKING_QUEUE_KEY, 1, item);
+                    }
+                } catch {
                     await this.redis.lrem(MATCHMAKING_QUEUE_KEY, 1, item);
                 }
             }
             await this.redis.srem(MATCHMAKING_MEMBERS_KEY, userId);
             logger.debug(`User ${userId} removed from matchmaking queue`);
+            await this.logQueueState('leaveMatchmaking', { userId });
         } catch (error) {
             logger.error(`Error leaving matchmaking queue for user ${userId}:`, error);
         }

@@ -42,13 +42,24 @@ export function useGameSync(
       if (state.game === game) stateHandlerRef.current?.(state);
     };
 
+	const joinGame = (matchGame: MatchGame = game) => {
+      socket.emit('game:join', { roomId: 'global', game: matchGame });
+    };
+
+    const handleMatchFound = (match: { game?: MatchGame }) => joinGame(match.game ?? game);
+    const handleConnect = () => joinGame();
+ 
     socket.on('game:action', handleRemoteAction);
     socket.on('game:state', handleRemoteState);
-    socket.emit('game:join', { roomId: 'global', game });
-
+    socket.on('match_found', handleMatchFound);
+    socket.on('connect', handleConnect);
+    if (socket.connected) joinGame();
+ 
     return () => {
       socket.off('game:action', handleRemoteAction);
       socket.off('game:state', handleRemoteState);
+      socket.off('match_found', handleMatchFound);
+      socket.off('connect', handleConnect);
     };
   }, [game, socket]);
 

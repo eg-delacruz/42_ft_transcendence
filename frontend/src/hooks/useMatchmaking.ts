@@ -14,6 +14,7 @@ export type MatchData = {
 };
 
 export type MatchmakingLog = {
+  id?: string; // lo genera el servidor; usarlo como key de React
   message: string;
   details: Record<string, unknown>;
   timestamp: string;
@@ -22,6 +23,9 @@ export type MatchmakingLog = {
 export const useMatchmaking = () => {
   const { socket } = useSocket();
   const { user } = useAuthContext();
+  // Dependemos del id (string estable) y no del objeto user, que puede cambiar de
+  // identidad en cada render del contexto y relanzaba el efecto.
+  const userId = user?.id ?? user?._id;
   const [inQueue, setInQueue] = useState(false);
   const [matchData, setMatchData] = useState<MatchData | null>(null);
   const [logs, setLogs] = useState<MatchmakingLog[]>([]);
@@ -37,7 +41,6 @@ export const useMatchmaking = () => {
 
     const handleMatchFound = (data: Omit<MatchData, 'role'>) => {
       console.info('[matchmaking] partida encontrada', data);
-      const userId = user?.id ?? user?._id;
       const normalizedPlayers = data.players.map((player) => ({
         ...player,
         username: player.username ?? player.userId,
@@ -49,23 +52,28 @@ export const useMatchmaking = () => {
       setMatchData({ ...data, players: normalizedPlayers, role });
     };
 
-    socket.on('queue_status', handleQueueStatus);
-    socket.on('match_found', handleMatchFound);
-
     const handleMatchmakingLog = (log: MatchmakingLog) => {
       console.info(`[matchmaking] ${log.message}`, log.details);
       setLogs((current) => [log, ...current].slice(0, 8));
     };
-    socket.on('matchmaking:log', handleMatchmakingLog);
 
-    socket.emit('join_matchmaking');
+    // Entrar en la cola en cada (re)conexión: si el socket se cae y vuelve, el servidor
+    // ya no tiene al usuario en la cola y nadie volvía a emitir join_matchmaking.
+    const joinQueueOnConnect = () => socket.emit('join_matchmaking');
+
+    socket.on('queue_status', handleQueueStatus);
+    socket.on('match_found', handleMatchFound);
+    socket.on('matchmaking:log', handleMatchmakingLog);
+    socket.on('connect', joinQueueOnConnect);
+    if (socket.connected) joinQueueOnConnect();
 
     return () => {
       socket.off('queue_status', handleQueueStatus);
       socket.off('match_found', handleMatchFound);
       socket.off('matchmaking:log', handleMatchmakingLog);
+      socket.off('connect', joinQueueOnConnect);
     };
-  }, [socket, user]);
+  }, [socket, userId]);
 
   const joinQueue = () => socket?.emit('join_matchmaking');
   const leaveQueue = () => socket?.emit('leave_matchmaking');
