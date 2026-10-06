@@ -23,7 +23,7 @@ export function TheRace({ onExitToMenu, playerRole, matchData }: TheRaceProps) {
 	const [raceState, setRaceState] = useState<RaceState>(createInitialRaceState);
 	const [elapsedSeconds, setElapsedSeconds] = useState(0);
 	const hasSubmittedScore = useRef(false);
-	const { t, i18n } = useTranslation();
+	const { t } = useTranslation();
 
 	useEffect(() => {
     	setActiveGame('the-race');
@@ -156,6 +156,8 @@ export function TheRace({ onExitToMenu, playerRole, matchData }: TheRaceProps) {
 }
 
 function RaceStatus({ raceState, winnerName }: { raceState: RaceState; winnerName: string }) {
+	const { t } = useTranslation();
+	
   if (raceState.phase === 'bettingCountdown') 
 	return 
 		<section className="raceStatusBox raceBox">

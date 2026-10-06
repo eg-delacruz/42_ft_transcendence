@@ -101,20 +101,44 @@ async function startServer() {
         });
 
         socket.on('game:join', async (payload: { roomId: string; game: string }) => {
-            if (!user || !socketService) return;
+            if (!user || !socketService) 
+				return;
             const activeMatch = await socketService.getActiveGame();
+
+			logger.info('[game] activeMatch al hacer game:join', {
+				socketId: socket.id,
+				userId: user.userId,
+				activeMatch,
+			});
+
             if (activeMatch?.roomId !== payload.roomId || activeMatch.game !== payload.game) {
-                socket.emit('game:error', { code: 'INVALID_GAME_SESSION' });
+				logger.warn('[game] INVALID_GAME_SESSION', {
+					socketId: socket.id,
+					userId: user.userId,
+					payload,
+					activeMatch,
+				});
+				socket.emit('game:error', { code: 'INVALID_GAME_SESSION' });
                 return;
             }
             socket.join(payload.roomId);
+
+			logger.info('[game] socket unido a la partida', {
+				socketId: socket.id,
+				userId: user.userId,
+				roomId: payload.roomId,
+				game: payload.game,
+			});
+
             socket.emit('game:ready', activeMatch);
             const gameState = await socketService.ensureGameState();
-            if (gameState) socket.emit('game:state', gameState);
+            if (gameState) 
+				socket.emit('game:state', gameState);
         });
 
         socket.on('game:action', async (payload) => {
-            if (!user || !socketService) return;
+            if (!user || !socketService) 
+				return;
             const result = await socketService.applyGameAction(user.userId, payload);
             if (!result) {
                 socket.emit('game:error', { code: 'INVALID_GAME_ACTION' });

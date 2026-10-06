@@ -61,7 +61,7 @@ export type FightState = {
   winnerId?: FightPlayerId;
 };
 
-export const FIGHT_INITIAL_HEALTH = 50;
+export const FIGHT_INITIAL_HEALTH = 150;
 
 export const FIGHT_BETTING_COUNTDOWN_SECONDS = 3;
 export const FIGHT_SELECTION_SECONDS = 3;

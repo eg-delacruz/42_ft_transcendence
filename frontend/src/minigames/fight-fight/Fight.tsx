@@ -40,7 +40,7 @@ export function FightFight({ onExitToMenu, onMinigameChange, playerRole, matchDa
 	const { user } = useAuthContext();
 	const [fightState, setFightState] = useState<FightState>(createInitialFightState,);
 	const hasSubmittedScore = useRef(false);
-	const { t, i18n } = useTranslation();
+	const { t } = useTranslation();
 
 	const { sendAction } = useGameSync(
 		'fight_fight',
@@ -217,6 +217,7 @@ function FighterStatus({
   const healthPercentage = getHealthPercentage(player.health);
   const width = `${Math.round(healthPercentage)}%`;
   const isLeft = side === 'left';
+  const { t } = useTranslation();
 
   return (
 	<article
@@ -252,6 +253,7 @@ function FighterStatus({
 }
 
 function FightClock({ fightState }: { fightState: FightState }) {
+	const { t } = useTranslation();
   return (
 	<div className="h-2/3 my-auto flex flex-col items-center bg-repeat bg-[url(../minigames/assets/fight-sign.png)] border-slate-100 border-8 rounded-xl">
 	  <div className="w-full h-full flex flex-col items-center justify-center">
@@ -277,6 +279,7 @@ function DecisionDisplay({
   const isImageIcon =
 	typeof actionIcon === 'string' &&
 	/\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(actionIcon);
+	const { t } = useTranslation();
 
   return (
 	<div className="w-full h-full flex flex-col items-center justify-center gap-2">
@@ -303,6 +306,7 @@ function RoundResult({
   player1Name: string;
   player2Name: string;
 }) {
+	const { t } = useTranslation();
   if (fightState.phase === 'bettingCountdown') {
 	return (
 	  <section className="flex flex-col items-center justify-center gap-6 text-center">
@@ -353,6 +357,7 @@ function RoundResult({
 }
 
 function ActionGuide() {
+	const { t } = useTranslation();
   return (
 	<section className="grid grid-cols-4 items-center justify-center p-4 gap-3 border-2 border-zinc-50 basicText">
 	  <ActionGuideItem

@@ -12,7 +12,8 @@ import { useTranslation } from 'react-i18next';
 import { SocketDebug } from "./Chat";
 
 function formatMatchPlayersLabel(matchData?: { players?: { userId: string; username: string; role: string }[]; spectators?: string[] }) {
-    if (!matchData?.players?.length) return 'Sin jugadores';
+    if (!matchData?.players?.length) 
+		return 'Sin jugadores';
 
     const players = matchData.players.map((player) => ({
         ...player,
@@ -93,7 +94,8 @@ function GameRoomContent() {
                         <div className="flex items-center justify-between w-full">
                             <p className="text-slate-300 text-sm">Entrando en la sala global...</p>
                         </div>
-                    )}
+                    )
+					}
                     {logs.length > 0 && (
                         <div className="ml-4 max-w-xl overflow-hidden text-xs text-slate-400">
                             {logs.slice(0, 2).map((log: MatchmakingLog) => {
@@ -106,7 +108,7 @@ function GameRoomContent() {
                                     ? `Jugador 1: ${player1} | Jugador 2: ${player2}${spectators ? ` | Espectadores: ${spectators}` : ''}`
                                     : log.message;
 
-                                return <p key={`${log.timestamp}-${log.message}`}>{label}</p>;
+                                return <p key={`${log.id}` ?? `${log.timestamp}-${log.message}`}>{label}</p>;
                             })}
                         </div>
                     )}

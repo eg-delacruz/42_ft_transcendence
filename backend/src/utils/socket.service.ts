@@ -321,7 +321,8 @@ export class SocketService {
 
                 await this.redis.sadd(MATCHMAKING_MEMBERS_KEY, user.userId);
                 await this.addUserToRoom(user.userId, GAME_ROOM_ID);
-
+                // Quien llega con una partida en curso y no participa en ella se pone en cola;
+                // antes solo se añadía a "members" y nunca volvía a entrar en el matchmaking.
                 if (!isParticipant) {
                     await this.enqueueForMatchmaking(user.userId, socketId);
                 }
@@ -392,6 +393,8 @@ export class SocketService {
         const currentState = await this.getGameState();
         if (currentState?.game === activeMatch.game) 
 			return currentState;
+
+        logger.info(`[matchmaking] ensureGameState: creando estado de juego para ${activeMatch.game} (players: ${activeMatch.players.map((p) => p.userId).join(', ')})`);
 
         if (activeMatch.game === 'fight_fight') {
             const state: GameStatePayload = {
@@ -471,11 +474,6 @@ export class SocketService {
 					return null;
                 const state = { ...currentState, state: nextState, timestamp: Date.now() };
                 await this.redis.set(GAME_STATE_KEY, JSON.stringify(state));
-
-                if (this.isTerminalGameState(state)) {
-                    void this.recycleFinishedMatch(state);
-                }
-
                 return { action, state };
             }
 
@@ -528,7 +526,8 @@ export class SocketService {
         const currentState = await this.getGameState();
         if (!currentState) 
 			return null;
-
+        // Un estado terminal alcanzado por una acción del jugador (p. ej. dungeon 'escaped'/'dead')
+        // nunca lo produce un tick, así que había que reciclarlo aquí o la partida no terminaba nunca.
         if (this.isTerminalGameState(currentState)) {
             void this.recycleFinishedMatch(currentState);
             return null;
@@ -990,126 +989,227 @@ export class SocketService {
      * reintento): nadie espera el resultado, así que hay que avisar a la sala con `match_found`.
      * Desde joinMatchmaking va en false porque el gateway ya emite el evento con el resultado.
      */
-    private async tryCreateMatch(notify = false): Promise<MatchmakingResult | null> {
-        const lockToken = `${Date.now()}-${Math.random()}`;
-        const lockAcquired = await this.redis.set(MATCHMAKING_LOCK_KEY, lockToken, 'EX', 15, 'NX');
-        if (!lockAcquired) {
-            logger.debug('[matchmaking] tryCreateMatch omitido: ya hay otro intento en curso (lock)');
+private async tryCreateMatch(notify = false): Promise<MatchmakingResult | null> {
+    const lockToken = `${Date.now()}-${Math.random()}`;
+
+    const lockAcquired = await this.redis.set(
+        MATCHMAKING_LOCK_KEY,
+        lockToken,
+        'EX',
+        15,
+        'NX',
+    );
+
+    if (!lockAcquired) {
+        logger.debug('[matchmaking] tryCreateMatch omitido: ya hay otro intento en curso (lock); se reintentará',
+        );
+        setTimeout(() => {
+            void this.tryCreateMatch(true);
+        }, 500);
+        return null;
+    }
+
+    try {
+        const existingMatch = await this.getActiveGame();
+
+        if (existingMatch) {
+            return {
+                payload: existingMatch,
+                created: false,
+            };
+        }
+
+        let queueUsers = await this.cleanMatchmakingQueue();
+
+        await this.logQueueState('tryCreateMatch:inicio', {
+            queueUsers,
+        });
+
+        if (queueUsers.length < 2) {
+            this.broadcastMatchmakingLog(
+                'Esperando al menos dos usuarios activos',
+                { users: queueUsers },
+            );
+
             return null;
         }
 
-        try {
-            const existingMatch = await this.getActiveGame();
-            if (existingMatch)
-                return { payload: existingMatch, created: false };
+        this.broadcastMatchmakingLog(
+            'Cuenta atras de matchmaking iniciada',
+            {
+                seconds: 5,
+                users: queueUsers,
+            },
+        );
 
-            let queueUsers = await this.cleanMatchmakingQueue();
-            await this.logQueueState('tryCreateMatch:inicio', { queueUsers });
-            if (queueUsers.length < 2) {
-                this.broadcastMatchmakingLog('Esperando al menos dos usuarios activos', { users: queueUsers });
-                return null;
-            }
-
-            this.broadcastMatchmakingLog('Cuenta atras de matchmaking iniciada', { seconds: 5, users: queueUsers });
-            for (let seconds = 5; seconds > 0; seconds -= 1) {
-                this.broadcastMatchmakingLog(`Matchmaking comienza en ${seconds}`, { users: await this.getActiveMatchmakingUsers() });
-                await new Promise((resolve) => setTimeout(resolve, 1000));
-                queueUsers = await this.cleanMatchmakingQueue();
-                if (queueUsers.length < 2) {
-                    this.broadcastMatchmakingLog('Cuenta atras cancelada: un usuario se desconecto', { users: queueUsers });
-                    await this.logQueueState('tryCreateMatch:cuenta-atras-cancelada', { seconds, queueUsers });
-                    return null;
-                }
-            }
-
-            const rawPlayers = (await this.redis.lpop(MATCHMAKING_QUEUE_KEY, 2)) ?? [];
-            const popped = rawPlayers.map((raw) => ({ raw, userId: (JSON.parse(raw) as { userId: string }).userId }));
-            await this.logQueueState('tryCreateMatch:tras-lpop', { popped: popped.map((p) => p.userId) });
-
-            // Validar que los dos sigan conectados y sean distintos. Antes, si fallaba, los
-            // usuarios extraídos se perdían (fuera de la cola pero aún en "members").
-            const valid: typeof popped = [];
-            for (const entry of popped) {
-                const connected = (await this.redis.exists(`${PRESENCE_PREFIX}${entry.userId}`)) === 1;
-                if (connected && !valid.some((v) => v.userId === entry.userId)) {
-                    valid.push(entry);
-                } else if (!connected) {
-                    await this.redis.srem(MATCHMAKING_MEMBERS_KEY, entry.userId);
-                }
-            }
-            if (valid.length < 2) {
-                // Devolver a los válidos a la cabeza de la cola, en su orden original.
-                for (const entry of [...valid].reverse()) {
-                    await this.redis.lpush(MATCHMAKING_QUEUE_KEY, entry.raw);
-                }
-                this.broadcastMatchmakingLog('Matchmaking abortado: un jugador se desconectó justo antes de empezar', {
-                    popped: popped.map((p) => p.userId),
-                    returnedToQueue: valid.map((v) => v.userId),
-                });
-                await this.logQueueState('tryCreateMatch:abortado-tras-lpop');
-                // El lock aún está tomado; reintentamos un poco después de liberarlo.
-                setTimeout(() => void this.tryCreateMatch(true), 500);
-                return null;
-            }
-
-            const userIds = valid.map((entry) => entry.userId);
-            userIds.sort(() => Math.random() - 0.5);
-
-            const game = this.getRandomGame();
-            const participantDetails = await this.redis.mget(...userIds.map((userId) => `${PRESENCE_PREFIX}${userId}`));
-            const usernamesByUserId = new Map(
-                userIds.map((userId, index) => {
-                    const rawPresence = participantDetails[index];
-                    const username = rawPresence ? (JSON.parse(rawPresence) as UserPresence).username : userId;
-                    return [userId, username] as const;
-                }),
+        for (let seconds = 5; seconds > 0; seconds -= 1) {
+            this.broadcastMatchmakingLog(
+                `Matchmaking comienza en ${seconds}`,
+                {
+                    users: await this.getActiveMatchmakingUsers(),
+                },
             );
 
-            const players = game === 'deep_&_dark'
-                ? [{ userId: userIds[0], username: usernamesByUserId.get(userIds[0]) ?? userIds[0], role: 'solo' as const }]
-                : [
-                    { userId: userIds[0], username: usernamesByUserId.get(userIds[0]) ?? userIds[0], role: 'player1' as const },
-                    { userId: userIds[1], username: usernamesByUserId.get(userIds[1]) ?? userIds[1], role: 'player2' as const },
-                ];
-            const spectators = game === 'deep_&_dark' && userIds.length > 1 ? [userIds[1]] : [];
-            const payload: MatchFoundPayload = {
-                roomId: GAME_ROOM_ID,
-                game,
-                players,
-                spectators,
-            };
+            await new Promise((resolve) => setTimeout(resolve, 1000));
 
-            const playerOneId = players[0]?.userId ?? 'N/A';
-            const playerTwoId = players[1]?.userId ?? 'N/A';
-            const logMessage = game === 'deep_&_dark'
-                ? `Partida iniciada: Jugador 1: ${playerOneId}${spectators.length ? ` | Espectador: ${spectators.join(', ')}` : ''}`
-                : `Partida iniciada: Jugador 1: ${playerOneId} | Jugador 2: ${playerTwoId}${spectators.length ? ` | Espectadores: ${spectators.join(', ')}` : ''}`;
+            queueUsers = await this.cleanMatchmakingQueue();
 
-            // Limpiar cualquier estado de una partida anterior: si no, ensureGameState() reutiliza
-            // un estado terminal viejo cuando el juego sorteado coincide con el anterior.
-            await this.redis.del(GAME_STATE_KEY);
-            await this.redis.set(ACTIVE_MATCH_KEY, JSON.stringify(payload));
-            for (const userId of userIds) {
-                await this.addUserToRoom(userId, GAME_ROOM_ID);
-            }
-            logger.info(`Global match created: ${game} (${userIds.join(', ')})`);
-            this.broadcastMatchmakingLog(logMessage, { game, roomId: GAME_ROOM_ID, players, spectators, player1: playerOneId, player2: playerTwoId });
-            await this.logQueueState('tryCreateMatch:partida-creada', { game, notify });
-            if (notify) {
-                this.broadcastToRoom(GAME_ROOM_ID, 'match_found', payload);
-            }
-
-            return { payload, created: true };
-        } finally {
-            const currentToken = await this.redis.get(MATCHMAKING_LOCK_KEY);
-            if (currentToken === lockToken) {
-                await this.redis.del(MATCHMAKING_LOCK_KEY);
+            if (queueUsers.length < 2) {
+                this.broadcastMatchmakingLog('Cuenta atras cancelada: un usuario se desconecto',{users: queueUsers,},);
+                await this.logQueueState('tryCreateMatch:cuenta-atras-cancelada',{seconds,queueUsers,},);
+                return null;
             }
         }
-    }
 
-    private getRandomGame(gamesOverride?: GameName[]): GameName {
-        const games = gamesOverride ?? ['the_race', 'fight_fight', 'deep_&_dark'];
+        const rawPlayers =
+            (await this.redis.lpop(MATCHMAKING_QUEUE_KEY, 2)) ?? [];
+        const popped = rawPlayers.map((raw) => ({raw,userId: (JSON.parse(raw) as { userId: string }).userId,}));
+
+        await this.logQueueState('tryCreateMatch:tras-lpop', {popped: popped.map((p) => p.userId),});
+
+        // Validar que los dos sigan conectados y sean distintos.
+        const valid: typeof popped = [];
+
+        for (const entry of popped) {
+            const connected =
+                (await this.redis.exists(`${PRESENCE_PREFIX}${entry.userId}`,)) === 1;
+
+            if (connected && !valid.some((v) => v.userId === entry.userId)) {
+                valid.push(entry);
+            } else if (!connected) {
+                await this.redis.srem(MATCHMAKING_MEMBERS_KEY, entry.userId,);
+            }
+        }
+
+        if (valid.length < 2) {
+            // Devolver a los válidos a la cabeza de la cola.
+            for (const entry of [...valid].reverse()) {
+                await this.redis.lpush(MATCHMAKING_QUEUE_KEY, entry.raw,);
+            }
+
+            this.broadcastMatchmakingLog(
+                'Matchmaking abortado: un jugador se desconectó justo antes de empezar',
+                {
+                    popped: popped.map((p) => p.userId),
+                    returnedToQueue: valid.map((v) => v.userId),
+                },
+            );
+
+            await this.logQueueState('tryCreateMatch:abortado-tras-lpop',);
+            setTimeout(() => {
+                void this.tryCreateMatch(true);}, 500);
+            return null;
+        }
+
+        const userIds = valid.map((entry) => entry.userId);
+        userIds.sort(() => Math.random() - 0.5);
+        const game = this.getRandomGame();
+        const participantDetails = await this.redis.mget(
+            ...userIds.map(
+                (userId) => `${PRESENCE_PREFIX}${userId}`,
+            ),
+        );
+
+        const usernamesByUserId = new Map(
+            userIds.map((userId, index) => {
+                const rawPresence = participantDetails[index];
+                const username = rawPresence
+                    ? (JSON.parse(rawPresence) as UserPresence).username
+                    : userId;
+
+                return [userId, username] as const;
+            }),
+        );
+
+        const players =
+            game === 'deep_&_dark'
+                ? [{ userId: userIds[0], username: usernamesByUserId.get(userIds[0]) ?? userIds[0], role: 'solo' as const,},]
+                : [{userId: userIds[0], username: usernamesByUserId.get(userIds[0]) ?? userIds[0], role: 'player1' as const, },
+                    {userId: userIds[1], username: usernamesByUserId.get(userIds[1]) ?? userIds[1],role: 'player2' as const,},
+                ];
+
+        const spectators =
+            game === 'deep_&_dark'
+                ? [userIds[1]]
+                : [];
+
+        const payload: MatchFoundPayload = {
+            roomId: GAME_ROOM_ID,
+            game,
+            players,
+            spectators,
+        };
+
+        const playerOneId = players[0]?.userId ?? 'N/A';
+        const playerTwoId = players[1]?.userId ?? 'N/A';
+
+        const logMessage =
+            game === 'deep_&_dark'
+                ? `Partida iniciada: Jugador 1: ${playerOneId}${
+                    spectators.length
+                        ? ` | Espectador: ${spectators.join(', ')}`
+                        : ''
+                }`
+                : `Partida iniciada: Jugador 1: ${playerOneId} | Jugador 2: ${playerTwoId}${
+                    spectators.length
+                        ? ` | Espectadores: ${spectators.join(', ')}`
+                        : ''
+                }`;
+
+        // Limpiar el estado de la partida anterior antes de crear una nueva.
+        await this.redis.del(GAME_STATE_KEY);
+
+        await this.redis.set(ACTIVE_MATCH_KEY,JSON.stringify(payload),);
+
+        for (const userId of userIds) {
+			await this.addUserToRoom(userId,GAME_ROOM_ID,);
+        }
+
+        logger.info(
+            `Global match created: ${game} (${userIds.join(', ')})`,
+        );
+
+        this.broadcastMatchmakingLog(
+            logMessage,
+            {
+                game,
+                roomId: GAME_ROOM_ID,
+                players,
+                spectators,
+                player1: playerOneId,
+                player2: playerTwoId,
+            },
+        );
+
+        await this.logQueueState(
+            'tryCreateMatch:partida-creada',
+            {
+                game,
+                notify,
+            },
+        );
+
+        if (notify) {
+            this.broadcastToRoom(
+                GAME_ROOM_ID,
+                'match_found',
+                payload,
+            );
+        }
+
+        return {payload, created: true,};
+    } finally {
+        const currentToken =
+            await this.redis.get(MATCHMAKING_LOCK_KEY);
+
+        if (currentToken === lockToken) {
+            await this.redis.del(MATCHMAKING_LOCK_KEY);
+        }
+    }
+}
+
+    private getRandomGame(): GameName {
+        const games: GameName[] = ['the_race', 'fight_fight', 'deep_&_dark'];
         return games[Math.floor(Math.random() * games.length)];
     }
 

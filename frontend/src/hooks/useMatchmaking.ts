@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuthContext } from '@/context/context';
 import { useSocket } from './useSocket';
 
@@ -29,14 +29,24 @@ export const useMatchmaking = () => {
   const [inQueue, setInQueue] = useState(false);
   const [matchData, setMatchData] = useState<MatchData | null>(null);
   const [logs, setLogs] = useState<MatchmakingLog[]>([]);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+	const endTimer = () => {
+		if (timerRef.current !== null) {
+			clearTimeout(timerRef.current);
+			timerRef.current = null;
+		}
+	};
 
   useEffect(() => {
-    if (!socket) return;
-
+    if (!socket) 
+		return;
     const handleQueueStatus = (data: { status: string }) => {
       console.info('[matchmaking]', data);
-      if (data.status === 'waiting') setInQueue(true);
-      if (data.status === 'cancelled') setInQueue(false);
+      if (data.status === 'waiting') 
+		setInQueue(true);
+      if (data.status === 'cancelled') 
+		setInQueue(false);
     };
 
     const handleMatchFound = (data: Omit<MatchData, 'role'>) => {
@@ -57,26 +67,23 @@ export const useMatchmaking = () => {
       setLogs((current) => [log, ...current].slice(0, 8));
     };
 
-    // Entrar en la cola en cada (re)conexión: si el socket se cae y vuelve, el servidor
-    // ya no tiene al usuario en la cola y nadie volvía a emitir join_matchmaking.
-    const joinQueueOnConnect = () => socket.emit('join_matchmaking');
-
     socket.on('queue_status', handleQueueStatus);
     socket.on('match_found', handleMatchFound);
     socket.on('matchmaking:log', handleMatchmakingLog);
-    socket.on('connect', joinQueueOnConnect);
-    if (socket.connected) joinQueueOnConnect();
 
     return () => {
       socket.off('queue_status', handleQueueStatus);
       socket.off('match_found', handleMatchFound);
       socket.off('matchmaking:log', handleMatchmakingLog);
-      socket.off('connect', joinQueueOnConnect);
     };
   }, [socket, userId]);
 
-  const joinQueue = () => socket?.emit('join_matchmaking');
-  const leaveQueue = () => socket?.emit('leave_matchmaking');
+  const joinQueue = () => {
+	socket?.emit('join_matchmaking')
+};
+  const leaveQueue = () => {
+	socket?.emit('leave_matchmaking')
+};
 
   return { inQueue, matchData, logs, joinQueue, leaveQueue };
 };
