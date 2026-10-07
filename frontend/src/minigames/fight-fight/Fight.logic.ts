@@ -177,7 +177,7 @@ export function calculateRoundResult(
       player2Damage: 0,
       player1ScoreGain: FIGHT_ROUND_SCORE,
       player2ScoreGain: FIGHT_ROUND_SCORE,
-      message: `${FIGHT_ACTION_ICONS.dodge} Esquiva usada. Nadie recibe daño.`,
+      message: "fight.dodgeMsg",
     };
   }
 
@@ -189,7 +189,7 @@ export function calculateRoundResult(
         player2Damage: 0,
         player1ScoreGain: FIGHT_ROUND_SCORE + FIGHT_DRAW_SCORE,
         player2ScoreGain: FIGHT_ROUND_SCORE + FIGHT_DRAW_SCORE,
-        message: `${FIGHT_ACTION_ICONS.grab} Ambos usan agarre. Nadie recibe daño.`,
+        message: "fight.grabMsg",
       };
     }
 
@@ -199,7 +199,7 @@ export function calculateRoundResult(
       player2Damage: applyResistance(player2, FIGHT_DRAW_DAMAGE),
       player1ScoreGain: FIGHT_ROUND_SCORE + FIGHT_DRAW_SCORE,
       player2ScoreGain: FIGHT_ROUND_SCORE + FIGHT_DRAW_SCORE,
-      message: `Empate de ${FIGHT_ACTION_ICONS[player1Action]} ${FIGHT_ACTION_LABELS[player1Action]}. Ambos reciben daño.`,
+      message: "fight.drawMsg",
     };
   }
 
@@ -215,7 +215,7 @@ export function calculateRoundResult(
         FIGHT_WIN_SCORE +
         (player1.consecutiveWins > 0 ? FIGHT_CONSECUTIVE_WIN_SCORE : 0),
       player2ScoreGain: FIGHT_ROUND_SCORE,
-      message: `Player 1 gana: ${FIGHT_ACTION_ICONS[player1Action]} ${FIGHT_ACTION_LABELS[player1Action]} vence a ${FIGHT_ACTION_ICONS[player2Action]} ${FIGHT_ACTION_LABELS[player2Action]}.`,
+      message: "",
     };
   }
 
@@ -230,7 +230,7 @@ export function calculateRoundResult(
       FIGHT_ROUND_SCORE +
       FIGHT_WIN_SCORE +
       (player2.consecutiveWins > 0 ? FIGHT_CONSECUTIVE_WIN_SCORE : 0),
-    message: `Player 2 gana: ${FIGHT_ACTION_ICONS[player2Action]} ${FIGHT_ACTION_LABELS[player2Action]} vence a ${FIGHT_ACTION_ICONS[player1Action]} ${FIGHT_ACTION_LABELS[player1Action]}.`,
+    message: "",
   };
 }
 

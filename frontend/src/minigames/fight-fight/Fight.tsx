@@ -182,24 +182,6 @@ return (
   				<p className="m-0 text-md"	>{FIGHT_PLAYER_1_CONTROLS_TEXT}</p>
 				<p className="m-0 text-md"	>{FIGHT_PLAYER_2_CONTROLS_TEXT}</p>
 			</section>
-
-		{fightState.phase === 'finished' && (
-		<section className="absolute left-1/2 top-1/2 -translate-1/2 z-10 flex flex-col align-center justify-center text-center gap-3">
-			<h2 className="basicText text-4xl text-amber-50 text-shadow-lg text-shadow-zinc-900">{t("fight.combatEnded")}</h2>
-
-			<p className="m-0 text-xl">
-			  {t("game.winner")}{getFightWinnerDisplayName(
-				fightState,
-				player1Name,
-				player2Name,
-			  )}
-			</p>
-
-			<p className="basicText text-lg">
-			  {t("game.backToMenu")}{fightState.resultsCountdown}...
-			</p>
-		</section>
-		)}
 	  </div>
 	</main>
   );
@@ -272,6 +254,7 @@ function DecisionDisplay({
   player: FightPlayer;
   phase: FightState['phase'];
 }) {
+  const { t } = useTranslation();
   const displayedAction = getDisplayedAction(player, phase);
   const actionIcon = displayedAction
 	? FIGHT_PLAYER_ACTION_ICONS[player.id][displayedAction]
@@ -279,18 +262,17 @@ function DecisionDisplay({
   const isImageIcon =
 	typeof actionIcon === 'string' &&
 	/\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(actionIcon);
-	const { t } = useTranslation();
 
   return (
 	<div className="w-full h-full flex flex-col items-center justify-center gap-2">
-		<p className="m-0 w-full h-2/3 flex items-center justify-center bg-contain bg-center bg-no-repeat"
+		<div className="m-0 w-full h-2/3 flex items-center justify-center bg-contain bg-center bg-no-repeat"
  			style={{ backgroundImage: isImageIcon ? `url(${actionIcon})` : undefined,
 		}}>
-		</p>
+		</div>
 		<p className="basicText text-sm">
 			{displayedAction
-				? FIGHT_ACTION_LABELS[displayedAction]
-				: 'Sin acción'}
+				? t(FIGHT_ACTION_LABELS[displayedAction])
+				: t("fight.noAction")}
 		</p>
 		<p className="basicText text-sm">{t("fight.streak")}{player.consecutiveWins}</p>
 	</div>
@@ -332,7 +314,7 @@ function RoundResult({
 
 		{fightState.lastRoundResult ? (
 		  <p className="basicText text-lg">
-			{fightState.lastRoundResult.message}
+			{t(fightState.lastRoundResult.message)} 
 		  </p>
 		) : (
 		  <p className="basicText text-lg">{t("fight.comparing")}</p>
@@ -345,9 +327,11 @@ function RoundResult({
 	return (
 	  <section className="flex flex-col items-center justify-center gap-6 text-center">
 		<p className="basicText text-4xl">KO</p>
-
 		<p className="m-0 text-center basicText text-4xl">
-		  {getFightWinnerDisplayName(fightState, player1Name, player2Name)}
+		  {t("game.winner")}{getFightWinnerDisplayName(fightState, player1Name, player2Name)}
+		</p>
+		<p className="basicText text-lg">
+			{t("game.backToMenu")}{fightState.resultsCountdown}...
 		</p>
 	  </section>
 	);
@@ -362,7 +346,7 @@ function ActionGuide() {
 	<section className="grid grid-cols-4 items-center justify-center p-4 gap-3 border-2 border-zinc-50 basicText">
 	  <ActionGuideItem
 		arrow="←"
-		name="Puñetazo"
+		name={t("fight.punch")}
 		colorStyle="text-blue-500"
 		rule={
 		  <>
@@ -379,7 +363,7 @@ function ActionGuide() {
 
 	  <ActionGuideItem
 		arrow="↑"
-		name="Agarre"
+		name= {t("fight.grab")}
 		colorStyle="text-green-500"
 		rule={
 		  <>
@@ -396,7 +380,7 @@ function ActionGuide() {
 
 	  <ActionGuideItem
 		arrow="→"
-		name="Patada"
+		name= {t("fight.kick")}
 		colorStyle="text-red-500"
 		rule={
 		  <>
@@ -413,7 +397,7 @@ function ActionGuide() {
 
 	  <ActionGuideItem
 		arrow="↓"
-		name="Esquiva"
+		name= {t("fight.dodge")}
 		colorStyle="text-yellow-500"
 		rule={
 		  <>
@@ -452,7 +436,7 @@ function ActionGuideItem({
   );
 }
 
-function getDisplayedAction(
+function  getDisplayedAction(
   player: FightPlayer,
   phase?: FightState['phase'],
 ) {
@@ -476,19 +460,20 @@ function getHealthPercentage(health: number): number {
 }
 
 function getClockLabel(fightState: FightState): string {
+	const { t } = useTranslation();
   if (fightState.phase === 'bettingCountdown') {
-	return 'Apuestas';
+	return t("game.bets");
   }
 
   if (fightState.phase === 'resolving') {
-	return 'Golpe';
+	return t("fight.resolving");
   }
 
   if (fightState.phase === 'finished') {
-	return 'Final';
+	return t("game.finsih");
   }
 
-  return 'Tiempo';
+  return t("game.clock");
 }
 
 function getClockValue(fightState: FightState): string {
@@ -520,6 +505,7 @@ function getFightWinnerDisplayName(
   player1Name: string,
   player2Name: string,
 ): string {
+	const { t } = useTranslation();
   if (fightState.winnerId === 'player1') {
 	return player1Name;
   }
@@ -528,7 +514,7 @@ function getFightWinnerDisplayName(
 	return player2Name;
   }
 
-  return 'Sin ganador';
+  return t("game.noWinner");
 }
 
 function getParticipantName(matchData: MatchData | null | undefined, role: 'player1' | 'player2', fallback: string): string {

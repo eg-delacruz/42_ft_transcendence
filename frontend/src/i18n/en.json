@@ -6,7 +6,6 @@
   "home.footer.copyright": "ft_transcendence © {{year}} — Proyecto 42",
   "home.footer.privacy": "Privacy Policy",
   "home.footer.terms": "Terms of Service",
-  "home.footer.back": "BACK",
 
   "common.back": "BACK",
   "common.cancel": "Cancel",
@@ -93,14 +92,17 @@
   "chat.status.disconnected": "disconnected",
   "chat.status.error": "error",
   "chat.noAction": "No action yet",
+  "chat.unknownUser": "Unknown",
 
 
   "game.bets":"Bets",
   "game.ready":"Ready?",
+  "game.finish":"Finish",
   "game.backToMenu":"Going back to menu ",
   "game.winner":"Winner: ",
+  "game.noWinner":"No one wins",
+  "game.clock":"Time:",
 
-  "race.clock":"Time:",
   "race.goal":"Goal - ",
   "race.finish":"Race finished",
   "race.bets":"The race will start automatically",
@@ -119,10 +121,27 @@
   "fight.kick":"Kick",
   "fight.grab":"Grab",
   "fight.dodge":"Dodge",
+  "fight.draw":"Draw",
+  "fight.noAction":"No action",
   "fight.wins":" wins over ",
   "fight.avoids":" avoids damage",
-  "fight.round":"Round",
+  "fight.round":"Round ",
+
+  "fight.dodgeMsg":"Dodge used. No one recieves damage.",
+  "fight.grabMsg":"Both used grab. No one receives damage.",
+  "fight.drawMsg":"Draw. Both receive damage.",
+  "fight.player1WinsMsg":" wins",
+  "fight.player2WinsMsg":" wins",
   
+  "ddd.HUD.player":"Player",
+  "ddd.HUD.class":"Class",
+  "ddd.HUD.noClass":"No choice made",
+  "ddd.HUD.points":"Points",
+  "ddd.HUD.streak":"Streak",
+  "ddd.HUD.time":"Time",
+  "ddd.HUD.rooms":"Rooms",
+  "ddd.HUD.health":"Health",
+
   "ddd.classes":"Available classes",
   "ddd.defClassWarn": "If you don't choose, Warrior will be selected",
   "ddd.score":"Final score: ",
@@ -144,12 +163,9 @@
   "ddd.objective":"Escape in time. You can give up whenever you like keeping all your points. If your health recahes 0, you'll lose a percentage of your score",
   "ddd.header":"Choose class, complete rooms and escape without dying",
   "ddd.chooseClass":"Choose class",
-  "ddd.HUD.player":"Player",
-  "ddd.HUD.class":"Class",
-  "ddd.HUD.noClass":"No choice made",
-  "ddd.HUD.points":"Points",
-  "ddd.HUD.streak":"Streak",
-  "ddd.HUD.time":"Time",
-  "ddd.HUD.rooms":"Rooms",
-  "ddd.HUD.health":"Health"
+  "ddd.success":"You completed the room",
+  "ddd.fail":"You received damage",
+  "ddd.roomType.combat":"Combat",
+  "ddd.roomType.trap":"Trap",
+  "ddd.roomType.empty":"Empty room"
 }

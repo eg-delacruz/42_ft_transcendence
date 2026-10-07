@@ -37,26 +37,39 @@ export function TheRace({ onExitToMenu, playerRole, matchData }: TheRaceProps) {
   );
 
   useEffect(() => {
-    if (raceState.phase !== 'running') return;
+    if (raceState.phase !== 'running') 
+		return;
     const intervalId = window.setInterval(() => setElapsedSeconds((seconds) => seconds + 1), 1000);
-    return () => window.clearInterval(intervalId);
+    
+	return () => window.clearInterval(intervalId);
   }, [raceState.phase]);
 
   useEffect(() => {
-    if (raceState.phase !== 'finished' || !raceState.winnerId || hasSubmittedScore.current) return;
-    const winner = raceState.players.find((player) => player.id === raceState.winnerId);
-    if (!winner) return;
-    hasSubmittedScore.current = true;
+
+    if (raceState.phase !== 'finished' || !raceState.winnerId || hasSubmittedScore.current) 
+		return;
+    
+	const winner = raceState.players.find((player) => player.id === raceState.winnerId);
+    
+	if (!winner) 
+		return;
+    
+	hasSubmittedScore.current = true;
     const winnerUserId = matchData?.players.find((player) => player.role === raceState.winnerId)?.userId ?? user?.id ?? user?._id;
-    if (!winnerUserId) return;
-    updateMinigameTopScore('the-race', winner.progress, winnerUserId).catch((error) => {
+    
+	if (!winnerUserId) 
+		return;
+    
+	updateMinigameTopScore('the-race', winner.progress, winnerUserId).catch((error) => {
       console.error('Error updating The Race top score:', error);
     });
   }, [raceState.phase, raceState.winnerId, raceState.players, matchData, user]);
 
   useEffect(() => {
-    if (raceState.phase !== 'finished' || raceState.resultsCountdown <= 0) return;
-    const timeoutId = window.setTimeout(() => {
+    if (raceState.phase !== 'finished' || raceState.resultsCountdown <= 0) 
+		return;
+    
+	const timeoutId = window.setTimeout(() => {
       setRaceState((state) => state.phase === 'finished'
         ? { ...state, resultsCountdown: state.resultsCountdown - 1 }
         : state,
@@ -66,15 +79,21 @@ export function TheRace({ onExitToMenu, playerRole, matchData }: TheRaceProps) {
   }, [raceState.phase, raceState.resultsCountdown]);
 
   useEffect(() => {
-    if (raceState.phase === 'finished' && raceState.resultsCountdown <= 0) onExitToMenu?.();
+    if (raceState.phase === 'finished' && raceState.resultsCountdown <= 0) 
+		onExitToMenu?.();
   }, [raceState.phase, raceState.resultsCountdown, onExitToMenu]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.repeat) return;
-      const playerId = getPlayerIdFromKey(event.code);
-      if (!playerId || (playerRole !== 'player1' && playerRole !== 'player2') || playerId !== playerRole) return;
-      event.preventDefault();
+      if (event.repeat) 
+		return;
+      
+	  const playerId = getPlayerIdFromKey(event.code);
+      
+	  if (!playerId || (playerRole !== 'player1' && playerRole !== 'player2') || playerId !== playerRole) 
+		return;
+      
+	  event.preventDefault();
       sendAction('race_step');
     }
     window.addEventListener('keydown', handleKeyDown);
@@ -85,7 +104,7 @@ export function TheRace({ onExitToMenu, playerRole, matchData }: TheRaceProps) {
   const player2 = raceState.players[1];
   const player1Name = getParticipantName(matchData, 'player1', 'Jugador 1');
   const player2Name = getParticipantName(matchData, 'player2', 'Jugador 2');
-  const winnerName = getRaceWinnerName(raceState);
+	const winnerName = getRaceWinnerName(raceState, player1Name, player2Name);
 
   return (
 	<main className="w-full h-screen lex items-center justify-center p-0 relative overflow-hidden bg-amber-500">
@@ -96,7 +115,7 @@ export function TheRace({ onExitToMenu, playerRole, matchData }: TheRaceProps) {
 			<div className="raceBox">
 				<span className="basicText text-4xl">◷</span>
 				<div className="flex flex-col gap-1">
-				<p className="basicText">{t("race.clock")}</p>
+				<p className="basicText">{t("game.clock")}</p>
 				<p className="basicText">{getRaceTimeText(raceState, elapsedSeconds)}</p>
 				</div>
 			</div>
@@ -158,31 +177,38 @@ export function TheRace({ onExitToMenu, playerRole, matchData }: TheRaceProps) {
 function RaceStatus({ raceState, winnerName }: { raceState: RaceState; winnerName: string }) {
 	const { t } = useTranslation();
 	
-  if (raceState.phase === 'bettingCountdown') 
-	return 
-		<section className="raceStatusBox raceBox">
+  if (raceState.phase === 'bettingCountdown') {
+	return (
+		<section className="raceStatusBox raceBox bg-blue-600">
 			<h2 className="basicText text-lg">{t("game.bets")}</h2>
 			<p className="basicText text-2xl">{raceState.bettingCountdown}</p>
 			<p className="basicText text-xs">{t("race.bets")}</p>
-		</section>;
-  if (raceState.phase === 'gameCountdown') 
-	return 
+		</section>
+	);
+  }
+  if (raceState.phase === 'gameCountdown') {
+	return (
 		<section className="raceStatusBox raceBox">
 			<h2 className="basicText text-lg">{t("game.ready")}</h2>
 			<p className="basicText text-2xl">{raceState.gameCountdown}</p>
 			<p className="basicText text-xs">{t("race.ready")}</p>
-		</section>;
-  if (raceState.phase === 'running') 
-	return 
+		</section>
+	);
+  }
+  if (raceState.phase === 'running') {
+	return (
 		<section className="raceStatusBox raceBox">
 			<h2 className="basicText text-lg">{t("race.run")}</h2>
 			<p className="basicText text-xs">{RACE_PLAYER_1_CONTROL_TEXT}{t("race.tutorial")}{RACE_PLAYER_2_CONTROL_TEXT}</p>
-		</section>;
-  return 
-  	<section className="raceStatusBox raceBox">
+		</section>
+	);
+  }
+  return (
+		<section className="raceStatusBox raceBox">
 		<h2 className="basicText text-lg">{t("race.goal")}</h2>
 		<p className="basicText text-md">{winnerName}</p>
-	</section>;
+	</section>
+  );
 }
 
 function RaceRunner({ player }: { player?: RacePlayer }) {

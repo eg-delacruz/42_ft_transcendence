@@ -86,10 +86,20 @@ export function advancePlayer(
   };
 }
 
-export function getRaceWinnerName(state: RaceState): string {
-  const winner = state.players.find((player) => player.id === state.winnerId);
+export function getRaceWinnerName(
+  state: RaceState,
+  player1Name: string,
+  player2Name: string,
+): string {
+  if (state.winnerId === 'player1') {
+    return player1Name;
+  }
 
-  return winner?.name ?? 'Unknown player';
+  if (state.winnerId === 'player2') {
+    return player2Name;
+  }
+
+  return "game.noWinner";
 }
 
 export function getProgressPercentage(progress: number): number {

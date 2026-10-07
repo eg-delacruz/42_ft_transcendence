@@ -61,7 +61,7 @@ export type FightState = {
   winnerId?: FightPlayerId;
 };
 
-export const FIGHT_INITIAL_HEALTH = 150;
+export const FIGHT_INITIAL_HEALTH = 15;
 
 export const FIGHT_BETTING_COUNTDOWN_SECONDS = 3;
 export const FIGHT_SELECTION_SECONDS = 3;
@@ -79,10 +79,10 @@ export const FIGHT_DRAW_SCORE = 1;
 export const FIGHT_ROUND_SCORE = 5;
 
 export const FIGHT_ACTION_LABELS: Record<FightAction, string> = {
-  punch: 'Puñetazo',
-  kick: 'Patada',
-  grab: 'Agarre',
-  dodge: 'Esquiva',
+  punch: "fight.punch",
+  kick: "fight.kick",
+  grab: "fight.grab",
+  dodge: "fight.dodge",
 };
 
 export const FIGHT_ACTION_ICONS: Record<FightAction, string> = {

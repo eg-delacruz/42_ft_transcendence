@@ -97,10 +97,12 @@
 
   "game.bets":"Apuestas",
   "game.ready":"Preparados",
+  "game.finish":"Fin",
   "game.backToMenu":"Volviendo al menú en ",
   "game.winner":"Ganador: ",
+  "game.noWinner":"Sin ganador",
+  "game.clock":"Tiempo:",
 
-  "race.clock":"Tiempo:",
   "race.goal":"Meta - ",
   "race.finish":"Carrera terminada",
   "race.bets":"La carrera empezará automáticamente",
@@ -119,10 +121,27 @@
   "fight.kick":"Patada",
   "fight.grab":"Agarre",
   "fight.dodge":"Esquivar",
+  "fight.draw":"Empate",
+  "fight.noAction":"Sin acción",
   "fight.wins":" gana a ",
   "fight.avoids":" evita daño",
-  "fight.round":"Ronda",
+  "fight.round":"Ronda ",
+
+  "fight.dodgeMsg":"Esquiva usada. Nadie recibe daño.",
+  "fight.grabMsg":"Ambos usan agarre. Nadie recibe daño.",
+  "fight.drawMsg":"Empate. Ambos reciben daño.",
+  "fight.player1WinsMsg":" gana",
+  "fight.player2WinsMsg":" gana",
   
+  "ddd.HUD.player":"Jugador",
+  "ddd.HUD.class":"Clase",
+  "ddd.HUD.noClass":"Sin elegir",
+  "ddd.HUD.points":"Puntos",
+  "ddd.HUD.streak":"Racha",
+  "ddd.HUD.time":"Tiempo",
+  "ddd.HUD.rooms":"Salas",
+  "ddd.HUD.health":"Vida",
+
   "ddd.classes":"Clases disponibles",
   "ddd.defClassWarn": "Si no eliges, se seleccionará Warrior.",
   "ddd.score":"Score final: ",
@@ -144,15 +163,9 @@
   "ddd.preparingPhase":"Preparando expedición",
   "ddd.header":"Elige clase, supera salas y escapa antes de morir.",
   "ddd.chooseClass":"Elige clase",
-  "ddd.HUD.player":"Jugador",
-  "ddd.HUD.class":"Clase",
-  "ddd.HUD.noClass":"Sin elegir",
-  "ddd.HUD.points":"Puntos",
-  "ddd.HUD.streak":"Racha",
-  "ddd.HUD.time":"Tiempo",
-  "ddd.HUD.rooms":"Salas",
-  "ddd.HUD.health":"Vida"
-
+  "ddd.success":"Sala superada",
+  "ddd.fail":"Has recibido daño",
+  "ddd.roomType.combat":"Combate",
+  "ddd.roomType.trap":"Trampa",
+  "ddd.roomType.empty":"Sala vacía"
 }
-
-

@@ -526,8 +526,7 @@ export class SocketService {
         const currentState = await this.getGameState();
         if (!currentState) 
 			return null;
-        // Un estado terminal alcanzado por una acción del jugador (p. ej. dungeon 'escaped'/'dead')
-        // nunca lo produce un tick, así que había que reciclarlo aquí o la partida no terminaba nunca.
+
         if (this.isTerminalGameState(currentState)) {
             void this.recycleFinishedMatch(currentState);
             return null;
@@ -583,7 +582,7 @@ export class SocketService {
             bettingCountdown: 3,
             selectionTimeLeft: 3,
             resolutionTimeLeft: 1,
-            resultsCountdown: 3,
+            resultsCountdown: 300,
             player1: this.createFightPlayer('player1'),
             player2: this.createFightPlayer('player2'),
         };
@@ -660,14 +659,14 @@ export class SocketService {
             if (player1Wins) {
                 player2Damage = Math.max(damage - (state.player2.health < 50 ? 1 : 0), 0);
                 player1ScoreGain += 2 + (state.player1.consecutiveWins > 0 ? 10 : 0);
-                resultType = 'player1Wins';
+                resultType = '<<';
             } else {
                 player1Damage = Math.max(damage - (state.player1.health < 50 ? 1 : 0), 0);
                 player2ScoreGain += 2 + (state.player2.consecutiveWins > 0 ? 10 : 0);
-                resultType = 'player2Wins';
+                resultType = '>>';
             }
         }
-
+// No creo que haya forma de sacar los mensajes de player1 wins y player2 wins con os users siin liarla y no se me ocurre un substituto chulo
         state.player1.health = Math.max(state.player1.health - player1Damage, 0);
         state.player2.health = Math.max(state.player2.health - player2Damage, 0);
         state.player1.score += player1ScoreGain;
@@ -682,7 +681,7 @@ export class SocketService {
             player2Damage,
             player1ScoreGain,
             player2ScoreGain,
-            message: resultType === 'draw' ? 'Empate' : resultType === 'noDamage' ? 'Esquiva usada' : `${resultType} gana`,
+            message: resultType === 'draw' ? "fight.draw" : resultType === 'noDamage' ? "fight.dodgeMsg" : `${resultType}`,
         };
         state.phase = 'resolving';
         state.resolutionTimeLeft = 1;
@@ -728,7 +727,7 @@ export class SocketService {
             resolveCountdown: 2,
             resultsCountdown: health <= 0 ? 2 : state.resultsCountdown,
             player: { ...state.player, health, score: state.player.score + (cleared ? 5 : 0), streak: cleared ? state.player.streak + 1 : 0, roundsSurvived: cleared ? state.player.roundsSurvived + 1 : state.player.roundsSurvived },
-            lastTurnResult: { roomCleared: cleared, damageTaken: damage, healingReceived: 0, scoreGained: cleared ? 5 : 0, message: cleared ? 'Sala superada' : 'Has recibido daño' },
+            lastTurnResult: { roomCleared: cleared, damageTaken: damage, healingReceived: 0, scoreGained: cleared ? 5 : 0, message: cleared ? 'ddd.success' : 'ddd.fail' },
         };
     }
 
@@ -869,7 +868,7 @@ export class SocketService {
 
     private createDungeonRoom(): DungeonRoom {
         const type = Math.random() < 0.5 ? 'combat' : Math.random() < 0.8 ? 'trap' : 'empty';
-        return { type, name: type === 'combat' ? 'Combate' : type === 'trap' ? 'Trampa' : 'Sala vacía', probability: 1, icon: type === 'combat' ? '⚔️' : type === 'trap' ? '🪤' : '🚪' };
+        return { type, name: type === 'combat' ? 'ddd.roomType.combat' : type === 'trap' ? 'ddd.roomType.trap' : 'ddd.roomType.empty', probability: 1, icon: type === 'combat' ? '⚔️' : type === 'trap' ? '🪤' : '🚪' };
     }
 
     private createDungeonHand(): DungeonCard[] {
