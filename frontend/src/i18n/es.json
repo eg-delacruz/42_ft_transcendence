@@ -184,5 +184,31 @@
   "ddd.drawing.continues": "El reto continúa. Robando nuevas cartas para intentarlo de nuevo.",
   "ddd.drawing.next": "Preparando la siguiente sala.",
   "ddd.tutorial.dmg.alt": "Carta que no supera el reto y provoca pérdida de vida",
-  "ddd.tutorial.protection.alt": "Carta que previene el daño"
+  "ddd.tutorial.protection.alt": "Carta que previene el daño",
+
+  "ddd.class.mague": "Mague",
+  "ddd.class.warrior": "Warrior",
+  "ddd.class.rogue": "Rogue",
+  "ddd.cards.mague-fireball": "Bola de fuego",
+  "ddd.cards.mague-magic-shield": "Escudo mágico",
+  "ddd.cards.mague-invisibility": "Invisibilidad",
+  "ddd.cards.warrior-fight": "Luchar",
+  "ddd.cards.warrior-block": "Bloquear",
+  "ddd.cards.warrior-healing-potion": "Poción de curación",
+  "ddd.cards.rogue-fight": "Luchar",
+  "ddd.cards.rogue-stealth": "Sigilo",
+  "ddd.cards.rogue-loot": "Saquear",
+  "ddd.controls.classes": "← Mague | ↑ Warrior | → Rogue",
+  "ddd.controls.cards": "← Carta 1 | ↑ Carta 3 | → Carta 2 | ↓ Abandonar",
+  "ddd.effect.clearCombat": "Combate",
+  "ddd.effect.clearTrap": "Trampa",
+  "ddd.effect.clearAll": "Todo",
+  "ddd.effect.preventDamage": "Defensa",
+  "ddd.effect.heal": "Cura",
+  "ddd.effect.bonusScore": "Bonus",
+  "ddd.effect.selfDamage": "Daño propio",
+  "ddd.controls.card1": "← Carta 1",
+  "ddd.controls.card2": "→ Carta 2",
+  "ddd.controls.card3": "↑ Carta 3"
+
 }

@@ -107,17 +107,17 @@ export const DUNGEON_HAND_SIZE = 3;
 export const DUNGEON_ROOMS: DungeonRoom[] = [
   {
     type: 'combat',
-    name: 'Combate',
+    name: 'ddd.roomType.combat',
     probability: 40,
   },
   {
     type: 'trap',
-    name: 'Trampa',
+    name: 'ddd.roomType.trap',
     probability: 40,
   },
   {
     type: 'empty',
-    name: 'Pasillo',
+    name: 'ddd.roomType.empty',
     probability: 20,
   },
 ];
@@ -172,19 +172,19 @@ export const DUNGEON_DECKS: Record<
   mague: [
     {
       id: 'mague-fireball',
-      name: 'Bola de fuego',
+      name: 'ddd.cards.mague-fireball',
       probability: 50,
       effects: ['clearCombat'],
     },
     {
       id: 'mague-magic-shield',
-      name: 'Escudo mágico',
+      name: 'ddd.cards.mague-magic-shield',
       probability: 30,
       effects: ['preventDamage'],
     },
     {
       id: 'mague-invisibility',
-      name: 'Invisibilidad',
+      name: 'ddd.cards.mague-invisibility',
       probability: 20,
       effects: ['clearTrap'],
     },
@@ -193,19 +193,19 @@ export const DUNGEON_DECKS: Record<
   warrior: [
     {
       id: 'warrior-fight',
-      name: 'Luchar',
+      name: 'ddd.cards.warrior-fight',
       probability: 60,
       effects: ['clearCombat', 'selfDamage'],
     },
     {
       id: 'warrior-block',
-      name: 'Bloquear',
+      name: 'ddd.cards.warrior-block',
       probability: 30,
       effects: ['clearTrap', 'preventDamage'],
     },
     {
       id: 'warrior-healing-potion',
-      name: 'Poción de curación',
+      name: 'ddd.cards.warrior-healing-potion',
       probability: 10,
       effects: ['heal'],
     },
@@ -214,19 +214,19 @@ export const DUNGEON_DECKS: Record<
   rogue: [
     {
       id: 'rogue-fight',
-      name: 'Luchar',
+      name: 'ddd.cards.rogue-fight',
       probability: 60,
       effects: ['clearCombat', 'selfDamage'],
     },
     {
       id: 'rogue-stealth',
-      name: 'Sigilo',
+      name: 'ddd.cards.rogue-stealth',
       probability: 30,
       effects: ['clearAll'],
     },
     {
       id: 'rogue-loot',
-      name: 'Saquear',
+      name: 'ddd.cards.rogue-loot',
       probability: 10,
       effects: ['clearAll', 'bonusScore'],
     },
@@ -281,9 +281,9 @@ export const DUNGEON_CLASS_LABELS: Record<
   DungeonClass,
   string
 > = {
-  mague: 'Mague',
-  rogue: 'Rogue',
-  warrior: 'Warrior',
+  mague: 'ddd.class.mague',
+  rogue: 'ddd.class.rogue',
+  warrior: 'ddd.class.warrior',
 };
 
 export const DUNGEON_CLASS_ICONS: Record<
@@ -330,13 +330,13 @@ export const DUNGEON_EFFECT_LABELS: Record<
   DungeonCardEffect,
   string
 > = {
-  clearCombat: 'Combate',
-  clearTrap: 'Trampa',
-  clearAll: 'Todo',
-  preventDamage: 'Defensa',
-  heal: 'Cura',
-  bonusScore: 'Bonus',
-  selfDamage: 'Daño propio',
+  clearCombat: 'ddd.effect.clearCombat',
+  clearTrap: 'ddd.effect.cleartTrap',
+  clearAll: 'ddd.effect.clearAll',
+  preventDamage: 'ddd.effect.preventDamage',
+  heal: 'ddd.effect.heal',
+  bonusScore: 'ddd.effect.bonusScore',
+  selfDamage: 'ddd.effect.selfDamage',
 };
 
 /*
@@ -346,13 +346,13 @@ export const DUNGEON_EFFECT_LABELS: Record<
  */
 
 export const DUNGEON_CLASS_CONTROL_TEXT =
-  '← Mague | ↑ Warrior | → Rogue';
+  'ddd.controls.classes';
 
 export const DUNGEON_CARD_CONTROL_TEXT =
-  '← Carta 1 | ↑ Carta 3 | → Carta 2 | ↓ Abandonar';
+  'ddd.controls.cards';
 
-export const DUNGEON_CARD_1_LABEL = '← Carta 1';
+export const DUNGEON_CARD_1_LABEL = 'ddd.control.card1';
 
-export const DUNGEON_CARD_2_LABEL = '→ Carta 2';
+export const DUNGEON_CARD_2_LABEL = 'ddd.control.card2';
 
-export const DUNGEON_CARD_3_LABEL = '↑ Carta 3';
+export const DUNGEON_CARD_3_LABEL = 'ddd.control.card3';

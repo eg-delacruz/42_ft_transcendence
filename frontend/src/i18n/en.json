@@ -184,5 +184,31 @@
   "ddd.drawing.continues": "The challenge continues. Drawing new cards to try again.",
   "ddd.drawing.next": "Preparing the next room.",
   "ddd.tutorial.dmg.alt": "Card that fails the challenge and causes health loss",
-  "ddd.tutorial.protection.alt": "Card that prevents damage"
+  "ddd.tutorial.protection.alt": "Card that prevents damage",
+
+  "ddd.class.mague": "Mage",
+  "ddd.class.warrior": "Warrior",
+  "ddd.class.rogue": "Rogue",
+  "ddd.cards.mague-fireball": "Fireball",
+  "ddd.cards.mague-magic-shield": "Magic shield",
+  "ddd.cards.mague-invisibility": "Invisibility",
+  "ddd.cards.warrior-fight": "Fight",
+  "ddd.cards.warrior-block": "Block",
+  "ddd.cards.warrior-healing-potion": "Healing potion",
+  "ddd.cards.rogue-fight": "Fight",
+  "ddd.cards.rogue-stealth": "Stealth",
+  "ddd.cards.rogue-loot": "Loot",
+  "ddd.controls.classes": "← Mage | ↑ Warrior | → Rogue",
+  "ddd.controls.cards": "← Card 1 | ↑ Card 3 | → Card 2 | ↓ Give up",
+  "ddd.effect.clearCombat": "Combat",
+  "ddd.effect.clearTrap": "Trap",
+  "ddd.effect.clearAll": "All",
+  "ddd.effect.preventDamage": "Defense",
+  "ddd.effect.heal": "Heal",
+  "ddd.effect.bonusScore": "Bonus",
+  "ddd.effect.selfDamage": "Self damage",
+  "ddd.controls.card1": "← Card 1",
+  "ddd.controls.card2": "→ Card 2",
+  "ddd.controls.card3": "↑ Card 3"
+
 }

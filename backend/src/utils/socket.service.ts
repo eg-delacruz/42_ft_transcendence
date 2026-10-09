@@ -875,12 +875,15 @@ export class SocketService {
         return { type, name: type === 'combat' ? 'ddd.roomType.combat' : type === 'trap' ? 'ddd.roomType.trap' : 'ddd.roomType.empty', probability: 1, icon: type === 'combat' ? '⚔️' : type === 'trap' ? '🪤' : '🚪' };
     }
 
-    private createDungeonHand(): DungeonCard[] {
-        return [
-            { id: 'clear-all', name: 'Carta segura', probability: 1, effects: ['clearAll'], icon: '✨' },
-            { id: 'risk', name: 'Carta de riesgo', probability: 1, effects: [], icon: '⚠️' },
-            { id: 'clear-combat', name: 'Golpe fuerte', probability: 1, effects: ['clearCombat'], icon: '⚔️' },
-        ];
+    private createDungeonHand(dungeonClass: 'mague' | 'rogue' | 'warrior' = 'warrior'): DungeonCard[] {
+        const deck = DUNGEON_DECKS[dungeonClass];
+        const total = deck.reduce((sum, card) => sum + card.probability, 0);
+
+        return Array.from({ length: DUNGEON_HAND_SIZE }, () => {
+            let roll = Math.random() * total;
+            const picked = deck.find((card) => (roll -= card.probability) < 0) ?? deck[0];
+            return { ...picked, effects: [...picked.effects] };
+        });
     }
 
     private isAllowedAction(payload: GameActionPayload): boolean {
