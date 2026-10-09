@@ -130,8 +130,8 @@
   "fight.dodgeMsg":"Esquiva usada. Nadie recibe daño.",
   "fight.grabMsg":"Ambos usan agarre. Nadie recibe daño.",
   "fight.drawMsg":"Empate. Ambos reciben daño.",
-  "fight.player1WinsMsg":" gana",
-  "fight.player2WinsMsg":" gana",
+  "fight.player1WinsMsg":"{{name}} gana",
+  "fight.player2WinsMsg":"{{name}} gana",
   
   "ddd.HUD.player":"Jugador",
   "ddd.HUD.class":"Clase",
@@ -142,6 +142,7 @@
   "ddd.HUD.rooms":"Salas",
   "ddd.HUD.health":"Vida",
 
+  "ddd.classes.time":"Elige clase",
   "ddd.classes":"Clases disponibles",
   "ddd.defClassWarn": "Si no eliges, se seleccionará Warrior.",
   "ddd.score":"Score final: ",
@@ -167,5 +168,21 @@
   "ddd.fail":"Has recibido daño",
   "ddd.roomType.combat":"Combate",
   "ddd.roomType.trap":"Trampa",
-  "ddd.roomType.empty":"Sala vacía"
+  "ddd.roomType.empty":"Sala vacía",
+
+  "ddd.time.bets": "{{seconds}}s apuestas",
+  "ddd.time.class": "{{seconds}}s clase",
+  "ddd.time.sameChallenge": "Mismo reto",
+  "ddd.time.drawing": "Robando cartas",
+  "ddd.time.card": "{{seconds}}s carta",
+  "ddd.time.resolve": "{{seconds}}s resolver",
+  "ddd.time.menu": "{{seconds}}s menú",
+  "ddd.result.escaped": "Has escapado",
+  "ddd.result.dead": "Has muerto",
+  "ddd.result.finished": "Partida finalizada",
+  "ddd.drawing.title": "Robando cartas...",
+  "ddd.drawing.continues": "El reto continúa. Robando nuevas cartas para intentarlo de nuevo.",
+  "ddd.drawing.next": "Preparando la siguiente sala.",
+  "ddd.tutorial.dmg.alt": "Carta que no supera el reto y provoca pérdida de vida",
+  "ddd.tutorial.protection.alt": "Carta que previene el daño"
 }

@@ -21,97 +21,101 @@ type MinigamesDevPageProps = {
   matchData?: MatchData | null;
 };
 
-function toDevMinigame(game: MatchGame): DevMinigame {
-  if (game === 'the_race') return 'the-race';
-  if (game === 'fight_fight') return 'fight-fight';
-  return 'deep-dark-dungeon';
-}
+const SHOW_DEV_MENU = import.meta.env.DEV;
 
 export function MinigamesDevPage({ matchGame, matchRole, matchData }: MinigamesDevPageProps) {
-  const [activeGame, setActiveGame] = useState<DevMinigame>(
-    matchGame ? toDevMinigame(matchGame) : 'menu',
-  );
+  const [devGame, setDevGame] = useState<DevMinigame>('menu');
+  const [dismissedMatchId, setDismissedMatchId] = useState<string | undefined>(undefined);
 
-  useEffect(() => {
-    if (matchGame) setActiveGame(toDevMinigame(matchGame));
-  }, [matchGame]);
+  const game = matchData?.game ?? matchGame;
+  const role = matchData?.role ?? matchRole;
+  const matchId = matchData?.matchId;
+  const dismissed = matchId !== undefined && dismissedMatchId === matchId;
 
   function handleExitToMenu() {
-    setActiveGame('menu');
+    if (matchData)
+		setDismissedMatchId(matchId);
+	else
+		setDevGame('menu');
   }
 
-  if (activeGame === 'scores') {
+  if (game && !dismissed)
+  {
+	const gameKey = matchId ?? game;
+
+	    return (
+      <main className="">
+        <section className="w-full h-full">
+          <div className="w-full h-full">
+            {game === 'the_race' && (
+              <TheRace key={gameKey} onExitToMenu={handleExitToMenu} playerRole={role} matchData={matchData} />
+            )}
+
+            {game === 'fight_fight' && (
+              <FightFight key={gameKey} onExitToMenu={handleExitToMenu} playerRole={role} matchData={matchData} />
+            )}
+
+            {game === 'deep_&_dark' && (
+              <DeepDarkDungeon key={gameKey} onExitToMenu={handleExitToMenu} playerRole={role} matchData={matchData} />
+            )}
+          </div>
+        </section>
+      </main>
+    );
+  }
+
+  // ── Sin partida (o ya salió de la actual) ──
+  if (!SHOW_DEV_MENU) {
+    return (
+      <main className="">
+        <section className="w-full h-full flex items-center justify-center text-slate-300">
+          Esperando a la siguiente partida...
+        </section>
+      </main>
+    );
+  }
+
+  // ── Menú de debug (solo desarrollo) ──
+  if (devGame === 'scores') {
     return <MinigamesScoresList onExitToMenu={handleExitToMenu} />;
   }
 
   return (
     <main className="">
-      {activeGame === 'menu' && (
+      {devGame === 'menu' && (
         <section style={styles.menu}>
           <h1 style={styles.title}>Minigames Dev Page</h1>
 
           <p style={styles.subtitle}>
-            Página temporal para probar los minijuegos a pantalla completa.
+            Esperando partida. Menú de pruebas (solo desarrollo).
           </p>
 
           <div style={styles.buttons}>
-            <button
-              type="button"
-              style={styles.button}
-              onClick={() => setActiveGame('the-race')}
-            >
+            <button type="button" style={styles.button} onClick={() => setDevGame('the-race')}>
               The Race
             </button>
 
-            <button
-              type="button"
-              style={styles.button}
-              onClick={() => setActiveGame('fight-fight')}
-            >
+            <button type="button" style={styles.button} onClick={() => setDevGame('fight-fight')}>
               Fight Fight
             </button>
 
-            <button
-              type="button"
-              style={styles.button}
-              onClick={() => setActiveGame('deep-dark-dungeon')}
-            >
+            <button type="button" style={styles.button} onClick={() => setDevGame('deep-dark-dungeon')}>
               Deep & Dark Dungeon
             </button>
 
-            <button
-              type="button"
-              style={styles.secondaryButton}
-              onClick={() => setActiveGame('scores')}
-            >
+            <button type="button" style={styles.secondaryButton} onClick={() => setDevGame('scores')}>
               Ver scores
             </button>
           </div>
         </section>
       )}
 
-      {activeGame !== 'menu' && (
+      {devGame !== 'menu' && (
         <section className="w-full h-full">
-          {/* <button
-            type="button"
-            style={styles.backButton}
-            onClick={handleExitToMenu}
-          >
-            ← Volver al menú
-          </button> */}
-
           <div className="w-full h-full">
-            {activeGame === 'the-race' && (
-              <TheRace onExitToMenu={handleExitToMenu} playerRole={matchRole} matchData={matchData} />
-            )}
-
-            {activeGame === 'fight-fight' && (
-              <FightFight onExitToMenu={handleExitToMenu} playerRole={matchRole} matchData={matchData} />
-            )}
-
-            {activeGame === 'deep-dark-dungeon' && (
-              <DeepDarkDungeon onExitToMenu={handleExitToMenu} playerRole={matchRole} matchData={matchData} />
-            )}
+            {devGame === 'the-race' && <TheRace onExitToMenu={handleExitToMenu} />}
+            {devGame === 'fight-fight' && <FightFight onExitToMenu={handleExitToMenu} />}
+            {devGame === 'deep-dark-dungeon' && <DeepDarkDungeon onExitToMenu={handleExitToMenu} />}
           </div>
         </section>
       )}

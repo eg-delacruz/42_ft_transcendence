@@ -659,11 +659,11 @@ export class SocketService {
             if (player1Wins) {
                 player2Damage = Math.max(damage - (state.player2.health < 50 ? 1 : 0), 0);
                 player1ScoreGain += 2 + (state.player1.consecutiveWins > 0 ? 10 : 0);
-                resultType = '<<';
+                resultType = 'player1Wins';
             } else {
                 player1Damage = Math.max(damage - (state.player1.health < 50 ? 1 : 0), 0);
                 player2ScoreGain += 2 + (state.player2.consecutiveWins > 0 ? 10 : 0);
-                resultType = '>>';
+                resultType = 'player2Wins';
             }
         }
 // No creo que haya forma de sacar los mensajes de player1 wins y player2 wins con os users siin liarla y no se me ocurre un substituto chulo
@@ -681,7 +681,11 @@ export class SocketService {
             player2Damage,
             player1ScoreGain,
             player2ScoreGain,
-            message: resultType === 'draw' ? "fight.draw" : resultType === 'noDamage' ? "fight.dodgeMsg" : `${resultType}`,
+            message: resultType === 'draw' 
+                ? (player1Action === 'grab' ? 'fight.grabMsg' : 'fight.drawMsg')
+                : resultType === 'noDamage'
+                    ? 'fight.dodgeMsg'
+                    : resultType === 'player1Wins' ? 'fight.player1WinsMsg' : 'fight.player2WinsMsg',
         };
         state.phase = 'resolving';
         state.resolutionTimeLeft = 1;
@@ -727,7 +731,7 @@ export class SocketService {
             resolveCountdown: 2,
             resultsCountdown: health <= 0 ? 2 : state.resultsCountdown,
             player: { ...state.player, health, score: state.player.score + (cleared ? 5 : 0), streak: cleared ? state.player.streak + 1 : 0, roundsSurvived: cleared ? state.player.roundsSurvived + 1 : state.player.roundsSurvived },
-            lastTurnResult: { roomCleared: cleared, damageTaken: damage, healingReceived: 0, scoreGained: cleared ? 5 : 0, message: cleared ? 'ddd.success' : 'ddd.fail' },
+            lastTurnResult: { roomCleared: cleared, damageTaken: damage, healingReceived: 0, scoreGained: cleared ? 5 : 0, message: cleared ? 'a' : 'ddd.fail' },
         };
     }
 

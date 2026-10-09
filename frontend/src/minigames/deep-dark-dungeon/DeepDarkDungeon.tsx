@@ -4,6 +4,7 @@ import { TopScores } from '../components/TopScores';
 import { useMinigameContext } from '../context/minigameContext';
 import { updateMinigameTopScore } from '../components/TopScores.api';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 
 import {
   chooseClass,
@@ -548,13 +549,13 @@ export function DeepDarkDungeon({ onExitToMenu, onMinigameChange, playerRole, ma
           {dungeonState.phase === 'drawingCards' && (
           <section className="w-full max-w-4xl rounded-xl border border-zinc-300/40 bg-zinc-950/80 p-6 text-center shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
             <h2 className="m-0 text-2xl text-zinc-50">
-                Robando cartas...
+                {t('ddd.drawing.title', { defaultValue: 'Robando cartas...' })}
               </h2>
 
             <p className="mt-3 text-sm text-zinc-200">
                 {isContinuingCurrentRoom(dungeonState)
-                  ? 'El reto continúa. Robando nuevas cartas para intentarlo de nuevo.'
-                  : 'Preparando la siguiente sala.'}
+                  ? t('ddd.drawing.continues', { defaultValue: 'El reto continúa. Robando nuevas cartas para intentarlo de nuevo.' })
+                  : t('ddd.drawing.next', { defaultValue: 'Preparando la siguiente sala.' })}
               </p>
             </section>
           )}
@@ -588,7 +589,7 @@ export function DeepDarkDungeon({ onExitToMenu, onMinigameChange, playerRole, ma
             dungeonState.phase === 'finished') && (
             <section className="w-full max-w-4xl rounded-xl border border-zinc-300/40 bg-zinc-950/80 p-6 text-center shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
               <h2 className="m-0 text-2xl text-zinc-50">
-                {t("ddd.score")}{getResultTitle(dungeonState)}
+                {t("ddd.score")}{getResultTitle(dungeonState, t)}
               </h2>
 
               <p className="mt-3 text-lg text-zinc-100">
@@ -669,7 +670,7 @@ function DungeonTutorial() {
           	</p>
             <img
 				src={tutorialDamageImage}
-				alt="Carta que no supera el reto y provoca pérdida de vida"
+				alt={t('ddd.tutorial.dmg.alt', { defaultValue: 'Carta que no supera el reto y provoca pérdida de vida' })}
 				className="mx-auto mt-4 h-auto w-full max-w-55 object-contain"
 			/>
         </article>
@@ -683,7 +684,7 @@ function DungeonTutorial() {
 			</p>
             <img
 				src={tutorialProtectionImage}
-				alt="Carta que previene el daño"
+				alt={t('ddd.tutorial.protection.alt', { defaultValue: 'Carta que previene el daño' })}
 				className="mx-auto mt-4 h-auto w-full max-w-55 object-contain"
 			/>
         </article>
@@ -756,7 +757,7 @@ function PlayerHud({
 
       <HudRow
         label={t("ddd.HUD.time")}
-        value={getDungeonTimeText(dungeonState)}
+        value={getDungeonTimeText(dungeonState, t)}
       />
 
       <HudRow
@@ -941,10 +942,7 @@ function ActiveChallenge({
 
               {dungeonState.lastTurnResult && (
                 <p className="m-0 text-sm text-zinc-200">
-                  {
-                    dungeonState.lastTurnResult
-                      .message
-                  }
+                  {t(dungeonState.lastTurnResult.message)}
                 </p>
               )}
             </>
@@ -959,7 +957,7 @@ function ActiveChallenge({
       <section className="flex min-h-80 w-full flex-col items-center justify-start gap-3">
         <article className="flex min-h-105 w-140 flex-col items-center justify-center gap-3 p-2 text-center">
           <h2 className="m-0 text-2xl text-zinc-50">
-            {getResultTitle(dungeonState)}
+            {getResultTitle(dungeonState, t)}
           </h2>
 
           <p className="m-0 text-sm text-zinc-200">
@@ -1048,29 +1046,30 @@ function renderHearts(health: number) {
 
 function getDungeonTimeText(
   dungeonState: DungeonState,
+  t: TFunction,
 ): string {
   switch (dungeonState.phase) {
     case 'bettingCountdown':
-      return `${dungeonState.bettingCountdown}s apuestas`;
+      return t('ddd.time.bets', { seconds: dungeonState.bettingCountdown, defaultValue: '{{seconds}}s apuestas' });
 
     case 'choosingClass':
-      return `${dungeonState.classSelectionCountdown}s clase`;
+      return t('ddd.time.class', { seconds: dungeonState.classSelectionCountdown, defaultValue: '{{seconds}}s clase' });
 
     case 'drawingCards':
       return isContinuingCurrentRoom(dungeonState)
-        ? 'Mismo reto'
-        : 'Robando cartas';
+        ? t('ddd.time.sameChallenge', { defaultValue: 'Mismo reto' })
+        : t('ddd.time.drawing', { defaultValue: 'Robando cartas' });
 
     case 'choosingCard':
-      return `${dungeonState.cardSelectionCountdown}s carta`;
+      return t('ddd.time.card', { seconds: dungeonState.cardSelectionCountdown, defaultValue: '{{seconds}}s carta' });
 
     case 'resolvingRoom':
-      return `${dungeonState.resolveCountdown}s resolver`;
+      return t('ddd.time.resolve', { seconds: dungeonState.resolveCountdown, defaultValue: '{{seconds}}s resolver' });
 
     case 'escaped':
     case 'dead':
     case 'finished':
-      return `${dungeonState.resultsCountdown}s menú`;
+      return t('ddd.time.menu', { seconds: dungeonState.resultsCountdown, defaultValue: '{{seconds}}s menú' });
 
     default:
       return '-';
@@ -1079,16 +1078,17 @@ function getDungeonTimeText(
 
 function getResultTitle(
   dungeonState: DungeonState,
+  t: TFunction,
 ): string {
   if (dungeonState.phase === 'escaped') {
-    return 'Has escapado';
+    return t('ddd.result.escaped', { defaultValue: 'Has escapado' });
   }
 
   if (dungeonState.phase === 'dead') {
-    return 'Has muerto';
+    return t('ddd.result.dead', { defaultValue: 'Has muerto' });
   }
 
-  return 'Partida finalizada';
+  return t('ddd.result.finished', { defaultValue: 'Partida finalizada' });
 }
 
 function isContinuingCurrentRoom(

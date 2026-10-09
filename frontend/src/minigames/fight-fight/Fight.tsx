@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { useAuthContext } from '@/context/context';
 import { TopScores } from '../components/TopScores';
 import { useMinigameContext } from '../context/minigameContext';
 import { updateMinigameTopScore } from '../components/TopScores.api';
+import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -239,7 +240,7 @@ function FightClock({ fightState }: { fightState: FightState }) {
   return (
 	<div className="h-2/3 my-auto flex flex-col items-center bg-repeat bg-[url(../minigames/assets/fight-sign.png)] border-slate-100 border-8 rounded-xl">
 	  <div className="w-full h-full flex flex-col items-center justify-center">
-		<p className="basicText text-md">{getClockLabel(fightState)}</p>
+		<p className="basicText text-md">{getClockLabel(fightState, t)}</p>
 		<p className="basicText text-2xl">{getClockValue(fightState)}</p>
 	  </div>
 	  <p className="basicText text-lg p-2">{t("fight.round")}{fightState.round}</p>
@@ -328,7 +329,7 @@ function RoundResult({
 	  <section className="flex flex-col items-center justify-center gap-6 text-center">
 		<p className="basicText text-4xl">KO</p>
 		<p className="m-0 text-center basicText text-4xl">
-		  {t("game.winner")}{getFightWinnerDisplayName(fightState, player1Name, player2Name)}
+		  {t("game.winner")}{getFightWinnerDisplayName(fightState, player1Name, player2Name, t)}
 		</p>
 		<p className="basicText text-lg">
 			{t("game.backToMenu")}{fightState.resultsCountdown}...
@@ -459,8 +460,7 @@ function getHealthPercentage(health: number): number {
   return Math.max((health / FIGHT_INITIAL_HEALTH) * 100, 0);
 }
 
-function getClockLabel(fightState: FightState): string {
-	const { t } = useTranslation();
+function getClockLabel(fightState: FightState, t: TFunction): string {
   if (fightState.phase === 'bettingCountdown') {
 	return t("game.bets");
   }
@@ -504,8 +504,8 @@ function getFightWinnerDisplayName(
   fightState: FightState,
   player1Name: string,
   player2Name: string,
+  t: TFunction,
 ): string {
-	const { t } = useTranslation();
   if (fightState.winnerId === 'player1') {
 	return player1Name;
   }
