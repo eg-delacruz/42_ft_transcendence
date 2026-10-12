@@ -49,8 +49,8 @@ export const handleLogin = async (
 
     res.cookie('access_token', token, {
       httpOnly: true,
-      secure: env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: true,
+      sameSite: 'lax',
       maxAge: 24 * 60 * 60 * 1000,
     });
 
@@ -129,7 +129,7 @@ export const registerUser = async (
 
     res.cookie('access_token', token, {
       httpOnly: true,
-      secure: env.NODE_ENV === 'production',
+      secure: true,
       sameSite: 'lax',
       maxAge: 24 * 60 * 60 * 1000,
     });
@@ -201,8 +201,8 @@ export const handleLogout = async (
 
     res.clearCookie('access_token', {
       httpOnly: true,
-      secure: env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: true,
+      sameSite: 'lax',
     });
 
     return successResponse(res, null, 'Logout successful', 200);

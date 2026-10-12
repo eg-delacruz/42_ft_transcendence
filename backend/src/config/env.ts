@@ -11,6 +11,8 @@ interface Env {
   NODE_ENV: string;
   VITE_CLIENT_HEADER_KEY: string;
   REDIS_URL: string;
+  SSL_KEY_PATH: string;
+  SSL_CERT_PATH: string;
 }
 
 const env: Env = {
@@ -24,6 +26,8 @@ const env: Env = {
   VITE_CLIENT_HEADER_KEY:
     process.env.VITE_CLIENT_HEADER_KEY || "defaultclientkey",
   REDIS_URL: process.env.REDIS_URL || "redis://redis:6379",
+  SSL_KEY_PATH: process.env.SSL_KEY_PATH || "certs/key.pem",
+  SSL_CERT_PATH: process.env.SSL_CERT_PATH || "certs/cert.pem",
 };
 
 // Simple check to ensure required variables exist

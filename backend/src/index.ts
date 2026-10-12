@@ -1,5 +1,5 @@
 // Main entry point of the backend.
-// Initializes MongoDB, HTTP server, Socket.IO, and Redis adapter.
+// Initializes MongoDB, HTTPS server, Socket.IO, and Redis adapter.
 
 import path from "path";
 import dotenv from "dotenv";
@@ -9,7 +9,8 @@ dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 dotenv.config({ path: path.resolve(process.cwd(), "../.env") });
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
-import http from 'http';
+import https from 'https';
+import fs from 'fs';
 import Redis from 'ioredis';
 import { createAdapter } from '@socket.io/redis-adapter';
 import { Server, type Socket } from 'socket.io';
@@ -26,9 +27,18 @@ import { SocketService } from '@utils/socket.service';
 async function startServer() {
     await connectDB();
 
-    const httpServer = http.createServer(app);
+    const keyPath = path.isAbsolute(env.SSL_KEY_PATH)
+        ? env.SSL_KEY_PATH
+        : path.resolve(process.cwd(), env.SSL_KEY_PATH);
+    const certPath = path.isAbsolute(env.SSL_CERT_PATH)
+        ? env.SSL_CERT_PATH
+        : path.resolve(process.cwd(), env.SSL_CERT_PATH);
+    const httpsServer = https.createServer(
+        { key: fs.readFileSync(keyPath), cert: fs.readFileSync(certPath) },
+        app
+    );
 
-    const io = new Server(httpServer, {
+    const io = new Server(httpsServer, {
         cors: {
             origin: (origin, cb) => cb(null, true),
             credentials: true,
@@ -186,11 +196,11 @@ async function startServer() {
         });
     });
 
-    // ── HTTP server ────────────────────────────────────────────────────────
-    httpServer.listen(env.PORT, () => {
+    // ── HTTPS server ───────────────────────────────────────────────────────
+    httpsServer.listen(env.PORT, () => {
         logger.info(`Server running on port ${env.PORT} in ${env.NODE_ENV} mode`);
         logger.info(
-            `Socket.IO ready — CORS origin: http://localhost:${env.FRONT_PORT}`,
+            `Socket.IO ready — CORS origin: https://localhost:${env.FRONT_PORT}`,
         );
     });
 

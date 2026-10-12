@@ -2,3 +2,5 @@
 .atl/
 node_modules/
 odd/
+backend/certs/key.pem
+frontend/certs/key.pem

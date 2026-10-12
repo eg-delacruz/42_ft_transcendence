@@ -18,7 +18,7 @@ Para ver las tareas del proyecto, ir a:
 The API is documented with Swagger/OpenAPI. While the backend is running in development mode, you can access the interactive UI at:
 
 ```
-http://localhost:3000/api-docs
+https://localhost:3000/api-docs
 ```
 
 From the UI you can:

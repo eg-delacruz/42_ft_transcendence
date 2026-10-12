@@ -37,14 +37,19 @@ cp .env.example .env
 make up
 ```
 
-The backend will be available at `http://localhost:3000` (or the port specified in your configuration).
+The backend will be available at `https://localhost:3000` (or the port specified in your configuration).
 
-The frontend (Vite) will be available at `http://localhost:5173` by default.
+The frontend (Vite) will be available at `https://localhost:5173` by default.
 
-To do a quick test, you can access the health check endpoint in your browser or via curl:
+To do a quick test, you can access the health check endpoint in your browser or via curl (use `-k` to accept the self-signed dev certificate):
 ```bash
-curl http://localhost:3000/api/
+curl -k https://localhost:3000/api/
 ```
+
+> **HTTPS note (42 evaluation):** both backend and frontend serve HTTPS with self-signed dev certificates (`backend/certs/`, `frontend/certs/`). Browsers/curl will warn about the self-signed cert — accept it or use `curl -k`. To regenerate the backend pair:
+> ```bash
+> openssl req -x509 -newkey rsa:2048 -keyout backend/certs/key.pem -out backend/certs/cert.pem -days 365 -nodes -subj "/CN=localhost"
+> ```
 
 ---
 ## Gestión centralizada de las tareas

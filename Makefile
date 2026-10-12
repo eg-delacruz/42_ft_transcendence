@@ -2,15 +2,20 @@
 #	42 - ft_trascendence	#
 # ========================= #
 
-.PHONY: up down restart logs status clean help mongo backend frontend re
+.PHONY: up down restart logs status clean help mongo backend frontend re certs
 
-up:
+certs:
+	mkdir -p backend/certs frontend/certs
+	@[ -f backend/certs/key.pem ] || openssl req -x509 -newkey rsa:2048 -keyout backend/certs/key.pem -out backend/certs/cert.pem -days 365 -nodes -subj "/CN=localhost"
+	@[ -f frontend/certs/key.pem ] || openssl req -x509 -newkey rsa:2048 -keyout frontend/certs/key.pem -out frontend/certs/cert.pem -days 365 -nodes -subj "/CN=localhost"
+
+up: certs
 	docker-compose up --build -d
 	@echo "Proyecto on-line:"
-	@echo "Frontend: http://localhost:5173"
-	@echo "Minigames: http://localhost:5173/minigames"
-	@echo "Backend: http://localhost:3000"
-	@echo "Documentación API: http://localhost:3000/api-docs"
+	@echo "Frontend: https://localhost:5173"
+	@echo "Minigames: https://localhost:5173/minigames"
+	@echo "Backend: https://localhost:3000"
+	@echo "Documentación API: https://localhost:3000/api-docs"
 
 down:
 	docker-compose down
@@ -58,4 +63,5 @@ help:
 	@echo "  make backend  - Abre una shell dentro del contenedor backend"
 	@echo "  make frontend - Abre una shell dentro del contenedor frontend"
 	@echo "  make re       - Ejecuta clean seguido de up"
+	@echo "  make certs    - Genera certificados autofirmados locales (solo si faltan)"
 	@echo "  make help     - Muestra esta ayuda"

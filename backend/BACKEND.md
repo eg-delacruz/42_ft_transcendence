@@ -3,14 +3,19 @@
 This document describes the **actual state of the backend implementation** dictated in the document `PLAN_DE_TRABAJO.md`, also how to manually test the current authentication flow of the backend API using `curl`
 and lastly, some utils and commands to actually use the mongo db (_monogosh_ command in MAKEFILE).
 
+> **HTTPS note:** the backend serves HTTPS only (self-signed dev cert in `backend/certs/`). All `curl` examples below use `curl -k` to accept the self-signed certificate. To regenerate the cert pair, run from the repo root:
+> ```bash
+> openssl req -x509 -newkey rsa:2048 -keyout backend/certs/key.pem -out backend/certs/cert.pem -days 365 -nodes -subj "/CN=localhost"
+> ```
+
 ## 1. Register a Standard User
 
 Create a new standard user and store the session cookie in `cookies.txt`:
 
 ```bash
-curl -i \
+curl -k -i \
   -c cookies.txt \
-  -X POST http://localhost:3000/api/auth/register \
+  -X POST https://localhost:3000/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"user1@example.com","password":"Secret123"}'
 ```
@@ -36,9 +41,9 @@ Expected response
 Use the cookie stored in cookies.txt to check the authenticated user:
 
 ```bash
-curl -i \
+curl -k -i \
   -b cookies.txt \
-  http://localhost:3000/api/auth/me
+  https://localhost:3000/api/auth/me
 ```
 
 Expected Response:
@@ -64,9 +69,9 @@ Expected Response:
 Log out the current user:
 
 ```bash
-curl -i \
+curl -k -i \
   -b cookies.txt \
-  -X POST http://localhost:3000/api/auth/logout
+  -X POST https://localhost:3000/api/auth/logout
 ```
 
 Expected Response:
@@ -92,9 +97,9 @@ If /auth/me still returns a valid user, double‑check that:
 Log in with the user created in the registration step and overwrite `cookies.txt`with the new session:
 
 ```bash
-curl -i \
+curl -k -i \
   -c cookies.txt \
-  -X POST http://localhost:3000/api/auth/login \
+  -X POST https://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"user1@example.com","password":"Secret123"}'
 ```
@@ -118,9 +123,9 @@ Expected response:
 Verify the session again:
 
 ```bash
-curl -i \
+curl -k -i \
   -b cookies.txt \
-  http://localhost:3000/api/auth/me
+  https://localhost:3000/api/auth/me
 ```
 
 Expected response:
@@ -152,9 +157,9 @@ Expected response:
 ### 5.1. Logging in as the admin (`/api/auth/login`).
 
 ```bash
-curl -i \
+curl -k -i \
   -c admin_cookies.txt \
-  -X POST http://localhost:3000/api/auth/login \
+  -X POST https://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"SUPER_EMAIL","password":"SUPER_PASS"}'
 ```
@@ -178,9 +183,9 @@ Expected response:
 Verify the authenticated admin:
 
 ```bash
-curl -i \
+curl -k -i \
   -b admin_cookies.txt \
-  http://localhost:3000/api/auth/me
+  https://localhost:3000/api/auth/me
 
 ```
 
@@ -207,9 +212,9 @@ Expected response (role must be super_user)
 #### Create user as Admin (`/users/create`)
 
 ```bash
-curl -i \
+curl -k -i \
   -b admin_cookies.txt \
-  -X POST http://localhost:3000/api/users/create \
+  -X POST https://localhost:3000/api/users/create \
   -H "Content-Type: application/json" \
   -d '{"email":"agent@example.com","password":"AgentPass123","role":"standard_user"}'
 ```
@@ -233,9 +238,9 @@ Expeceted response:
 Retrieve a list of all users:
 
 ```bash
-curl -i \
+curl -k -i \
   -b admin_cookies.txt \
-  http://localhost:3000/api/users/all
+  https://localhost:3000/api/users/all
 ```
 
 Expected response:
@@ -259,9 +264,9 @@ Expected response:
 Delete a specific user by ID (replace the ID with one from the previous list):
 
 ```bash
-curl -i \
+curl -k -i \
   -b admin_cookies.txt \
-  -X DELETE http://localhost:3000/api/users/delete/69c15c5544dc8c41fbf588b8
+  -X DELETE https://localhost:3000/api/users/delete/69c15c5544dc8c41fbf588b8
 ```
 
 Expected response:
@@ -358,7 +363,7 @@ The WebSocket infrastructure is **fully initialized and partially implemented**,
 
 #### ✅ Core Infrastructure
 
-- **Socket.IO Server** - Attached to Express HTTP server, sharing the same port (HTTP + WS)
+- **Socket.IO Server** - Attached to Express HTTPS server, sharing the same port (HTTPS + WSS)
 - **Redis Adapter** - Multi-instance synchronization enabled (ready for horizontal scaling)
 - **JWT Authentication Middleware** - Validates auth via cookies / headers before socket connection
 - **Base Connection Lifecycle** - Connection, disconnection, and ping/pong fully working
@@ -541,7 +546,7 @@ Same flow as REST authentication is required before connecting sockets.
 ### 1. Authenticate first
 
 ```bash
-curl -c cookies.txt -X POST http://localhost:3000/api/auth/login \
+curl -k -c cookies.txt -X POST https://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"socket_test@example.com","password":"Test123"}'
 ```
@@ -550,7 +555,7 @@ curl -c cookies.txt -X POST http://localhost:3000/api/auth/login \
 
 ### 2. Verify connection
 
-1. Open: `http://localhost:5173/socket-debug`
+1. Open: `https://localhost:5173/socket-debug`
 2. Ensure status → `connected`
 3. Click **Ping**
 4. Verify **Pong received**

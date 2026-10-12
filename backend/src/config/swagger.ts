@@ -25,9 +25,9 @@ const options: swaggerJsdoc.Options = {
           description:
             '**This is not a REST endpoint.** It documents the Socket.IO WebSocket API.\n\n' +
             '## Connection\n\n' +
-            'Connect to `ws://localhost:3000/chat` using the Socket.IO client:\n\n' +
+            'Connect to `wss://localhost:3000/chat` using the Socket.IO client:\n\n' +
             '```js\n' +
-            'const socket = io("http://localhost:3000/chat", {\n' +
+            'const socket = io("https://localhost:3000/chat", {\n' +
             '  withCredentials: true,\n' +
             '  transports: ["websocket"],\n' +
             '});\n' +
