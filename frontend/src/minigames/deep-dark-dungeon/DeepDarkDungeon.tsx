@@ -275,7 +275,7 @@ export function DeepDarkDungeon({ onExitToMenu, onMinigameChange, playerRole, ma
         }
 
         if (currentState.cardSelectionCountdown <= 1) {
-          return resolveCardChoice(currentState, 0);
+          return resolveCardChoice(currentState, 0, t);
         }
 
         return {
@@ -311,7 +311,7 @@ export function DeepDarkDungeon({ onExitToMenu, onMinigameChange, playerRole, ma
 
         if (currentState.resolveCountdown <= 1) {
           if (currentState.player.health <= 0) {
-            return finishAsDead(currentState);
+            return finishAsDead(currentState, t);
           }
 
           return {
@@ -464,6 +464,7 @@ export function DeepDarkDungeon({ onExitToMenu, onMinigameChange, playerRole, ma
       const nextState = handleDungeonKey(
         dungeonState,
         event.code,
+		t,
       );
 
       if (!nextState) {
@@ -498,7 +499,7 @@ export function DeepDarkDungeon({ onExitToMenu, onMinigameChange, playerRole, ma
       style={{ backgroundImage: `url(${dungeonBackground})` }}
     >
       <header className="mt-6 text-center">
-        <p className="m-0 text-sm uppercase tracking-[0.28em] text-zinc-400">Minigame</p>
+        <p className="m-0 text-sm uppercase tracking-[0.28em] text-zinc-400">{t('ddd.minigame')}</p>
 
         <h1 className="mt-2 mb-1 text-[40px] leading-none text-zinc-50">
           Deep & Dark Dungeon
@@ -512,7 +513,7 @@ export function DeepDarkDungeon({ onExitToMenu, onMinigameChange, playerRole, ma
       <section className="grid w-full grid-cols-[360px_minmax(520px,1fr)] items-start gap-8">
         <PlayerHud
           dungeonState={dungeonState}
-          playerName={getDungeonPlayerName(matchData, user)}
+          playerName={getDungeonPlayerName(matchData, user, t)}
         />
 
         <ActiveChallenge dungeonState={dungeonState} />
@@ -537,7 +538,7 @@ export function DeepDarkDungeon({ onExitToMenu, onMinigameChange, playerRole, ma
               </section>
 
             <p className="mt-4 text-sm text-zinc-300">
-                {DUNGEON_CLASS_CONTROL_TEXT}
+                {t(DUNGEON_CLASS_CONTROL_TEXT)}
               </p>
 
             <p className="mt-2 text-sm text-zinc-200">
@@ -579,7 +580,7 @@ export function DeepDarkDungeon({ onExitToMenu, onMinigameChange, playerRole, ma
               </section>
 
               <p className="text-sm text-zinc-300">
-                {DUNGEON_CARD_CONTROL_TEXT}
+                {t(DUNGEON_CARD_CONTROL_TEXT)}
               </p>
             </section>
           )}
@@ -619,6 +620,7 @@ function DungeonCardImage({
 }: {
   card: DungeonCard;
 }) {
+  const { t } = useTranslation();
   const image = CARD_IMAGES[card.id];
 
   if (!image) {
@@ -629,7 +631,7 @@ function DungeonCardImage({
       <article className="flex h-fit w-auto items-center justify-center p-2 text-center">
       <img
         src={image}
-        alt={card.name}
+        alt={t(`ddd.cards.${card.id}`)}
           className="block h-auto max-h-101.25 w-82.5 object-contain"
       />
     </article>
@@ -656,7 +658,7 @@ function DungeonTutorial() {
           	</p>
             <img
 				src={tutorialSuccessImage}
-				alt="Carta que supera un reto"
+				alt={t('ddd.tutorial.success.alt')}
 				className="mx-auto mt-4 h-auto w-full max-w-55 object-contain"
           	/>
         </article>
@@ -723,10 +725,8 @@ function PlayerHud({
         label={t("ddd.HUD.class")}
         value={
           selectedClass
-            ? `${DUNGEON_CLASS_ICONS[selectedClass]} ${
-                DUNGEON_CLASS_LABELS[selectedClass]
-              }`
-            : 'N/A'
+            ? `${DUNGEON_CLASS_ICONS[selectedClass]} ${t(DUNGEON_CLASS_LABELS[selectedClass])}`
+            : t('ddd.HUD.noClass')
         }
       />
 
@@ -802,8 +802,8 @@ function HudRow({
   );
 }
 
-function getDungeonPlayerName(matchData: MatchData | null | undefined, user: ReturnType<typeof useAuthContext>['user']): string {
-  return matchData?.players.find((player) => player.role === 'solo')?.username ?? user?.username ?? 'Jugador';
+function getDungeonPlayerName(matchData: MatchData | null | undefined, user: ReturnType<typeof useAuthContext>['user'], t: TFunction): string {
+  return matchData?.players.find((player) => player.role === 'solo')?.username ?? user?.username ?? t('ddd.HUD.player');
 }
 
 /*
@@ -892,7 +892,7 @@ function ActiveChallenge({
           roomImage ? (
             <img
               src={roomImage}
-              alt={dungeonState.currentRoom.name}
+              alt={t(`ddd.roomType.${dungeonState.currentRoom.type}`)}
                 className="block h-auto max-h-101.25 w-82.5 object-contain"
             />
           ) : (
@@ -917,7 +917,7 @@ function ActiveChallenge({
           {roomImage && (
             <img
               src={roomImage}
-              alt={dungeonState.currentRoom.name}
+              alt={t(`ddd.roomType.${dungeonState.currentRoom.type}`)}
               className="block h-auto max-h-101.25 w-82.5 object-contain"
             />
           )}
@@ -994,6 +994,7 @@ function ClassOption({
 }: {
   dungeonClass: DungeonClass;
 }) {
+  const { t } = useTranslation();
   const classImages: Record<DungeonClass, string> = {
     mague: magueClassImage,
     warrior: warriorClassImage,
@@ -1004,7 +1005,7 @@ function ClassOption({
 	    <article className="flex items-center justify-center rounded-lg border border-zinc-300/20 bg-zinc-900/70 p-2 transition-transform duration-150 hover:-translate-y-0.5">
       <img
         src={classImages[dungeonClass]}
-        alt={DUNGEON_CLASS_LABELS[dungeonClass]}
+        alt={t(DUNGEON_CLASS_LABELS[dungeonClass])}
 	        className="block h-auto w-28 object-contain"
       />
     </article>

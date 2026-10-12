@@ -331,7 +331,7 @@ export const DUNGEON_EFFECT_LABELS: Record<
   string
 > = {
   clearCombat: 'ddd.effect.clearCombat',
-  clearTrap: 'ddd.effect.cleartTrap',
+  clearTrap: 'ddd.effect.clearTrap',
   clearAll: 'ddd.effect.clearAll',
   preventDamage: 'ddd.effect.preventDamage',
   heal: 'ddd.effect.heal',
@@ -351,8 +351,8 @@ export const DUNGEON_CLASS_CONTROL_TEXT =
 export const DUNGEON_CARD_CONTROL_TEXT =
   'ddd.controls.cards';
 
-export const DUNGEON_CARD_1_LABEL = 'ddd.control.card1';
+export const DUNGEON_CARD_1_LABEL = 'ddd.controls.card1';
 
-export const DUNGEON_CARD_2_LABEL = 'ddd.control.card2';
+export const DUNGEON_CARD_2_LABEL = 'ddd.controls.card2';
 
-export const DUNGEON_CARD_3_LABEL = 'ddd.control.card3';
+export const DUNGEON_CARD_3_LABEL = 'ddd.controls.card3';
