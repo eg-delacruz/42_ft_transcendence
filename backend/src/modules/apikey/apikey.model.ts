@@ -1,8 +1,8 @@
-import crypto from "node:crypto";
 import mongoose, { Schema, Document, Types } from "mongoose";
 import env from "@config/env";
+import { hashApiKeySecret as hashSecretWithPepper, type ApiKeyScope } from "./apikey-keys";
 
-export type ApiKeyScope = "read" | "write";
+export type { ApiKeyScope };
 
 export interface IApiKey extends Document {
   prefix: string;
@@ -39,8 +39,5 @@ export const ApiKey = mongoose.model<IApiKey>("ApiKey", apiKeySchema);
 
 // SHA-256(secret + pepper). The pepper is optional and comes from env.
 export const hashApiKeySecret = (secret: string): string => {
-  return crypto
-    .createHash("sha256")
-    .update(`${secret}${env.API_KEY_HASH_SECRET}`)
-    .digest("hex");
+  return hashSecretWithPepper(secret, env.API_KEY_HASH_SECRET);
 };

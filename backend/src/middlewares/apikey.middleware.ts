@@ -1,6 +1,6 @@
-import crypto from "node:crypto";
 import { Request, Response, NextFunction } from "express";
-import { ApiKey, hashApiKeySecret, ApiKeyScope } from "@modules/apikey/apikey.model";
+import { ApiKey, hashApiKeySecret, type ApiKeyScope } from "@modules/apikey/apikey.model";
+import { parseApiKeyHeader, timingSafeEqualHex, getApiKeyUsability, hasApiKeyScope } from "@modules/apikey/apikey-keys";
 import { errorResponse } from "@utils/response";
 
 export interface ApiKeyAuthInfo {
@@ -12,13 +12,6 @@ export interface ApiKeyAuthInfo {
 export interface ApiKeyRequest extends Request {
   apiKey?: ApiKeyAuthInfo;
 }
-
-const timingSafeEqualHex = (a: string, b: string): boolean => {
-  const aBuf = Buffer.from(a, "hex");
-  const bBuf = Buffer.from(b, "hex");
-  if (aBuf.length !== bBuf.length) return false;
-  return crypto.timingSafeEqual(aBuf, bBuf);
-};
 
 export const apiKeyAuthMiddleware = async (
   req: ApiKeyRequest,
@@ -34,11 +27,11 @@ export const apiKeyAuthMiddleware = async (
   }
 
   // Expected format: ft_pk_<prefix>.<secret>
-  const match = /^ft_pk_([0-9a-f]{12})\.([^.]+)$/.exec(raw.trim());
-  if (!match) {
+  const parsed = parseApiKeyHeader(raw);
+  if (!parsed) {
     return errorResponse(res, "Invalid API key", 401);
   }
-  const [, prefix, secret] = match;
+  const { prefix, secret } = parsed;
 
   try {
     const record = await ApiKey.findOne({ prefix }).exec();
@@ -51,11 +44,12 @@ export const apiKeyAuthMiddleware = async (
       return errorResponse(res, "Invalid API key", 401);
     }
 
-    if (record.revokedAt) {
+    const usability = getApiKeyUsability(record);
+    if (usability === "revoked") {
       return errorResponse(res, "API key revoked", 403);
     }
 
-    if (record.expiresAt && record.expiresAt.getTime() <= Date.now()) {
+    if (usability === "expired") {
       return errorResponse(res, "API key expired", 401);
     }
 
@@ -82,11 +76,8 @@ export const apiKeyAuthMiddleware = async (
 export const requireApiScope = (scope: ApiKeyScope) => {
   return (req: ApiKeyRequest, res: Response, next: NextFunction) => {
     const scopes = req.apiKey?.scopes ?? [];
-    // A `write` key implies `read`.
-    if (scope === "read" && (scopes.includes("read") || scopes.includes("write"))) {
-      return next();
-    }
-    if (scope === "write" && scopes.includes("write")) {
+    // A `write` key implies `read` (see hasApiKeyScope).
+    if (hasApiKeyScope(scopes, scope)) {
       return next();
     }
     return errorResponse(res, "Forbidden", 403);

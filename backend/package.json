@@ -5,7 +5,7 @@
   "main": "./src/index.ts",
   "scripts": {
     "preinstall": "node -e \"const ua=process.env.npm_config_user_agent||''; if(!ua.includes('pnpm')){console.error('Use pnpm only. npm/yarn are not supported.'); process.exit(1);}\"",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --test src/modules/apikey/apikey-keys.test.ts",
     "dev": "nodemon --legacy-watch --watch src --exec ts-node -r tsconfig-paths/register src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
