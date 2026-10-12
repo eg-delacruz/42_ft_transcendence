@@ -102,7 +102,8 @@ export const updateGameScores = async (
     const user = await User.findById(user_id);
     if (user) {
       user.points = Math.max(user.points ?? 0, new_score);
-      await user.save();
+      // Skip full-document validation: legacy documents may predate the current schema
+      await user.save({ validateBeforeSave: false });
     }
 
     // Re-fetch with populated users for the response

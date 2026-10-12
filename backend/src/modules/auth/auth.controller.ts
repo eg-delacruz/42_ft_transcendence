@@ -32,7 +32,8 @@ export const handleLogin = async (
     }
 
     user.state = 'online';
-    await user.save();
+    // Skip full-document validation: legacy documents may predate the current schema
+    await user.save({ validateBeforeSave: false });
 
     const token = jwt.sign(
       {
