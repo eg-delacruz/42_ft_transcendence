@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
 
-import { DeepDarkDungeon } from './deep-dark-dungeon/DeepDarkDungeon';
-import { FightFight } from './fight-fight/Fight';
-import { MinigamesScoresList } from './MinigamesScoresList';
 import { TheRace } from './the-race/TheRace';
-
+import { FightFight } from './fight-fight/Fight';
+import { DeepDarkDungeon } from './deep-dark-dungeon/DeepDarkDungeon';
+import { MinigamesScoresList } from './MinigamesScoresList';
 import { styles } from './MinigamesDevPage.styles';
 import type { MatchData, MatchGame, MatchRole } from '@/hooks/useMatchmaking';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faSpinner } from '@fortawesome/free-solid-svg-icons'
+import { useTranslation } from 'react-i18next';
 
 type DevMinigame =
   | 'menu'
@@ -26,6 +29,7 @@ const SHOW_DEV_MENU = import.meta.env.DEV;
 export function MinigamesDevPage({ matchGame, matchRole, matchData }: MinigamesDevPageProps) {
   const [devGame, setDevGame] = useState<DevMinigame>('menu');
   const [dismissedMatchId, setDismissedMatchId] = useState<string | undefined>(undefined);
+  const { t } = useTranslation();
 
   const game = matchData?.game ?? matchGame;
   const role = matchData?.role ?? matchRole;
@@ -44,23 +48,21 @@ export function MinigamesDevPage({ matchGame, matchRole, matchData }: MinigamesD
 	const gameKey = matchId ?? game;
 
 	    return (
-      <main className="">
-        <section className="w-full h-full">
-          <div className="w-full h-full">
-            {game === 'the_race' && (
-              <TheRace key={gameKey} onExitToMenu={handleExitToMenu} playerRole={role} matchData={matchData} />
-            )}
+     	<main className="h-full w-full">
+			<section className="w-full h-full">
+					{game === 'the_race' && (
+					<TheRace key={gameKey} onExitToMenu={handleExitToMenu} playerRole={role} matchData={matchData} />
+					)}
 
-            {game === 'fight_fight' && (
-              <FightFight key={gameKey} onExitToMenu={handleExitToMenu} playerRole={role} matchData={matchData} />
-            )}
+					{game === 'fight_fight' && (
+					<FightFight key={gameKey} onExitToMenu={handleExitToMenu} playerRole={role} matchData={matchData} />
+					)}
 
-            {game === 'deep_&_dark' && (
-              <DeepDarkDungeon key={gameKey} onExitToMenu={handleExitToMenu} playerRole={role} matchData={matchData} />
-            )}
-          </div>
-        </section>
-      </main>
+					{game === 'deep_&_dark' && (
+					<DeepDarkDungeon key={gameKey} onExitToMenu={handleExitToMenu} playerRole={role} matchData={matchData} />
+					)}
+			</section>
+		</main>
     );
   }
 
@@ -81,44 +83,50 @@ export function MinigamesDevPage({ matchGame, matchRole, matchData }: MinigamesD
   }
 
   return (
-    <main className="">
-      {devGame === 'menu' && (
-        <section style={styles.menu}>
-          <h1 style={styles.title}>Minigames Dev Page</h1>
+    // <main className="">
+    //   {devGame === 'menu' && (
+    //     <section style={styles.menu}>
+    //       <h1 style={styles.title}>Minigames Dev Page</h1>
 
-          <p style={styles.subtitle}>
-            Esperando partida. Menú de pruebas (solo desarrollo).
-          </p>
+    //       <p style={styles.subtitle}>
+    //         Esperando partida. Menú de pruebas (solo desarrollo).
+    //       </p>
 
-          <div style={styles.buttons}>
-            <button type="button" style={styles.button} onClick={() => setDevGame('the-race')}>
-              The Race
-            </button>
+    //       <div style={styles.buttons}>
+    //         <button type="button" style={styles.button} onClick={() => setDevGame('the-race')}>
+    //           The Race
+    //         </button>
 
-            <button type="button" style={styles.button} onClick={() => setDevGame('fight-fight')}>
-              Fight Fight
-            </button>
+    //         <button type="button" style={styles.button} onClick={() => setDevGame('fight-fight')}>
+    //           Fight Fight
+    //         </button>
 
-            <button type="button" style={styles.button} onClick={() => setDevGame('deep-dark-dungeon')}>
-              Deep & Dark Dungeon
-            </button>
+    //         <button type="button" style={styles.button} onClick={() => setDevGame('deep-dark-dungeon')}>
+    //           Deep & Dark Dungeon
+    //         </button>
 
-            <button type="button" style={styles.secondaryButton} onClick={() => setDevGame('scores')}>
-              Ver scores
-            </button>
-          </div>
-        </section>
-      )}
+    //         <button type="button" style={styles.secondaryButton} onClick={() => setDevGame('scores')}>
+    //           Ver scores
+    //         </button>
+    //       </div>
+    //     </section>
+    //   )}
 
-      {devGame !== 'menu' && (
-        <section className="w-full h-full">
-          <div className="w-full h-full">
-            {devGame === 'the-race' && <TheRace onExitToMenu={handleExitToMenu} />}
-            {devGame === 'fight-fight' && <FightFight onExitToMenu={handleExitToMenu} />}
-            {devGame === 'deep-dark-dungeon' && <DeepDarkDungeon onExitToMenu={handleExitToMenu} />}
-          </div>
-        </section>
-      )}
-    </main>
+    //   {devGame !== 'menu' && (
+    //     <section className="w-full h-full">
+    //       <div className="w-full h-full">
+    //         {devGame === 'the-race' && <TheRace onExitToMenu={handleExitToMenu} />}
+    //         {devGame === 'fight-fight' && <FightFight onExitToMenu={handleExitToMenu} />}
+    //         {devGame === 'deep-dark-dungeon' && <DeepDarkDungeon onExitToMenu={handleExitToMenu} />}
+    //       </div>
+    //     </section>
+    //   )}
+    // </main>
+	<main className="min-h-screen w-full flex justify-center items-center">
+		<section className="flex-1 flex flex-col items-center justify-center text-center gap-4" aria-hidden="true">
+				<FontAwesomeIcon icon={faSpinner} className="text-white text-4xl animate-spin duration-100 ease-in-out"/>
+				<p className="basicText">{t("game.matchmaking")}</p>
+		</section>
+	</main>
   );
 }

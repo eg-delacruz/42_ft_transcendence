@@ -37,7 +37,6 @@ will be updated as features are completed and validated.
 
 ## Team Information
 
-The 42 subject requires the team to assign Product Owner, Project Manager / Scrum Master, Technical Lead / Architect,  Developer responsibilities... The same person may have more than one role.
 
 | Team member | Assigned role(s) | Responsibilities |
 | --- | --- | --- |
@@ -165,8 +164,6 @@ containers and starts the frontend and backend in development mode.
 
 ## Features List
 
-The following is the initial feature inventory. A feature should be marked
-complete only after it has been implemented, tested, and reviewed.
 
 | Feature | Status | Description | Contributors |
 | --- | --- | --- | --- |
@@ -268,9 +265,6 @@ erDiagram
 
 ## Modules and Points
 
-The 42 subject requires the README to list every claimed Major and Minor
-module and explain its implementation. Only fully functional modules should
-be claimed for evaluation.
 
 ### Chosen modules
 
@@ -287,34 +281,27 @@ be claimed for evaluation.
 | Remote players | Major | 2 | Two users can participate in the same game from separate clients through synchronized real-time game state. |
 | More than one game with matchmaking | Major | 2 | The project includes multiple distinct mini-games, including The Race, Fight-Fight, and Deep Dark Dungeon, together with a real-time matchmaking flow for selecting players. |
 | Spectator mode | Minor | 1 | Users can observe an active game in real time without being one of its players, with access to the game-room chat. |
+| Support for multiple languages | Minor | 1 | There's at least 3 languages that can be selected by users. |
 
-**Current claimed total: 19 points.**
+**Current claimed total: 20 points.**
 The score is calculated as `2 points × Major modules + 1 point × Minor
 modules`. Extra modules may be listed separately as bonus work only after the
 mandatory target has been completed.
 
 ### Reusable frontend components
 
-The codebase contains reusable components and providers used to centralize
-application behavior and UI patterns:
+The project contains reusable components to maintain an cohesive style in all pages:
 
-1. `ProtectedRoute`: guards routes that require authentication.
-2. `ErrorBoundary`: catches rendering errors and provides a fallback UI.
-3. `ChatPanel`: reusable real-time chat interface used in game-related views.
-4. `GameCanvas`: shared real-time game rendering and synchronization surface.
-5. `AuthProvider`: provides authentication state through React context.
-6. `SocketProvider`: provides the shared Socket.IO connection through context.
-7. `TopScores`: displays leaderboard data for the games.
-8. `MinigamesScoresList`: renders score entries in the mini-game interface.
-9. `TheRace`: encapsulates the Race mini-game view and its controls.
-10. `Fight`: encapsulates the Fight-Fight mini-game view and its controls.
-11. `DeepDarkDungeon`: encapsulates the dungeon mini-game view and its controls.
-12. `GameRoom`: shared game-room layout combining game content and communication.
-
-These components are supported by shared hooks such as `useAuth`,
-`useSocket`, `useChatSocket`, `useGameSync`, and `useMatchmaking`, which keep
-authentication, real-time communication, synchronization, and matchmaking
-logic separate from presentation.
+1. `arcadeform`: used for all form components to maintain the same aesthetic in login and register.
+2. `customButton`: used for all buttons in the app.
+3. `labelCustom`: used for all labels (both in forms and images).
+4. `chatText`: used for messages, users and dates.
+5. `credit-icon`: to keep the same style in all credit images.
+6. `basicText`: used in minigames' texts.
+7. `basicBox`: used in minigames to style divs.
+8. `raceStatusBox`: to keep the same div style through the different race phases.
+9. `raceRunner`: to make both users have the same style.
+10. `animations`: diagonal, slideintop, vanish and appear are used throughout the web for different effects.
 
 ## Individual Contributions
 

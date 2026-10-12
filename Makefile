@@ -4,10 +4,6 @@
 
 .PHONY: up down restart logs status clean help mongo backend frontend re certs
 
-certs:
-	mkdir -p backend/certs frontend/certs
-	@[ -f backend/certs/key.pem ] || openssl req -x509 -newkey rsa:2048 -keyout backend/certs/key.pem -out backend/certs/cert.pem -days 365 -nodes -subj "/CN=localhost"
-	@[ -f frontend/certs/key.pem ] || openssl req -x509 -newkey rsa:2048 -keyout frontend/certs/key.pem -out frontend/certs/cert.pem -days 365 -nodes -subj "/CN=localhost"
 
 up: certs
 	docker-compose up --build -d
@@ -16,6 +12,11 @@ up: certs
 	@echo "Minigames: https://localhost:5173/minigames"
 	@echo "Backend: https://localhost:3000"
 	@echo "Documentación API: https://localhost:3000/api-docs"
+
+certs:
+	mkdir -p backend/certs frontend/certs
+	@[ -f backend/certs/key.pem ] || openssl req -x509 -newkey rsa:2048 -keyout backend/certs/key.pem -out backend/certs/cert.pem -days 365 -nodes -subj "/CN=localhost"
+	@[ -f frontend/certs/key.pem ] || openssl req -x509 -newkey rsa:2048 -keyout frontend/certs/key.pem -out frontend/certs/cert.pem -days 365 -nodes -subj "/CN=localhost"
 
 down:
 	docker-compose down

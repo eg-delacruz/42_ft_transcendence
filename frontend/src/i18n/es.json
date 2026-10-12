@@ -94,7 +94,7 @@
   "chat.noAction": "Sin acciones aún",
   "chat.unknownUser": "Desconocido",
 
-
+  "game.matchmaking":"Buscando partida...",
   "game.bets":"Apuestas",
   "game.ready":"Preparados",
   "game.finish":"Fin",

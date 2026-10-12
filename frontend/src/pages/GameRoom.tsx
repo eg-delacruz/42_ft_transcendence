@@ -131,11 +131,6 @@ function GameRoomContent() {
 						</div>
 					</div>
 					<div className="w-1/2 mx-auto flex flex-row items-center p-4 justify-end gap-4">
-						<div className="flex flex-col gap-1">
-							<button onClick={() => i18n.changeLanguage("es")} className="customButton text-xs p-2">ES</button>
-							<button onClick={() => i18n.changeLanguage("en")} className="customButton text-xs p-2">EN</button>
-							<button onClick={() => i18n.changeLanguage("pt")} className="customButton text-xs p-2">PT</button>
-						</div>
 						<Menu as="div" className="size-10">
 							<MenuButton className="h-full w-full items-center justify-center">
 								<div aria-hidden="true" className="">
@@ -166,6 +161,11 @@ function GameRoomContent() {
 								</form>
 								</div>
 							</MenuItems>
+						<div className="flex flex-col gap-1">
+							<button onClick={() => i18n.changeLanguage("es")} className="customButton text-xs p-2">ES</button>
+							<button onClick={() => i18n.changeLanguage("en")} className="customButton text-xs p-2">EN</button>
+							<button onClick={() => i18n.changeLanguage("pt")} className="customButton text-xs p-2">PT</button>
+						</div>
 						</Menu>
 					</div>
 				</div>

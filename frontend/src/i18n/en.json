@@ -95,6 +95,7 @@
   "chat.unknownUser": "Unknown",
 
 
+  "game.matchmaking":"Searching for a match...",
   "game.bets":"Bets",
   "game.ready":"Ready?",
   "game.finish":"Finish",

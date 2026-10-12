@@ -16,28 +16,28 @@ function Home ()
 	const handleTerms = () => setShowTerms(true);
 
     return (
-		<div className="h-screen relative flex flex-col bg-linear-to-t from-(--gradient-dark) to-(--gradient-light)">
+		<div className="min-h-screen relative flex flex-col bg-linear-to-t from-(--gradient-dark) to-(--gradient-light)">
 			<div className="fixed h-full w-screen inset-0 bg-[url(/arcadePatternRepeat.png)] bg-auto animate-diagonal opacity-10 pointer-events-none z-0" aria-hidden="true"></div>
-			<div className="relative w-full h-1/3 flex items-center justify-center border-b-8 border-b-slate-200 overflow-hidden">
+			<header className="relative w-full h-[33vh] shrink-0 flex items-center justify-center border-b-8 border-b-slate-200 overflow-hidden">
 			{/*Banner*/}
 				<div className="absolute inset-0 overflow-hidden bg-slate-200">
 					<div className="flex w-screen h-full gap-0 lg:gap-4">
-							<div className="w-1/3 h-full marquee-item bg-[url(/race-thumbnail.png)] lg:bg-[url(/race-thumbnail-lg.png)] bg-cover bg-bottom " aria-hidden="true"></div>
+						<div className="w-1/3 h-full marquee-item bg-[url(/race-thumbnail.png)] lg:bg-[url(/race-thumbnail-lg.png)] bg-cover bg-bottom " aria-hidden="true"></div>
 						<div className="w-1/3 h-full marquee-item bg-[url(/fight-thumbnail.png)] lg:bg-[url(/fight-thumbnail-lg.png)] bg-cover bg-center " aria-hidden="true"></div>
-					<div className="w-1/3 h-full marquee-item bg-[url(/ddd-thumbnail.png)] lg:bg-[url(/ddd-thumbnail-lg.png)] bg-cover bg-top " aria-hidden="true"></div>
+						<div className="w-1/3 h-full marquee-item bg-[url(/ddd-thumbnail.png)] lg:bg-[url(/ddd-thumbnail-lg.png)] bg-cover bg-top " aria-hidden="true"></div>
+					</div>
 				</div>
-			</div>
-			{/*Black screen*/}
-			<div>
-				<div className="absolute inset-0 z-10 bg-black opacity-50 pointer-events-none"></div>
-			</div>
-			{/*Title*/}
-			<div className="relative z-20 font-pressstart">
+				{/*Black screen*/}
+				<div>
+					<div className="absolute inset-0 z-10 bg-black opacity-50 pointer-events-none"></div>
+				</div>
+				{/*Title*/}
+				<div className="relative z-20 font-pressstart">
 					<p className="text-xl sm:text-3xl lg:text-6xl text-slate-100 text-shadow-lg text-shadow-slate-400">{t("home.title")}</p>
 				</div>
-			</div>
+			</header>
 			{/* Background and description */}
-			<div className="relative w-full h-2/3 flex-1  overflow-scroll"> {/**/}
+			<div className="relative w-full flex-1"> {/**/}
 				<div className="relative w-full p-6 pt-10 sm:gap-4 flex flex-col items-center justify-center">{/*overflow-scroll*/}
 					<div className=" text-slate-300 text-center text-lg lg:text-3xl font-aldrich wrap-normal">
 						<p>{t("home.description")}</p>
@@ -104,7 +104,7 @@ function Home ()
 				</div>
 			</div>
 			{/*Políticas y Términos */}
-			<footer className="w-full flex flex-col sm:flex-row justify-between items-center text-center text-sm font-aldrich border-t pt-6  text-slate-500 bg-(--gradient-dark)">
+			<footer className="relative z-10 w-full flex flex-col sm:flex-row justify-between items-center text-center text-sm font-aldrich border-t pt-6 text-slate-500 bg-(--gradient-dark)">
 				<div>
 					{t("home.footer.copyright", {year: new Date().getFullYear()})}
 				</div>
