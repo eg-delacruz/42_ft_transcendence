@@ -1,199 +1,403 @@
-# 42_ft_transcendence
+_This project has been created as part of the 42 curriculum by erde-la-, penpalac, jaferna2, ajodar-c, dfernan3._
 
-**Visión general del proyecto**
-
-Hemos quedado en que nuestro transcendence es una página de minijuegos online.
-Los usuarios se registran y son movidos al lobby, dónde estarán con el resto de usuarios conectados en ese momento.
-Los usuarios pueden elegir si participar en los juegos o solo espectar. Los juegos se irán empezando en orden aleatorio y la máquina escogerá aleatoriamente a un par de jugadores para competir entre ellos. Los espectadores tendrán un chat donde hablar y una zona de apuestas para la partida de ese momento.
+# 42 ft_transcendence
 
 ## Table of Contents
-- [🚀 Getting Started](#-getting-started)
-- [Gestión centralizada de las tareas](#gestión-centralizada-de-las-tareas)
-- [Documentación de front y back](#documentación-de-front-y-back)
-- [Cosas a Tener en Cuenta](#cosas-a-tener-en-cuenta)
-	- [Uso de pnpm en vez de npm](#uso-de-pnpm-en-vez-de-npm)
-	- [Gestión de la base de datos](#gestión-de-la-base-de-datos)
-	- [Ramas](#ramas)
-	- [Consideraciones generales del proyecto](#consideraciones-generales-del-proyecto)
-- [Commands for Development](#commands-for-development)
 
----
+- [Description](#description)
+- [Team Information](#team-information)
+- [Project Management](#project-management)
+- [Technical Stack](#technical-stack)
+- [Instructions](#instructions)
+- [Features List](#features-list)
+- [Database Schema](#database-schema)
+- [Modules and Points](#modules-and-points)
+- [Individual Contributions](#individual-contributions)
+- [Resources and AI Usage](#resources-and-ai-usage)
+- [Project Documentation](#project-documentation)
+- [Development Commands](#development-commands)
 
-## 🚀 Getting Started
+## Description
 
-1. Clone the repository:
-```bash
-git clone git@github.com:eg-delacruz/42_ft_transcendence.git
-cd 42_ft_transcendence.git
-```
+### Project goal
 
-2. Create your environment file from the example:
+**42 ft_transcendence** is a web application built as a collection of online mini-games. Authenticated users can access the lobby, interact with other players, join games, spectate ongoing matches, chat in real time, and use the available game and betting features.
+
+The project is being developed as a real-time multiplayer experience. The initial product vision is to provide:
+
+- A lobby for connected users.
+- Real-time game rooms and synchronization between clients.
+- Player and spectator experiences.
+- User profiles, authentication, and account management.
+- Social interaction through chat.
+- Scores, game history, and a points-based economy.
+
+The implementation and feature status are tracked in the sections below and
+will be updated as features are completed and validated.
+
+## Team Information
+
+The 42 subject requires the team to assign Product Owner, Project Manager / Scrum Master, Technical Lead / Architect,  Developer responsibilities... The same person may have more than one role.
+
+| Team member | Assigned role(s) | Responsibilities |
+| --- | --- | --- |
+| `erde-la-` | **Project Manager / Backend Developer** | Sprint planning and creation, task assignment, and backend development |
+| `penpalac` | **Frontend Lead / Frontend Developer** | Design and implementation of the styling and frontend for the visible parts of the project |
+| `jaferna2` | **Software Architect / Backend Developer** | Definition of the project structure and design patterns, implementation of those patterns, and backend development |
+| `ajodar-c` | **Product Owner / Frontend Developer** | Decision-making, presenting and defending the project, and frontend development |
+| `dfernan3` | **Full-Stack Developer** | Development of complementary backend and frontend features |
+
+## Project Management
+
+### Work organization
+
+The team worked using a sprint-based process. At the beginning of each sprint,
+the work was divided into small tasks and prioritized according to the current
+needs of the project. Each task was assigned to a team member through GitHub
+Projects and moved through the relevant status as work progressed.
+
+Before starting a task, the assigned person moved it from **Ready** to
+**In Progress** and assigned it to themselves. Completed work was reviewed by
+the team before being integrated into the shared development branch. This
+process helped us avoid duplicated work and keep track of each contribution.
+
+The team's workflow was based on the following practices:
+
+- Plan the sprint and select the features to be worked on.
+- Divide each feature into small, manageable tasks.
+- Assign tasks according to the team's responsibilities and current workload.
+- Use feature branches for development.
+- Review changes through commits, merges, and pull requests when appropriate.
+- Test the feature before considering the task complete.
+- Discuss blockers with the team and adjust the task assignment when needed.
+- Review the progress made at the end of each sprint.
+
+### Project management tools
+
+- GitHub Projects: [team project board](https://github.com/users/eg-delacruz/projects/2).
+- GitHub Issues and pull requests: feature tracking and code review.
+- Git: version control and feature branches.
+- Communication channels: Discord and WhatsApp.
+
+### Branching model
+
+- `origin/master` is the protected milestone and release branch.
+- `origin/dev` is the integration branch for completed features.
+- Feature branches should use the following naming convention: `feature/<area>/<feature-name>`, for example `feature/frontend/user-profile`.
+
+## Technical Stack
+
+| Area | Technology | Reason for the choice |
+| --- | --- | --- |
+| Frontend | React 19, TypeScript, Vite | Component-based UI and fast development feedback. |
+| Frontend styling | Tailwind CSS | Reusable utility-based styling. |
+| Frontend routing and i18n | React Router, i18next, react-i18next | Client-side navigation and translatable user-facing content. |
+| Backend | Node.js, Express 5, TypeScript | HTTP API and server-side application logic. |
+| Real time | Socket.IO, Redis adapter | Bidirectional events and synchronization between clients. |
+| Database | MongoDB 6 with Mongoose | Document-oriented persistence for users, games, and related records. |
+| Authentication | JSON Web Tokens, HTTP cookies, bcrypt | Session authentication and password protection. |
+| API documentation | Swagger / OpenAPI | Interactive documentation for the backend API. |
+| Runtime | Docker Compose | Reproducible frontend, backend, database, and Redis services. |
+| Package manager | pnpm | The project enforces pnpm through package scripts. |
+
+The stack is split into separate frontend and backend applications so that
+each part can be developed and deployed independently. Redis is used to
+support real-time services across backend processes, while MongoDB stores
+persistent application data.
+
+## Instructions
+
+### Prerequisites
+
+Install or make available:
+
+- Docker Engine and Docker Compose.
+- Git.
+- `make` (the repository Makefile provides the development shortcuts).
+- `pnpm` 10.x when running package commands manually.
+- A modern browser with JavaScript enabled.
+
+The normal development workflow runs the application services in Docker.
+Do not use `npm` or `yarn` for this project.
+
+### Configuration
+
+Create a local environment file from the example:
+
 ```bash
 cp .env.example .env
 ```
 
-3. Start the services:
+Review the values before starting the stack. The important settings include:
+
+- `NODE_ENV`: development or production mode.
+- `PORT`: backend port, normally `3000`.
+- `MONGO_URI`: MongoDB connection string.
+- `MONGO_ROOT_USER`, `MONGO_ROOT_PASS`, `MONGO_DB`: MongoDB initialization.
+- `JWT_SECRET`: secret used to sign authentication tokens.
+- `SUPER_EMAIL`, `SUPER_PASS`: credentials for the seeded super-admin account.
+
+Never commit `.env` or real credentials. Use safe local values for development.
+
+### Start the application
+
 ```bash
+cd 42_ft_transcendence
+cp .env.example .env
 make up
 ```
 
-The backend will be available at `https://localhost:3000` (or the port specified in your configuration).
+Once the containers are ready:
 
-The frontend (Vite) will be available at `https://localhost:5173` by default.
+- Frontend: <http://localhost:5173>
+- Backend: <http://localhost:3000>
+- Swagger UI: <http://localhost:3000/api-docs> (development only)
+- MongoDB: `localhost:27017`
 
-To do a quick test, you can access the health check endpoint in your browser or via curl (use `-k` to accept the self-signed dev certificate):
+The backend health endpoint can be checked with:
+
 ```bash
-curl -k https://localhost:3000/api/
+curl http://localhost:3000/api/
 ```
 
-> **HTTPS note (42 evaluation):** both backend and frontend serve HTTPS with self-signed dev certificates (`backend/certs/`, `frontend/certs/`). Browsers/curl will warn about the self-signed cert — accept it or use `curl -k`. To regenerate the backend pair:
-> ```bash
-> openssl req -x509 -newkey rsa:2048 -keyout backend/certs/key.pem -out backend/certs/cert.pem -days 365 -nodes -subj "/CN=localhost"
-> ```
+The Docker Compose setup installs dependencies inside the corresponding
+containers and starts the frontend and backend in development mode.
 
----
-## Gestión centralizada de las tareas
+## Features List
 
-Las tareas del proyecto están centralizadas en el proyecto vinculado al repo de github. Cualquier participante puede crear tareas y moverlas entre estados. La idea sería que, cuando alguien quiera empezar a trabajar en alguna tarea, que arrastre la tarea del estado de "Ready" al estado de "In Progress", y de esta manera asegurarse de que solamente una persona está trabajando en ella. Además, si estás trabajando en una tarea, asígnate a ella para que se sepa quién está trabajando en ella.
+The following is the initial feature inventory. A feature should be marked
+complete only after it has been implemented, tested, and reviewed.
 
-Las tareas deben ser bastante granulares, evitando ser muy generales o que abarquen demasiado.
-
-Enlace al proyecto:
-
-`https://github.com/users/eg-delacruz/projects/2/views/1`
-
----
-
-## Documentación de front y back
-
-El front y el back tienen sus propios README.md, donde se especifican los distintos workflows, implementaciones, estados y notas correspondientes a cada contenedor. Estos deberías ser modificados solamente por los integrantes respectivos que estén trabajando en esas áreas.
-
-Directorios de los README.ms:
-
-Frontend: `frontend/README.md`.
-
-Backend: `backend/BACKEND.md`.
-
----
-
-## Cosas a Tener en Cuenta
-
-### Uso de pnpm en vez de npm
-
-Para el proyecto se utilizará `pnpm` en lugar de `npm` para la gestión de paquetes. `pnpm` es un gestor más moderno y su manejo de dependencias mediante enlaces simbólicos mejora la velocidad y organización.
-La mayoría de los comandos se ven casi iguales, pero algunos cambian de forma o nombre (por ejemplo, `add` y `remove`).
-
-Tabla rápida de equivalencias:
-
-| Acción | npm | pnpm | Descripción |
+| Feature | Status | Description | Contributors |
 | --- | --- | --- | --- |
-| Instalar dependencias del proyecto | `npm install` | `pnpm install` | Lee `package.json` y el lockfile para instalar todo. |
-| Añadir dependencia | `npm install <package-name>` | `pnpm add <package-name>` | Agrega el paquete a `dependencies`. |
-| Añadir dependencia de desarrollo | `npm install -D <package-name>` | `pnpm add -D <package-name>` | Agrega el paquete a `devDependencies`. |
-| Eliminar dependencia | `npm uninstall <package-name>` | `pnpm remove <package-name>` | Elimina el paquete del proyecto. |
-| Ejecutar script | `npm run <script>` | `pnpm <script>` | Ejecuta un script de `package.json`. |
-| Instalar paquete global | `npm install -g <package-name>` | `pnpm add -g <package-name>` | Instala el paquete globalmente. |
+| Registration and login | Implemented; verify end-to-end | Create accounts and authenticate users. | `jaferna2`, `erde-la-`, `dfernan3` |
+| Protected routes | Implemented; verify permissions | Restrict authenticated application views and API actions. | `jaferna2`, `erde-la-` |
+| User profiles | Implemented; verify final flow | View and update user information, display name, and profile settings. | `penpalac`, `erde-la-`, `jaferna2` |
+| Lobby and home | Implemented | Show the application entry point, game navigation, and connected-user experience. | `penpalac`, `dfernan3`, `ajodar-c` |
+| Real-time chat | Implemented; verify reconnection | Send and receive messages through Socket.IO, including chat in game rooms. | `jaferna2`, `erde-la-`, `penpalac`, `dfernan3` |
+| Mini-games | Implemented; verify complete matches | Play the available browser-based games, including The Race, Fight-Fight, and Deep Dark Dungeon. | `ajodar-c`, `penpalac`, `erde-la-` |
+| Game rooms and synchronization | Implemented; verify multi-client behavior | Synchronize game state and player information between connected clients. | `dfernan3`, `jaferna2`, `penpalac`, `erde-la-` |
+| Matchmaking | Implemented; verify full loop | Pair players and cycle through games using the real-time matchmaking flow. | `dfernan3`, `jaferna2`, `penpalac` |
+| Spectator mode | Implemented / verify evaluation scenario | Observe an active match without playing, with real-time game-room updates and chat. | `penpalac`, `jaferna2`, `dfernan3` |
+| Scores and match history | Partially implemented; verify persistence | Store and display game scores and top-score information. | `erde-la-`, `ajodar-c`, `penpalac` |
+| Points and betting | Implemented; verify complete user flow | Use game points and betting-related UI/API features around matches. | `penpalac`, `erde-la-`, `ajodar-c` |
+| Internationalization | Implemented; verify translation coverage | Support English, Spanish, and Portuguese translations through i18next. | `penpalac` |
+| API documentation | Implemented | Publish the backend API through Swagger UI at `/api-docs`. | `erde-la-` |
+| Public API | Implemented; verify external-client flow | Provide key-protected CRUD endpoints for game data with Swagger documentation and rate limiting. | `erde-la-` |
+| Avatar/file uploads | Partially implemented; verify requirement scope | Provide avatar selection/storage and serve uploaded assets. | `penpalac`, `erde-la-` |
 
-Nota corta:
-`pnpm add <package-name>` agrega por defecto a `dependencies`. Usa `-D` para `devDependencies` y `-P` si necesitas declararlo como `peerDependencies`.
 
-Para instalar nuevas dependencias, hay que hacerlo dentro del contenedor correspondiente (backend o frontend), no en la maquina host:
+## Database Schema
 
-```bash
-# Backend
-make backend
-pnpm add <package-name>
+The application uses MongoDB. The schema is represented by collections rather
+than relational tables. The following is the initial domain model and must be
+kept synchronized with the Mongoose models.
 
-# Frontend
-make frontend
-pnpm add <package-name>
+### Collections
+
+| Collection | Purpose | Main relationships |
+| --- | --- | --- |
+| `users` | Credentials, profile data, roles, avatars, points, user state, and win/loss statistics. | Referenced by the top-score fields in `games`; real-time chat and socket authentication use user data. |
+| `games` | One document per game type with its top three users and scores. | `top_1_user`, `top_2_user`, and `top_3_user` reference `users`. |
+
+Chat messages and active socket sessions are currently handled as real-time
+application data and are not represented by separate Mongoose collections.
+
+### `users` fields
+
+| Field | Type | Constraints or purpose |
+| --- | --- | --- |
+| `_id` | `ObjectId` | MongoDB document identifier. |
+| `username` | `String` | Required, unique, and trimmed. |
+| `email` | `String` | Required, unique, lowercased, and trimmed. |
+| `password` | `String` | Required; stored as a hash. |
+| `avatarUrl` | `String` | Default avatar path when no custom avatar is selected. |
+| `avatar_url` | `String` | Additional avatar URL field used by the application. |
+| `display_name` | `String` | Optional public display name. |
+| `role` | `String` | Required; one of `user`, `admin`, or `super_admin`. |
+| `state` | `String` | One of `offline`, `online`, `waiting`, `playing`, or `spectating`. |
+| `points` | `Number` | Defaults to `100`; minimum value is `0`. |
+| `stats.wins` | `Number` | Number of recorded wins; defaults to `0`. |
+| `stats.losses` | `Number` | Number of recorded losses; defaults to `0`. |
+| `createdAt` / `updatedAt` | `Date` | Automatically managed by Mongoose timestamps. |
+
+### `games` fields
+
+| Field | Type | Constraints or purpose |
+| --- | --- | --- |
+| `_id` | `ObjectId` | MongoDB document identifier. |
+| `name` | `String` | Required and unique game name. |
+| `top_1_user` / `top_2_user` / `top_3_user` | `ObjectId \| null` | Optional references to the `User` collection. |
+| `top_1_score` / `top_2_score` / `top_3_score` | `Number` | Scores for the three stored leaderboard positions; default `0`. |
+| `createdAt` / `updatedAt` | `Date` | Automatically managed by Mongoose timestamps. |
+
+The current `Game` model stores leaderboard data by game type. It does not
+yet represent every individual match as a separate persisted document, so
+full match history should not be claimed until a dedicated match-history model
+or equivalent persistence flow is implemented.
+
+### Entity relationship diagram
+
+```mermaid
+erDiagram
+    USER ||--o{ GAME_TOP_SCORE : holds
+    GAME ||--o{ GAME_TOP_SCORE : contains
+
+    USER {
+        ObjectId id
+        string username
+        string email
+        string role
+        string state
+        number points
+    }
+
+    GAME {
+        ObjectId id
+        string name
+        number top_1_score
+        number top_2_score
+        number top_3_score
+    }
+
+    GAME_TOP_SCORE {
+        string position
+        ObjectId user_id
+    }
 ```
 
-### Gestión de la base de datos
+## Modules and Points
 
-Durante el desarrollo del proyecto, la base de datos será local, lo cual implica que cada desarrollador tendrá su propia copia de los elementos que vaya creando (usuarios, chats, etc...).
-Cuando queramos utilizar una DB central, esta funcionará en la red de 42, para lo cual habrá que modificar el docker-compose.yml
+The 42 subject requires the README to list every claimed Major and Minor
+module and explain its implementation. Only fully functional modules should
+be claimed for evaluation.
 
-### Ramas
+### Chosen modules
 
-La rama principal es `origin/master`. Al completar ciertos Milestones, si todos estamos de acuerto, podemos hacer merge de `origin/dev` a esta rama. No debería tocarse nunca hasta no estar seguros de los cambios.
+| Module | Type | Points | Implementation summary |
+| --- | --- | ---: | --- |
+| Frontend and backend frameworks | Major | 2 | React with TypeScript is used for the frontend and Express with TypeScript for the backend. |
+| Real-time features | Major | 2 | Socket.IO is used for real-time communication, including chat, game synchronization, matchmaking, and connection lifecycle handling. |
+| Custom-made design system with at least 10 reusable components | Minor | 1 | The frontend follows a shared visual language based on reusable React components, Tailwind CSS utilities, consistent layouts, forms, buttons, navigation elements, game panels, chat panels, score displays, avatar controls, and responsive page sections. |
+| Public API | Major | 2 | The backend exposes a documented `/api/public` namespace protected by an `x-api-key` header, scoped API keys, and rate limiting. It provides five database endpoints: `GET /api/public/games`, `GET /api/public/games/{game_name}`, `POST /api/public/games`, `PUT /api/public/games/{game_name}`, and `DELETE /api/public/games/{game_name}`. |
+| Accessibility compliance | Major | 2 | The interface includes semantic labels, keyboard-accessible controls, image alternative text, and accessible interaction patterns. |
+| Additional browser support | Minor | 1 | The application is intended to work in at least two browsers in addition to the main development browser. |
+| Role-based user permissions | Major | 2 | Backend authentication and role middleware distinguish administrative and regular-user actions. |
+| Complete web-based games | Major | 2 | The application contains browser-based mini-games with live matches and explicit game outcomes. |
+| Remote players | Major | 2 | Two users can participate in the same game from separate clients through synchronized real-time game state. |
+| More than one game with matchmaking | Major | 2 | The project includes multiple distinct mini-games, including The Race, Fight-Fight, and Deep Dark Dungeon, together with a real-time matchmaking flow for selecting players. |
+| Spectator mode | Minor | 1 | Users can observe an active game in real time without being one of its players, with access to the game-room chat. |
 
-La rama `origin/dev` debe ser el punto central del proyecto, donde todos vamos haciendo merge de las nuevas features que vamos añadiendo.
+**Current claimed total: 19 points.**
+The score is calculated as `2 points × Major modules + 1 point × Minor
+modules`. Extra modules may be listed separately as bonus work only after the
+mandatory target has been completed.
 
-**Creación de nuevas ramas**
-Las nuevas ramas serán creadas según features.
-La nomenclatura debería ser `feature/NOMBRE_DEL_FEATURE`.
-Si el feature está relacionado con back o front, sería óptimo añadirlo al nombre para mayor claridad de la siguiente manera:
+### Reusable frontend components
 
-`feature/front/NOMBRE_DEL_FEATURE`
+The codebase contains reusable components and providers used to centralize
+application behavior and UI patterns:
 
+1. `ProtectedRoute`: guards routes that require authentication.
+2. `ErrorBoundary`: catches rendering errors and provides a fallback UI.
+3. `ChatPanel`: reusable real-time chat interface used in game-related views.
+4. `GameCanvas`: shared real-time game rendering and synchronization surface.
+5. `AuthProvider`: provides authentication state through React context.
+6. `SocketProvider`: provides the shared Socket.IO connection through context.
+7. `TopScores`: displays leaderboard data for the games.
+8. `MinigamesScoresList`: renders score entries in the mini-game interface.
+9. `TheRace`: encapsulates the Race mini-game view and its controls.
+10. `Fight`: encapsulates the Fight-Fight mini-game view and its controls.
+11. `DeepDarkDungeon`: encapsulates the dungeon mini-game view and its controls.
+12. `GameRoom`: shared game-room layout combining game content and communication.
 
-### Consideraciones generales del proyecto
+These components are supported by shared hooks such as `useAuth`,
+`useSocket`, `useChatSocket`, `useGameSync`, and `useMatchmaking`, which keep
+authentication, real-time communication, synchronization, and matchmaking
+logic separate from presentation.
 
-- **Controles de Minijuegos:**
-  - Los controles estarán limitados a las flechas y dos botones (A y B) asignables.
+## Individual Contributions
 
-- **Diseño de Juegos:**
-  - Los minijuegos deberán tener mecánicas simples.
+This section must be updated throughout the project and should describe
+specific, verifiable work rather than only listing a general area.
 
-- **Base de Datos:**
-  - Guardar usuarios, sus sesiones, y sus puntuaciones.
+| Team member | Features and components | Modules |
+| --- | --- | --- |
+| `erde-la-` | Backend authentication and user-management endpoints; MongoDB/Mongoose models and seed data; game endpoints and score persistence; public API key management and rate limiting; Swagger/OpenAPI setup; Socket.IO backend support and chat services. | Backend and frontend frameworks; real-time features; role-based user permissions; public API; API documentation; scores and game data persistence. |
+| `penpalac` | Frontend visual design and responsive layouts; reusable UI components; user profile and avatar interface; chat interface and game-room integration; mini-game UI and assets; i18next integration and English, Spanish, and Portuguese translations; accessibility improvements. | Accessibility compliance; additional browser support; custom-made design system; spectator mode; complete web-based games; internationalization candidate. |
+| `jaferna2` | Authentication context and protected routes; login, registration, logout, and user flows; API and frontend utilities; initial Socket.IO chat and real-time game experiments; application structure and backend integration. | Frontend and backend frameworks; real-time features; remote players; role-based user permissions. |
+| `ajodar-c` | Mini-game implementation and refactoring; game layouts, assets, and score integration; support for game-room experiences and player information. | Complete web-based games; remote players; second game with matchmaking; spectator mode. |
+| `dfernan3` | Matchmaking implementation; Socket.IO game synchronization and `GameCanvas` initial sync; connection and authentication handling; complementary frontend/backend game features. | Real-time features; remote players; second game with matchmaking; spectator mode. |
 
-- **Puntos y Apuestas:**
-  - Los puntos ganados en los juegos servirán como moneda en apuestas.
-  - Los usuarios no pueden quedarse en números rojos (si llegan a 0, se plantea que los "coma" el black hole).
-  - Las apuestas seguirán un sistema tipo Twitch.
+## Resources and AI Usage
 
-- **Estados de Usuarios:**
-  - Se requiere una máquina de estados que incluya: Jugando, En espera, Espectador.
+### Technical resources
 
-- **Personalización:**
-  - Propuesta de que los usuarios suban sus propias fotos para personalizar los muñecos con los que juegan.
+- [42 ft_transcendence subject](./en.subject.pdf)
+- [React documentation](https://react.dev/)
+- [Vite documentation](https://vite.dev/guide/)
+- [Express documentation](https://expressjs.com/)
+- [Socket.IO documentation](https://socket.io/docs/v4/)
+- [Mongoose documentation](https://mongoosejs.com/docs/)
+- [MongoDB documentation](https://www.mongodb.com/docs/)
+- [Docker Compose documentation](https://docs.docker.com/compose/)
+- [pnpm documentation](https://pnpm.io/)
 
----
+### AI usage
 
-## Commands for Development
+AI tools may be used to reduce repetitive work, but every generated result must be reviewed, understood, tested, and discussed with the team.
 
-Use the following commands during development:
+During the project, AI was used as an assistance tool throughout the
+development lifecycle, including planning, implementation, debugging, testing,
+code review, and documentation. It was used to explore implementation options,
+understand framework APIs, suggest debugging approaches, improve error
+messages, review the README against the subject requirements, and help design
+manual test cases.
 
-- To view logs:
+AI assistance was used across both the frontend and backend, including React
+components, Express routes, Socket.IO flows, database documentation, and
+project documentation. AI-generated suggestions were not accepted
+automatically: the team reviewed the relevant source code, adapted suggestions
+to the project, ran the applicable checks or tests, and kept only changes that
+the team understood and could explain during evaluation.
+
+| Project activity | AI assistance | Human validation |
+| --- | --- | --- |
+| Planning and architecture | Compare possible structures, workflows, and technical approaches. | The team selected the final approach according to the project requirements and existing codebase. |
+| Frontend and backend development | Explain framework APIs, suggest implementation patterns, and help identify integration issues. | Developers reviewed, adapted, and tested every retained change. |
+| Debugging and testing | Suggest likely causes, edge cases, and manual test scenarios for authentication, sockets, games, and matchmaking. | The team reproduced issues, ran the application, and verified the observed behavior. |
+| Documentation | Organize the README, describe the database schema, review module requirements, and improve technical explanations. | The documentation was compared with the subject and the actual repository implementation. |
+| Code review | Identify possible bugs, incomplete requirements, and inconsistent behavior. | Team members inspected the source code and decided which findings were relevant. |
+
+AI did not replace peer review or technical responsibility. The final
+implementation, tests, and documentation remain the responsibility of the
+team.
+
+## Development Commands
+
+All commands are intended to be run from the repository root:
+
 ```bash
+make up       # Build and start all services
+make down     # Stop all services
+make restart  # Restart services
+make re       # Rebuild and restart services
 make logs CONTAINER=backend
 make logs CONTAINER=frontend
 make logs CONTAINER=mongo
+make backend   # Open a shell in the backend container
+make frontend  # Open a shell in the frontend container
+make mongosh   # Open a MongoDB shell
+make status    # Show container status
+make clean     # Clean dangling Docker resources
 ```
 
-- To enter the backend container:
+When adding a dependency, enter the relevant container first:
+
 ```bash
 make backend
-```
+pnpm add <package-name>
 
-- To enter the frontend container:
-```bash
 make frontend
-```
-
-- Restart a service:
-```bash
-make restart
-```
-
-- Stop the services:
-```bash
-make down
-```
-
-- To rebuild the services:
-```bash
-make re
-```
-
-- Clean dangling images and volumes:
-```bash
-make clean
-```
-
-- Show container status:
-```bash
-make status
+pnpm add <package-name>
 ```
