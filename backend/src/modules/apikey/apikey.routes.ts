@@ -19,7 +19,7 @@ const router = Router();
  * @swagger
  * /api-keys:
  *   post:
- *     summary: Issue a new API key. Admin only (cookie auth). The plaintext key is returned ONCE.
+ *     summary: Issue a new API key. Admin only (cookie auth). The plaintext key is returned ONCE. Keys expire 24h after issuance (server-set, not client-configurable).
  *     tags: [ApiKeys]
  *     security:
  *       - cookieAuth: []
@@ -33,12 +33,11 @@ const router = Router();
  *             properties:
  *               name: { type: string, example: "evaluator-client" }
  *               scopes: { type: array, items: { type: string, enum: [read, write] }, example: ["read"] }
- *               expiresAt: { type: string, format: date-time, nullable: true }
  *     responses:
  *       201:
- *         description: API key created — plaintext secret included only in this response
+ *         description: API key created — plaintext secret included only in this response; expires 24h after issuance
  *       400:
- *         description: Invalid name, scopes, or expiresAt
+ *         description: Invalid name or scopes
  *       401:
  *         description: Not authenticated
  *       403:

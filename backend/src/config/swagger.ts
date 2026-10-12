@@ -8,10 +8,23 @@ const options: swaggerJsdoc.Options = {
       title: 'ft_transcendence API',
       version: '1.0.0',
       description:
-        'Interactive API documentation for the ft_transcendence backend. Protected endpoints require the access_token cookie set via /auth/login or /auth/register.',
+        'Interactive API documentation for the ft_transcendence backend. Protected endpoints require the access_token cookie set via /auth/login or /auth/register.\n\n' +
+        '## Public API quickstart (API key)\n\n' +
+        'External clients call `/public/*` with an `x-api-key` header — no cookie.\n\n' +
+        '**1. Log in as admin** (once; gives you a cookie): `POST /auth/login` with the seeded super-admin from `.env` (`SUPER_EMAIL` / `SUPER_PASS`). In this browser UI the cookie is sent automatically.\n\n' +
+        '**2. Issue a key:** `POST /api-keys` with `{"name":"evaluator-client","scopes":["read","write"]}`. Copy `body.apiKey` — it is shown ONCE and expires 24h after issuance.\n\n' +
+        '**3. Test it:** `curl -k https://localhost:3000/api/public/games -H "x-api-key: <the-key>"`. No key gives 401, revoked key or missing scope gives 403, over 100 requests per 15 minutes gives 429.',
     },
     servers: [{ url: '/api' }],
     tags: [
+      {
+        name: 'Public',
+        description: 'External key-secured namespace (`x-api-key` header, no cookie). Start at POST /api-keys to issue a key, then call these endpoints.',
+      },
+      {
+        name: 'ApiKeys',
+        description: 'Admin-only key issuance and management (cookie auth, never `x-api-key`). Plaintext secrets are returned only at creation.',
+      },
       {
         name: 'Chat (WebSocket)',
         description: 'Real-time chat over Socket.IO. Not REST — see the /chat endpoint below for connection details and event reference.',

@@ -589,6 +589,23 @@ External clients use ONLY the `x-api-key` header — no cookie. Internal routes
 namespace (`/api/public/*`) never accepts cookies. Public payloads contain safe
 Game leaderboard fields only (no emails, no password hashes). Rate limit:
 100 requests per 15 minutes per IP on `/api/public/*` (HTTP 429 when exceeded).
+Keys expire 24h after issuance (server-set); the plaintext key is shown only once.
+
+### 0. Log in as admin (once per terminal)
+
+Only an admin can issue keys. Log in with the seeded super-admin from your
+`.env` (`SUPER_EMAIL` / `SUPER_PASS`) and store the cookie:
+
+```bash
+curl -k -c admin_cookies.txt -X POST https://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"<SUPER_EMAIL>","password":"<SUPER_PASS>"}'
+```
+
+No terminal at hand? Open `https://localhost:3000/api-docs` in the same browser
+where you are logged into the app as admin — the browser sends your admin
+cookie automatically, so `POST /api-keys` with `{"name":"...","scopes":[...]}` 
+just works, no login step needed.
 
 ### 1. Issue a key (admin, cookie auth)
 

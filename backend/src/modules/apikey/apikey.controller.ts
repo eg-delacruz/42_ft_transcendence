@@ -25,7 +25,9 @@ export const createApiKey = async (
   res: Response,
   next: NextFunction,
 ) => {
-  const { name, scopes, expiresAt } = req.body ?? {};
+  // Expiry is server-controlled: every key lives exactly 24h from issuance.
+  // Any client-sent `expiresAt` is ignored and cannot extend it.
+  const { name, scopes } = req.body ?? {};
 
   if (!name || typeof name !== "string" || name.trim().length === 0) {
     return errorResponse(res, "name is required and must be a non-empty string", 400);
@@ -37,13 +39,7 @@ export const createApiKey = async (
     return errorResponse(res, "scopes must be a subset of ['read', 'write']", 400);
   }
 
-  let expires: Date | null = null;
-  if (expiresAt !== undefined && expiresAt !== null) {
-    expires = new Date(expiresAt);
-    if (isNaN(expires.getTime())) {
-      return errorResponse(res, "expiresAt must be a valid date", 400);
-    }
-  }
+  const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
   try {
     const creatorId = req.user?.userId ?? (req.user as any)?.id;
