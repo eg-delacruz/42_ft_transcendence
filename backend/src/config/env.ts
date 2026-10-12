@@ -9,7 +9,7 @@ interface Env {
   SUPER_PASS: string;
   JWT_SECRET: string;
   NODE_ENV: string;
-  VITE_CLIENT_HEADER_KEY: string;
+  API_KEY_HASH_SECRET: string;
   REDIS_URL: string;
   SSL_KEY_PATH: string;
   SSL_CERT_PATH: string;
@@ -23,8 +23,7 @@ const env: Env = {
   SUPER_PASS: process.env.SUPER_PASS || "",
   JWT_SECRET: process.env.JWT_SECRET || "defaultsecret",
   NODE_ENV: process.env.NODE_ENV || "development",
-  VITE_CLIENT_HEADER_KEY:
-    process.env.VITE_CLIENT_HEADER_KEY || "defaultclientkey",
+  API_KEY_HASH_SECRET: process.env.API_KEY_HASH_SECRET || "",
   REDIS_URL: process.env.REDIS_URL || "redis://redis:6379",
   SSL_KEY_PATH: process.env.SSL_KEY_PATH || "certs/key.pem",
   SSL_CERT_PATH: process.env.SSL_CERT_PATH || "certs/cert.pem",

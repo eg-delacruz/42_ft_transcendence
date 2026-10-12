@@ -69,6 +69,11 @@ const options: swaggerJsdoc.Options = {
           in: 'cookie',
           name: 'access_token',
         },
+        apiKeyAuth: {
+          type: 'apiKey',
+          in: 'header',
+          name: 'x-api-key',
+        },
       },
     },
   },

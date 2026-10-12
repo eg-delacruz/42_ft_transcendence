@@ -581,3 +581,92 @@ curl -k -c cookies.txt -X POST https://localhost:3000/api/auth/login \
 
 ```
 ---
+
+## Public API (API key via `x-api-key`)
+
+External clients use ONLY the `x-api-key` header — no cookie. Internal routes
+(`/api/users`, `/api/games`, `/auth/me`) never accept API keys, and the public
+namespace (`/api/public/*`) never accepts cookies. Public payloads contain safe
+Game leaderboard fields only (no emails, no password hashes). Rate limit:
+100 requests per 15 minutes per IP on `/api/public/*` (HTTP 429 when exceeded).
+
+### 1. Issue a key (admin, cookie auth)
+
+```bash
+curl -k -i \
+  -b admin_cookies.txt \
+  -X POST https://localhost:3000/api/api-keys \
+  -H "Content-Type: application/json" \
+  -d '{"name":"evaluator-client","scopes":["read","write"]}'
+```
+
+Expected response (plaintext `apiKey` appears ONLY here — store it now):
+
+```json
+{
+  "error": "",
+  "body": {
+    "apiKey": "ft_pk_abc123def456.<secret>",
+    "prefix": "abc123def456",
+    "name": "evaluator-client",
+    "scopes": ["read", "write"]
+  },
+  "message": "API key created successfully"
+}
+```
+
+List (metadata only), revoke, delete:
+
+```bash
+curl -k -b admin_cookies.txt https://localhost:3000/api/api-keys
+curl -k -b admin_cookies.txt -X POST https://localhost:3000/api/api-keys/<id>/revoke
+curl -k -X DELETE -b admin_cookies.txt https://localhost:3000/api/api-keys/<id>
+```
+
+### 2. Read the leaderboard (no cookie, key only)
+
+```bash
+curl -k https://localhost:3000/api/public/games \
+  -H "x-api-key: ft_pk_<prefix>.<secret>"
+
+curl -k https://localhost:3000/api/public/games/fight_fight \
+  -H "x-api-key: ft_pk_<prefix>.<secret>"
+```
+
+### 3. Write (`write` scope required)
+
+```bash
+curl -k -X POST https://localhost:3000/api/public/games \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: ft_pk_<prefix>.<secret>" \
+  -d '{"name":"fight_fight"}'
+
+curl -k -X PUT https://localhost:3000/api/public/games/fight_fight \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: ft_pk_<prefix>.<secret>" \
+  -d '{"new_score":1500,"user_id":"<mongoObjectId>"}'
+
+curl -k -X DELETE https://localhost:3000/api/public/games/fight_fight \
+  -H "x-api-key: ft_pk_<prefix>.<secret>"
+```
+
+### 4. Without a key (must fail)
+
+```bash
+curl -k -i https://localhost:3000/api/public/games
+# -> 401 Missing API key
+
+curl -k -i https://localhost:3000/api/public/games \
+  -H "x-api-key: ft_pk_deadbeef1234.invalid"
+# -> 401 Invalid API key
+```
+
+### 5. Key isolation (must fail)
+
+A valid API key on internal routes still returns 401:
+
+```bash
+curl -k -i https://localhost:3000/api/users/all \
+  -H "x-api-key: ft_pk_<prefix>.<secret>"
+# -> 401 Not authenticated (keys are not accepted on internal routes)
+```
