@@ -71,7 +71,7 @@ type DungeonCard = {
     name: string;
     probability: number;
     effects: string[];
-    icon: string;
+    icon?: string;
 };
 type DungeonRoom = {
     type: 'combat' | 'trap' | 'empty';
@@ -90,6 +90,25 @@ type DungeonState = {
     currentRoom?: DungeonRoom;
     hand: DungeonCard[];
     lastTurnResult?: { roomCleared: boolean; damageTaken: number; healingReceived: number; scoreGained: number; message: string };
+};
+
+const DUNGEON_HAND_SIZE = 3;
+const DUNGEON_DECKS: Record<'mague' | 'rogue' | 'warrior', DungeonCard[]> = {
+    mague: [
+        { id: 'mague-fireball', name: 'Bola de fuego', probability: 50, effects: ['clearCombat'] },
+        { id: 'mague-magic-shield', name: 'Escudo mágico', probability: 30, effects: ['preventDamage'] },
+        { id: 'mague-invisibility', name: 'Invisibilidad', probability: 20, effects: ['clearTrap'] },
+    ],
+    warrior: [
+        { id: 'warrior-fight', name: 'Luchar', probability: 60, effects: ['clearCombat', 'selfDamage'] },
+        { id: 'warrior-block', name: 'Bloquear', probability: 30, effects: ['clearTrap', 'preventDamage'] },
+        { id: 'warrior-healing-potion', name: 'Poción de curación', probability: 10, effects: ['heal'] },
+    ],
+    rogue: [
+        { id: 'rogue-fight', name: 'Luchar', probability: 60, effects: ['clearCombat', 'selfDamage'] },
+        { id: 'rogue-stealth', name: 'Sigilo', probability: 30, effects: ['clearAll'] },
+        { id: 'rogue-loot', name: 'Saquear', probability: 10, effects: ['clearAll', 'bonusScore'] },
+    ],
 };
 
 export class SocketService {
