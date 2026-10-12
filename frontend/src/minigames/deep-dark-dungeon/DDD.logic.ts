@@ -1,3 +1,6 @@
+import type { TFunction } from 'i18next';
+
+
 import {
   DUNGEON_BETTING_COUNTDOWN_SECONDS,
   DUNGEON_CARD_1_LABEL,
@@ -45,6 +48,7 @@ export function createInitialDungeonState(): DungeonState {
 export function handleDungeonKey(
   state: DungeonState,
   code: string,
+  t: TFunction,
 ): DungeonState | null {
   if (state.phase === 'choosingClass') {
     if (code === 'ArrowLeft') {
@@ -64,19 +68,19 @@ export function handleDungeonKey(
 
   if (state.phase === 'choosingCard') {
     if (code === 'ArrowLeft') {
-      return resolveCardChoice(state, 0);
+      return resolveCardChoice(state, 0, t);
     }
 
     if (code === 'ArrowRight') {
-      return resolveCardChoice(state, 1);
+      return resolveCardChoice(state, 1, t);
     }
 
     if (code === 'ArrowUp') {
-      return resolveCardChoice(state, 2);
+      return resolveCardChoice(state, 2, t);
     }
 
     if (code === 'ArrowDown') {
-      return escapeDungeon(state);
+      return escapeDungeon(state, t);
     }
 
     return null;
@@ -154,6 +158,7 @@ export function startNewRoom(state: DungeonState): DungeonState {
 export function resolveCardChoice(
   state: DungeonState,
   cardIndex: number,
+  t: TFunction,
 ): DungeonState {
   if (
     state.phase !== 'choosingCard' ||
@@ -169,6 +174,7 @@ export function resolveCardChoice(
     state.player,
     state.currentRoom,
     selectedCard,
+    t,
   );
 
   const nextScore = state.player.score + turnResult.scoreGained;
@@ -202,6 +208,7 @@ export function resolveTurn(
   player: DungeonPlayer,
   room: DungeonRoom,
   card: DungeonCard,
+  t: TFunction,
 ): DungeonTurnResult {
   if (room.type === 'empty') {
     const scoreGained = getRoomScore(player.streak) + getBonusScore(card);
@@ -211,7 +218,12 @@ export function resolveTurn(
       damageTaken: 0,
       healingReceived: getHealing(card),
       scoreGained,
-      message: `🚪 Sala vacía. ${card.icon} ${card.name}. Sala superada. +${scoreGained}`,
+      // El nombre sale del id/tipo (no de .name) para que valga también si la sala o carta viene del servidor.
+      message: t('ddd.turn.empty', {
+        room: t(`ddd.roomType.${room.type}`),
+        card: t(`ddd.cards.${card.id}`),
+        score: scoreGained,
+      }),
     };
   }
 
@@ -242,6 +254,7 @@ export function resolveTurn(
       damageTaken,
       healingReceived,
       scoreGained,
+      t,
     ),
   };
 }
@@ -253,14 +266,20 @@ export function buildTurnMessage(
   damageTaken: number,
   healingReceived: number,
   scoreGained: number,
+  t: TFunction,
 ): string {
-  const resultText = roomCleared ? 'Superada' : 'No superada';
-  const continueText = roomCleared ? 'Avanzas' : 'El reto continúa';
-
-  return `${room.icon} ${room.name} | ${card.icon} ${card.name} | ${resultText} | Daño ${damageTaken} | Cura ${healingReceived} | +${scoreGained} | ${continueText}`;
+  return t('ddd.turn.summary', {
+    room: t(`ddd.roomType.${room.type}`),
+    card: t(`ddd.cards.${card.id}`),
+    result: roomCleared ? t('ddd.turn.cleared') : t('ddd.turn.notCleared'),
+    damage: damageTaken,
+    healing: healingReceived,
+    score: scoreGained,
+    next: roomCleared ? t('ddd.turn.advance') : t('ddd.turn.continues'),
+  });
 }
 
-export function escapeDungeon(state: DungeonState): DungeonState {
+export function escapeDungeon(state: DungeonState, t: TFunction): DungeonState {
   return {
     ...state,
     phase: 'escaped',
@@ -270,12 +289,12 @@ export function escapeDungeon(state: DungeonState): DungeonState {
       damageTaken: 0,
       healingReceived: 0,
       scoreGained: 0,
-      message: '🏃 Has abandonado la mazmorra con vida.',
+      message: t('ddd.escaped.message'),
     },
   };
 }
 
-export function finishAsDead(state: DungeonState): DungeonState {
+export function finishAsDead(state: DungeonState, t: TFunction): DungeonState {
   const penalizedScore = Math.floor(
     state.player.score * (1 - DUNGEON_DEATH_SCORE_PENALTY),
   );
@@ -293,7 +312,7 @@ export function finishAsDead(state: DungeonState): DungeonState {
       damageTaken: 0,
       healingReceived: 0,
       scoreGained: 0,
-      message: '☠️ Has muerto. Pierdes el 25% del score acumulado.',
+      message: t('ddd.dead.message', { percent: Math.round(DUNGEON_DEATH_SCORE_PENALTY * 100) }),
     },
   };
 }

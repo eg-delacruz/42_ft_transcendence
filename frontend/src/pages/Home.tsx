@@ -45,7 +45,7 @@ function Home ()
 					<div className ="h-auto gap-4 flex flex-row">
 						<button onClick={() => i18n.changeLanguage("es")} className="customButton p-4">ES</button>
 						<button onClick={() => i18n.changeLanguage("en")} className="customButton p-4">EN</button>
-						<button onClick={() => i18n.changeLanguage("en")} className="customButton p-4">EN</button>
+						<button onClick={() => i18n.changeLanguage("pt")} className="customButton p-4">PT</button>
 					</div>
 					<div className="p-6 gap-4 lg:gap-8 flex flex-col sm:flex-row">
 						<Link className="customButton lg:p-6 lg:text-2xl transition ease-out-4 bg-linear-to-t from-amber-500 to-amber-300" to="/login">

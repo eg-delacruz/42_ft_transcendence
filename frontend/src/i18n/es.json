@@ -185,6 +185,8 @@
   "ddd.drawing.next": "Preparando la siguiente sala.",
   "ddd.tutorial.dmg.alt": "Carta que no supera el reto y provoca pérdida de vida",
   "ddd.tutorial.protection.alt": "Carta que previene el daño",
+  "ddd.tutorial.success.alt": "Carta que supera un reto",
+  "ddd.minigame": "Minijuego",
 
   "ddd.class.mague": "Mague",
   "ddd.class.warrior": "Warrior",
@@ -209,6 +211,14 @@
   "ddd.effect.selfDamage": "Daño propio",
   "ddd.controls.card1": "← Carta 1",
   "ddd.controls.card2": "→ Carta 2",
-  "ddd.controls.card3": "↑ Carta 3"
+  "ddd.controls.card3": "↑ Carta 3",
 
+  "ddd.turn.empty": "🚪 {{room}}. {{card}}. Sala superada. +{{score}}",
+  "ddd.turn.summary": "{{room}} | {{card}} | {{result}} | Daño {{damage}} | Cura {{healing}} | +{{score}} | {{next}}",
+  "ddd.turn.cleared": "Superada",
+  "ddd.turn.notCleared": "No superada",
+  "ddd.turn.advance": "Avanzas",
+  "ddd.turn.continues": "El reto continúa",
+  "ddd.escaped.message": "🏃 Has abandonado la mazmorra con vida.",
+  "ddd.dead.message": "☠️ Has muerto. Pierdes el {{percent}}% del score acumulado."
 }

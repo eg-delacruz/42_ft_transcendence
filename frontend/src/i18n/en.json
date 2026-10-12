@@ -185,6 +185,8 @@
   "ddd.drawing.next": "Preparing the next room.",
   "ddd.tutorial.dmg.alt": "Card that fails the challenge and causes health loss",
   "ddd.tutorial.protection.alt": "Card that prevents damage",
+  "ddd.tutorial.success.alt": "Card that overcomes a challenge",
+  "ddd.minigame": "Minigame",
 
   "ddd.class.mague": "Mage",
   "ddd.class.warrior": "Warrior",
@@ -209,6 +211,14 @@
   "ddd.effect.selfDamage": "Self damage",
   "ddd.controls.card1": "← Card 1",
   "ddd.controls.card2": "→ Card 2",
-  "ddd.controls.card3": "↑ Card 3"
+  "ddd.controls.card3": "↑ Card 3",
 
+  "ddd.turn.empty": "🚪 {{room}}. {{card}}. Room cleared. +{{score}}",
+  "ddd.turn.summary": "{{room}} | {{card}} | {{result}} | Damage {{damage}} | Heal {{healing}} | +{{score}} | {{next}}",
+  "ddd.turn.cleared": "Cleared",
+  "ddd.turn.notCleared": "Not cleared",
+  "ddd.turn.advance": "You move on",
+  "ddd.turn.continues": "The challenge continues",
+  "ddd.escaped.message": "🏃 You left the dungeon alive.",
+  "ddd.dead.message": "☠️ You died. You lose {{percent}}% of your accumulated score."
 }
