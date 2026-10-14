@@ -45,7 +45,7 @@ function GameRoomContent() {
     const { activeGame } = useMinigameContext();
 
     // Hook de Matchmaking creado en el Punto 3
-    const { inQueue, matchData, logs, leaveQueue } = useMatchmaking();
+    const { inQueue, matchData, logs, leaveQueue, clearMatchData } = useMatchmaking();
 
     const displayName = user?.username?.trim() ? user.username : "Anonymous";
     const avatarUrl = user?.avatarUrl?.trim() ? user.avatarUrl : "/game01.jpg";
@@ -66,7 +66,7 @@ function GameRoomContent() {
         <div className="w-screen h-screen flex flex-row items-start bg-linear-to-br from-(--gradient-dark) to-(--gradient-light) relative overflow-hidden">
             {/* Game screen */}
             <div className="w-2/3 h-full border-r-6 border-amber-100 hidden lg:block">
-                <MinigamesDevPage matchGame={matchData?.game} matchRole={matchData?.role} matchData={matchData} />
+                <MinigamesDevPage matchGame={matchData?.game} matchRole={matchData?.role} matchData={matchData} clearMatchData={clearMatchData}/>
                 
                 {/* Panel / Banner de Matchmaking en la parte del Juego */}
                 <div className="p-4 bg-slate-900/80 border-t-2 border-amber-100 flex items-center justify-between text-white font-aldrich">
@@ -161,12 +161,12 @@ function GameRoomContent() {
 								</form>
 								</div>
 							</MenuItems>
+						</Menu>
 						<div className="flex flex-col gap-1">
 							<button onClick={() => i18n.changeLanguage("es")} className="customButton text-xs p-2">ES</button>
 							<button onClick={() => i18n.changeLanguage("en")} className="customButton text-xs p-2">EN</button>
 							<button onClick={() => i18n.changeLanguage("pt")} className="customButton text-xs p-2">PT</button>
 						</div>
-						</Menu>
 					</div>
 				</div>
 				<div className="flex-none p-4 w-full flex flex-col items-center border-b-6 border-amber-100">

@@ -22,11 +22,12 @@ type MinigamesDevPageProps = {
   matchGame?: MatchGame;
   matchRole?: MatchRole;
   matchData?: MatchData | null;
+  clearMatchData?: () => void;
 };
 
 const SHOW_DEV_MENU = import.meta.env.DEV;
 
-export function MinigamesDevPage({ matchGame, matchRole, matchData }: MinigamesDevPageProps) {
+export function MinigamesDevPage({ matchGame, matchRole, matchData, clearMatchData, }: MinigamesDevPageProps) {
   const [devGame, setDevGame] = useState<DevMinigame>('menu');
   const [dismissedMatchId, setDismissedMatchId] = useState<string | undefined>(undefined);
   const { t } = useTranslation();
@@ -38,7 +39,7 @@ export function MinigamesDevPage({ matchGame, matchRole, matchData }: MinigamesD
 
   function handleExitToMenu() {
     if (matchData)
-		setDismissedMatchId(matchId);
+		clearMatchData?.();
 	else
 		setDevGame('menu');
   }

@@ -470,7 +470,7 @@ function getClockLabel(fightState: FightState, t: TFunction): string {
   }
 
   if (fightState.phase === 'finished') {
-	return t("game.finsih");
+	return t("game.finish");
   }
 
   return t("game.clock");

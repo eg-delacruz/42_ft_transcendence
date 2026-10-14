@@ -1051,10 +1051,10 @@ function getDungeonTimeText(
 ): string {
   switch (dungeonState.phase) {
     case 'bettingCountdown':
-      return t('ddd.time.bets', { seconds: dungeonState.bettingCountdown, defaultValue: '{{seconds}}s apuestas' });
+      return t('ddd.time.bets', { seconds: dungeonState.bettingCountdown});
 
     case 'choosingClass':
-      return t('ddd.time.class', { seconds: dungeonState.classSelectionCountdown, defaultValue: '{{seconds}}s clase' });
+      return t('ddd.time.class', { seconds: dungeonState.classSelectionCountdown});
 
     case 'drawingCards':
       return isContinuingCurrentRoom(dungeonState)
@@ -1062,15 +1062,15 @@ function getDungeonTimeText(
         : t('ddd.time.drawing', { defaultValue: 'Robando cartas' });
 
     case 'choosingCard':
-      return t('ddd.time.card', { seconds: dungeonState.cardSelectionCountdown, defaultValue: '{{seconds}}s carta' });
+      return t('ddd.time.card', { seconds: dungeonState.cardSelectionCountdown});
 
     case 'resolvingRoom':
-      return t('ddd.time.resolve', { seconds: dungeonState.resolveCountdown, defaultValue: '{{seconds}}s resolver' });
+      return t('ddd.time.resolve', { seconds: dungeonState.resolveCountdown});
 
     case 'escaped':
     case 'dead':
     case 'finished':
-      return t('ddd.time.menu', { seconds: dungeonState.resultsCountdown, defaultValue: '{{seconds}}s menú' });
+      return t('ddd.time.menu', { seconds: dungeonState.resultsCountdown});
 
     default:
       return '-';

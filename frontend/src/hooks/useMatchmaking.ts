@@ -23,8 +23,6 @@ export type MatchmakingLog = {
 export const useMatchmaking = () => {
   const { socket } = useSocket();
   const { user } = useAuthContext();
-  // Dependemos del id (string estable) y no del objeto user, que puede cambiar de
-  // identidad en cada render del contexto y relanzaba el efecto.
   const userId = user?.id ?? user?._id;
   const [inQueue, setInQueue] = useState(false);
   const [matchData, setMatchData] = useState<MatchData | null>(null);
@@ -36,6 +34,11 @@ export const useMatchmaking = () => {
 			clearTimeout(timerRef.current);
 			timerRef.current = null;
 		}
+	};
+
+	const clearMatchData = () => {
+  		setMatchData(null);
+  		setInQueue(false);
 	};
 
   useEffect(() => {
@@ -84,6 +87,7 @@ export const useMatchmaking = () => {
   const leaveQueue = () => {
 	socket?.emit('leave_matchmaking')
 };
+//!!! NEED TO CLEAN MATCHDATA SO GAMES GO BACK TO MENU ONCE A GAME IS DONE
 
-  return { inQueue, matchData, logs, joinQueue, leaveQueue };
+  return { inQueue, matchData, logs, joinQueue, leaveQueue, clearMatchData };
 };

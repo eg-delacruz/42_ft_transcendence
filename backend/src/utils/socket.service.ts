@@ -30,6 +30,9 @@ const GAME_STATE_KEY = 'matchmaking:game-state';
 const GAME_STATE_LOCK_KEY = 'matchmaking:game-state-lock';
 const GAME_ROOM_ID = 'global';
 const PRESENCE_TTL = 3600; // 1 hour
+const MATCHMAKING_COUNTDOWN_SECONDS = 10;
+const SOLO_WAIT_SECONDS = 20;
+const MATCHMAKING_LOCK_TTL = 30;
 
 type MatchmakingResult = {
     payload?: MatchFoundPayload;
@@ -114,6 +117,7 @@ const DUNGEON_DECKS: Record<'mague' | 'rogue' | 'warrior', DungeonCard[]> = {
 export class SocketService {
     private io: Server | Namespace;
     private redis: Redis;
+	private soloWait: { userId: string; timer: NodeJS.Timeout } | null = null;
 
     constructor(io: Server | Namespace, redis: Redis) {
         this.io = io;
@@ -340,8 +344,7 @@ export class SocketService {
 
                 await this.redis.sadd(MATCHMAKING_MEMBERS_KEY, user.userId);
                 await this.addUserToRoom(user.userId, GAME_ROOM_ID);
-                // Quien llega con una partida en curso y no participa en ella se pone en cola;
-                // antes solo se añadía a "members" y nunca volvía a entrar en el matchmaking.
+
                 if (!isParticipant) {
                     await this.enqueueForMatchmaking(user.userId, socketId);
                 }
@@ -351,8 +354,6 @@ export class SocketService {
                 return { payload: activeMatch, created: false };
             }
 
-            // enqueueForMatchmaking es idempotente: si el usuario ya estaba en "members" pero
-            // no en la cola (estado huérfano) lo vuelve a encolar.
             await this.enqueueForMatchmaking(user.userId, socketId);
 
             const users = await this.getActiveMatchmakingUsers();
@@ -537,7 +538,8 @@ export class SocketService {
             return { action, state: nextState };
         } finally {
             const currentToken = await this.redis.get(GAME_STATE_LOCK_KEY);
-            if (currentToken === lockToken) await this.redis.del(GAME_STATE_LOCK_KEY);
+            if (currentToken === lockToken) 
+				await this.redis.del(GAME_STATE_LOCK_KEY);
         }
     }
 
@@ -935,7 +937,10 @@ export class SocketService {
             ? await this.redis.mget(...participantIds.map((userId) => `${PRESENCE_PREFIX}${userId}`))
             : [];
         const activeUsers = presence.filter(Boolean).length;
-        if (participantIds.length < 2 || activeUsers < 2) {
+        const enoughActive = match.game === 'deep_&_dark'
+            ? Boolean(presence[0])
+            : participantIds.length >= 2 && activeUsers >= 2;
+        if (!enoughActive) {
             // await this.redis.del(ACTIVE_MATCH_KEY, GAME_STATE_KEY);
             this.broadcastMatchmakingLog('Partida activa descartada: no hay dos usuarios activos', { participantIds, activeUsers });
             return null;
@@ -1014,14 +1019,14 @@ export class SocketService {
      * reintento): nadie espera el resultado, así que hay que avisar a la sala con `match_found`.
      * Desde joinMatchmaking va en false porque el gateway ya emite el evento con el resultado.
      */
-private async tryCreateMatch(notify = false): Promise<MatchmakingResult | null> {
+private async tryCreateMatch(notify = false, soloUserId?: string): Promise<MatchmakingResult | null> {
     const lockToken = `${Date.now()}-${Math.random()}`;
 
     const lockAcquired = await this.redis.set(
         MATCHMAKING_LOCK_KEY,
         lockToken,
         'EX',
-        15,
+        MATCHMAKING_LOCK_TTL,
         'NX',
     );
 
@@ -1029,10 +1034,12 @@ private async tryCreateMatch(notify = false): Promise<MatchmakingResult | null> 
         logger.debug('[matchmaking] tryCreateMatch omitido: ya hay otro intento en curso (lock); se reintentará',
         );
         setTimeout(() => {
-            void this.tryCreateMatch(true);
+            void this.tryCreateMatch(true, soloUserId);
         }, 500);
         return null;
     }
+
+	let soloStart = false;
 
     try {
         const existingMatch = await this.getActiveGame();
@@ -1051,43 +1058,58 @@ private async tryCreateMatch(notify = false): Promise<MatchmakingResult | null> 
         });
 
         if (queueUsers.length < 2) {
-            this.broadcastMatchmakingLog(
-                'Esperando al menos dos usuarios activos',
-                { users: queueUsers },
-            );
-
-            return null;
-        }
-
-        this.broadcastMatchmakingLog(
-            'Cuenta atras de matchmaking iniciada',
-            {
-                seconds: 5,
-                users: queueUsers,
-            },
-        );
-
-        for (let seconds = 5; seconds > 0; seconds -= 1) {
-            this.broadcastMatchmakingLog(
-                `Matchmaking comienza en ${seconds}`,
-                {
-                    users: await this.getActiveMatchmakingUsers(),
-                },
-            );
-
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-
-            queueUsers = await this.cleanMatchmakingQueue();
-
-            if (queueUsers.length < 2) {
-                this.broadcastMatchmakingLog('Cuenta atras cancelada: un usuario se desconecto',{users: queueUsers,},);
-                await this.logQueueState('tryCreateMatch:cuenta-atras-cancelada',{seconds,queueUsers,},);
+            if (queueUsers.length === 1 && soloUserId === queueUsers[0]) {
+                soloStart = true;
+                this.clearSoloWait();
+                this.broadcastMatchmakingLog(
+                    `Nadie más se ha unido en ${SOLO_WAIT_SECONDS}s: empieza deep_&_dark en solitario`,
+                    { users: queueUsers },
+                );
+            } else {
+                this.broadcastMatchmakingLog(
+                    'Esperando al menos dos usuarios activos',
+                    { users: queueUsers },
+                );
+                this.scheduleSoloWait(queueUsers);
                 return null;
-            }
-        }
+        	}
+		} else {
+			this.clearSoloWait();
+		}
 
+		if (!soloStart) {
+			this.broadcastMatchmakingLog(
+				'Cuenta atras de matchmaking iniciada',
+				{
+					seconds: MATCHMAKING_COUNTDOWN_SECONDS,
+					users: queueUsers,
+				},
+			);
+ 
+            for (let seconds = MATCHMAKING_COUNTDOWN_SECONDS; seconds > 0; seconds -= 1) {
+                this.broadcastMatchmakingLog(
+                    `Matchmaking comienza en ${seconds}`,
+                    {
+                        users: await this.getActiveMatchmakingUsers(),
+                    },
+                );
+ 
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+ 
+                queueUsers = await this.cleanMatchmakingQueue();
+ 
+                if (queueUsers.length < 2) {
+                    this.broadcastMatchmakingLog('Cuenta atras cancelada: un usuario se desconecto',{users: queueUsers,},);
+                    await this.logQueueState('tryCreateMatch:cuenta-atras-cancelada',{seconds,queueUsers,},);
+                    this.scheduleSoloWait(queueUsers);
+    				return null;
+                }
+            }
+		}
+
+		const requiredPlayers = soloStart ? 1 : 2;
         const rawPlayers =
-            (await this.redis.lpop(MATCHMAKING_QUEUE_KEY, 2)) ?? [];
+            (await this.redis.lpop(MATCHMAKING_QUEUE_KEY, requiredPlayers)) ?? [];
         const popped = rawPlayers.map((raw) => ({raw,userId: (JSON.parse(raw) as { userId: string }).userId,}));
 
         await this.logQueueState('tryCreateMatch:tras-lpop', {popped: popped.map((p) => p.userId),});
@@ -1106,7 +1128,7 @@ private async tryCreateMatch(notify = false): Promise<MatchmakingResult | null> 
             }
         }
 
-        if (valid.length < 2) {
+        if (valid.length < requiredPlayers) {
             // Devolver a los válidos a la cabeza de la cola.
             for (const entry of [...valid].reverse()) {
                 await this.redis.lpush(MATCHMAKING_QUEUE_KEY, entry.raw,);
@@ -1128,7 +1150,7 @@ private async tryCreateMatch(notify = false): Promise<MatchmakingResult | null> 
 
         const userIds = valid.map((entry) => entry.userId);
         userIds.sort(() => Math.random() - 0.5);
-        const game = this.getRandomGame();
+        const game: GameName = soloStart ? 'deep_&_dark' : this.getRandomGame();
         const participantDetails = await this.redis.mget(
             ...userIds.map(
                 (userId) => `${PRESENCE_PREFIX}${userId}`,
@@ -1155,7 +1177,7 @@ private async tryCreateMatch(notify = false): Promise<MatchmakingResult | null> 
 
         const spectators =
             game === 'deep_&_dark'
-                ? [userIds[1]]
+                ? userIds.slice(1)
                 : [];
 
         const payload: MatchFoundPayload = {
@@ -1232,6 +1254,36 @@ private async tryCreateMatch(notify = false): Promise<MatchmakingResult | null> 
         }
     }
 }
+
+	/* Si un jugador esta solo durante un tiempo, se inicia ddd */
+    private scheduleSoloWait(queueUsers: string[]): void {
+        if (queueUsers.length !== 1) {
+            this.clearSoloWait();
+            return;
+        }
+ 
+        const [userId] = queueUsers;
+        if (this.soloWait?.userId === userId) 
+			return;
+ 
+        this.clearSoloWait();
+        this.broadcastMatchmakingLog(
+            `Un solo jugador en cola: si nadie más entra en ${SOLO_WAIT_SECONDS}s empezará deep_&_dark en solitario`,
+            { userId, seconds: SOLO_WAIT_SECONDS },
+        );
+ 
+        const timer = setTimeout(() => {
+            this.soloWait = null;
+            void this.tryCreateMatch(true, userId);
+        }, SOLO_WAIT_SECONDS * 1000);
+        this.soloWait = { userId, timer };
+    }
+ 
+    private clearSoloWait(): void {
+        if (!this.soloWait) return;
+        clearTimeout(this.soloWait.timer);
+        this.soloWait = null;
+    }
 
     private getRandomGame(): GameName {
         const games: GameName[] = ['the_race', 'fight_fight', 'deep_&_dark'];
@@ -1326,7 +1378,12 @@ private async tryCreateMatch(notify = false): Promise<MatchmakingResult | null> 
                 : [];
             const activeRemainingIds = remainingIds.filter((_, index) => Boolean(remainingPresence[index]));
 
-            if (activeRemainingIds.length >= 2) {
+            const soloPlayerId = activeMatch.players[0]?.userId;
+            const sessionStillValid = activeMatch.game === 'deep_&_dark'
+                ? Boolean(soloPlayerId) && activeRemainingIds.includes(soloPlayerId)
+                : activeRemainingIds.length >= 2;
+ 
+            if (sessionStillValid) {
                 await this.leaveMatchmaking(userId);
                 logger.debug(`User ${userId} left an active match while the session remains valid`);
                 await this.logQueueState('handlePlayerDeparture:partida-continua', { userId, activeRemainingIds });
@@ -1369,6 +1426,8 @@ private async tryCreateMatch(notify = false): Promise<MatchmakingResult | null> 
                 }
             }
             await this.redis.srem(MATCHMAKING_MEMBERS_KEY, userId);
+			if (this.soloWait?.userId  === userId)
+				this.clearSoloWait();
             logger.debug(`User ${userId} removed from matchmaking queue`);
             await this.logQueueState('leaveMatchmaking', { userId });
         } catch (error) {

@@ -20,7 +20,12 @@ export function useAuth() {
   const auth = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await api.get("/auth/me");
+      const data = await api.get("/auth/me", { ignoreStatuses: [401, 404] });
+	  if (!data)
+	  {
+		setUser(null);
+		return { error: "Not autheticated"};
+	  }
       const userData = data.body?.user ?? data.user ?? null;
       setUser(userData);
       return data;
