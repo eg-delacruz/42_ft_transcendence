@@ -730,16 +730,18 @@ export class SocketService {
             const dungeonClass = key === 'ArrowLeft' ? 'mague' : key === 'ArrowRight' ? 'rogue' : key === 'ArrowUp' ? 'warrior' : null;
             if (!dungeonClass) 
 				return null;
-            return { ...state, phase: 'choosingCard', player: { ...state.player, class: dungeonClass }, currentRoom: this.createDungeonRoom(), hand: this.createDungeonHand() };
+            return { ...state, phase: 'choosingCard', player: { ...state.player, class: dungeonClass }, currentRoom: this.createDungeonRoom(), hand: this.createDungeonHand(dungeonClass) };
         }
         if (state.phase !== 'choosingCard') 
 			return null;
         if (key === 'ArrowDown') 
 			return { ...state, phase: 'escaped', resultsCountdown: 2 };
+	
         const cardIndex = key === 'ArrowLeft' ? 0 : key === 'ArrowRight' ? 1 : key === 'ArrowUp' ? 2 : -1;
         if (cardIndex < 0) 
 			return null;
         const card = state.hand[cardIndex] ?? state.hand[0];
+
         const room = state.currentRoom;
         if (!card || !room) 
 			return null;
@@ -764,11 +766,11 @@ export class SocketService {
         } else if (state.phase === 'choosingClass') {
             state.classSelectionCountdown -= 1;
             if (state.classSelectionCountdown <= 0) 
-				return this.persistDungeonState(currentState, { ...state, phase: 'choosingCard', player: { ...state.player, class: 'warrior' }, currentRoom: this.createDungeonRoom(), hand: this.createDungeonHand() });
+				return this.persistDungeonState(currentState, { ...state, phase: 'choosingCard', player: { ...state.player, class: 'warrior' }, currentRoom: this.createDungeonRoom(), hand: this.createDungeonHand(state.player.class) });
         } else if (state.phase === 'resolvingRoom') {
             state.resolveCountdown -= 1;
             if (state.resolveCountdown <= 0) 
-				return this.persistDungeonState(currentState, { ...state, phase: 'choosingCard', currentRoom: this.createDungeonRoom(), hand: this.createDungeonHand(), cardSelectionCountdown: 3 });
+				return this.persistDungeonState(currentState, { ...state, phase: 'choosingCard', currentRoom: this.createDungeonRoom(), hand: this.createDungeonHand(state.player.class), cardSelectionCountdown: 3 });
         } else {
             return null;
         }
@@ -906,6 +908,14 @@ export class SocketService {
             return { ...picked, effects: [...picked.effects] };
         });
     }
+
+	// private createDungeonHand(): DungeonCard[] {
+    //     return [
+    //         { id: 'clear-all', name: 'Carta segura', probability: 1, effects: ['clearAll'], icon: '✨' },
+    //         { id: 'risk', name: 'Carta de riesgo', probability: 1, effects: [], icon: '⚠️' },
+    //         { id: 'clear-combat', name: 'Golpe fuerte', probability: 1, effects: ['clearCombat'], icon: '⚔️' },
+    //     ];
+	// }
 
     private isAllowedAction(payload: GameActionPayload): boolean {
         if (payload.game === 'the_race') {
