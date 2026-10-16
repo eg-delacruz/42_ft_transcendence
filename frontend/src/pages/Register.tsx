@@ -30,14 +30,10 @@ function Register() {
 		if (!isStrongPassword(password))
             return setError(t("register.error.passwordWeak"));
 
-		try 
-		{
-			const res = await register(email, password);
-        }
-        catch (err) 
-		{
-			setError(t("register.error.failed"));
-        }
+
+		const res = await register(email, password);
+		if (res.error)
+			return setError(res.error || t("register.error.failed"));
         navigate("/user");
     }
 
@@ -136,12 +132,14 @@ function Register() {
   									<span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 animate-sidebounce text-3xl">◄</span>
 								)}
 							</form>
-							<div className="p-2 flex items-center">
-								<p className="font-aldrich opacity-70">{t("register.haveAccount")}<Link to="/login" className="text-blue-300">{t("register.haveAccount.link")}</Link></p>
+							<div className="p-2 items-center">
+								<p className="font-aldrich opacity-70">{t("register.haveAccount")} <Link to="/login" className="text-blue-300">{t("register.haveAccount.link")}</Link></p>
 							</div>
-							<div className="p-2 flex items-center text-center wrap-normal gap-2">
+							<div className="p-2 text-center">
 								<p className="font-aldrich opacity-70">{t("common.termsWarning")}</p>
-								<button onClick={handleTerms} className="text-blue-300 font-aldrich opacity-70">
+								<button onClick={handleTerms} 
+									className="text-blue-300 font-aldrich opacity-70"
+								>
 									{t("common.termsWarning.link")}
 								</button> 
 								{showTerms && (
