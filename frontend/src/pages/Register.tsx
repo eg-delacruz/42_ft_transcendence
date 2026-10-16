@@ -1,6 +1,6 @@
 // TODO: REGISTER page
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuthContext } from "@/context/context";
 import { isStrongPassword } from "@/utils/passwordUtils";
 import { preload } from 'react-dom';
@@ -137,7 +137,7 @@ function Register() {
 								)}
 							</form>
 							<div className="p-2 flex items-center">
-								<p className="font-aldrich opacity-70">{t("register.haveAccount")}<a href="/login" className="text-blue-300">{t("register.haveAccount.link")}</a></p>
+								<p className="font-aldrich opacity-70">{t("register.haveAccount")}<Link to="/login" className="text-blue-300">{t("register.haveAccount.link")}</Link></p>
 							</div>
 							<div className="p-2 flex items-center text-center wrap-normal gap-2">
 								<p className="font-aldrich opacity-70">{t("common.termsWarning")}</p>

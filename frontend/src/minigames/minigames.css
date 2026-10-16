@@ -15,14 +15,14 @@
 	--gradient-light: rgb(30, 25, 47);
 }
 
-@view-transition {
+/* @view-transition {
 	navigation: auto;
 	types: slide;
 }
 
 ::view-transition-group(*) {
 	animation-duration: 3s;
-}
+} */
 
 @layer components {
 	.glowingText {

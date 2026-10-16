@@ -146,7 +146,11 @@ function User() {
 					</button>	
 				</div>
 				<div className="w-auto flex flex-col lg:flex-row gap-8">
-					<div className="w-full p-6 flex items-center gap-4 text-left font-aldrich text-md text-slate-200">
+					<form onSubmit={(e) => {
+						e.preventDefault();
+						changeUser({ displayName });
+					}}
+					className="w-full p-6 flex flex-col justify-center items-start gap-4 text-left font-aldrich text-md text-slate-200">
 						<div className="outline-none w-full">
 							<label className="labelCustom"> {t("user.banner.displayName")} 
 							<input
@@ -155,10 +159,14 @@ function User() {
 								value={displayName}
 								id="displayName"
 								onChange={(e) => setDisplayname(e.target.value)}
-								placeholder="display"
+								placeholder="user"
 							/></label>
 						</div>
-					</div>
+						<button type="submit" className="customButton text-xs">
+							{t("user.banner.changeName")}
+						</button>
+					</form>
+
 					<div className="hidden lg:flex lg:p-12 flex-col text-left font-aldrich text-2xl text-slate-200">
 						{/* <p className="font-bold p-2">ID: </p>
 						<p className="tab-2">{user.userId || user.id || user._id}</p> */}

@@ -2,7 +2,7 @@ import { useAuthContext } from "@/context/context";
 import { useUser } from "@/hooks/useUser";
 import { useMatchmaking, type MatchmakingLog } from "@/hooks/useMatchmaking";
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { MinigamesDevPage } from "../minigames/MinigamesDevPage";
 import { TopScores } from '../minigames/components/TopScores';
 import { MinigameProvider, useMinigameContext } from "../minigames/context/minigameContext";
@@ -142,12 +142,12 @@ function GameRoomContent() {
 								className="absolute right-0 z-10 mt-2 w-64 origin-top-right rounded-md bg-slate-900/60 outline-3 -outline-offset-1 outline-white/10 transition data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in">
 								<div className="py-1">
 								<MenuItem>
-									<a
-									href="/user"
+									<Link
+									to="/user"
 									className="block px-4 py-2 text-lg lg:text-2xl font-aldrich text-gray-300"
 									>
 									{t("user.settings")}
-									</a>
+									</Link>
 								</MenuItem>
 								<form onClick={Logout}>
 									<MenuItem>

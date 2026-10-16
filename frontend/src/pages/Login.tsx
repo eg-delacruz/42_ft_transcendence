@@ -1,7 +1,7 @@
 // TODO: Login page
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuthContext } from "@/context/context";
 import { PrivacyPolicy } from '@/pages/PrivacyPolicy';
 import { TermsOfService } from '@/pages/TermsOfService';
@@ -108,7 +108,7 @@ function Login() {
 								)}
 							</form>
 							<div className="p-2 flex items-center">
-								<p className="font-aldrich opacity-70">{t("login.noAccount")}<a href="/register" className="text-blue-300">{t("login.noAccount.link")}</a></p>
+								<p className="font-aldrich opacity-70">{t("login.noAccount")}<Link to="/register" className="text-blue-300">{t("login.noAccount.link")}</Link></p>
 							</div>
 							<div className="p-2 flex items-center text-center wrap-normal gap-2">
 								<p className="font-aldrich opacity-70">{t("common.termsWarning")}</p>

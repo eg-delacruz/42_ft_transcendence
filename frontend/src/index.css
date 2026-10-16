@@ -15,14 +15,14 @@
 	--gradient-light: rgb(30, 25, 47);
 }
 
-@view-transition {
+/* @view-transition {
 	navigation: auto;
 	types: slide;
 }
 
 ::view-transition-group(*) {
 	animation-duration: 3s;
-}
+} */
 
 @layer components {
 	.credit-icon {
@@ -141,7 +141,7 @@
 	animation: slideintop 1s ease-out;
 }
 
-@keyframes vanish {
+/* @keyframes vanish {
 	from {
 		opacity: 100%;
 	}
@@ -152,7 +152,7 @@
 
 .animate-vanish {
 	animation: vanish 1s linear forwards;
-}
+} */
 
 @keyframes appear {
 	from {
