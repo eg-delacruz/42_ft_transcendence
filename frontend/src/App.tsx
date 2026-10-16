@@ -38,20 +38,17 @@ const routes = [
   { path: "/minigames", element: <MinigamesDevPage /> }
 ]
 
-function App() {
-
-	const [showPage, setShowPage] = useState(true);
-
-	function RequireAuth() {
+function RequireAuth() {
 		const { user, auth } = useAuthContext();
 		const [checked, setChecked] = useState(!!user);
 
 		useEffect(() => {
 			if (user) return setChecked(true);
 			auth().finally(() => setChecked(true));
-		}, []); // solo al montar
+		}, []);
 
-		if (!checked) return null; // o un spinner
+		if (!checked) 
+			return null;
 		return user ? <Outlet /> : <Navigate to="/login" replace />;
 	}
 
@@ -71,6 +68,10 @@ function App() {
 		);
 	}
 
+function App() {
+
+	const [showPage, setShowPage] = useState(true);
+
   return (
 	<div className={showPage ? "page-enter page-enter-active" : "page-exit page-exit-active"}>
 	<BrowserRouter>
@@ -84,8 +85,8 @@ function App() {
 				<Route path="/register" element={<Register />} />
 
 				<Route element={<RequireAuth />}>
-					<Route element={<SocketLayout />}>
 						<Route path="/user" element={<User />} />
+					<Route element={<SocketLayout />}>
 						<Route path="/gameroom" element={<GameRoom />} />
 					</Route>
 				</Route>

@@ -111,7 +111,7 @@ function Login() {
 								<p className="font-aldrich opacity-70">{t("login.noAccount")} <Link to="/register" className="text-blue-300">{t("login.noAccount.link")}</Link></p>
 							</div>
 							<div className="p-2 text-center">
-								<p className="font-aldrich opacity-70">{t("common.termsWarning")}
+								<p className="font-aldrich opacity-70">{t("common.termsWarning")}</p>
 								<button onClick={handleTerms} 
 									className="text-blue-300 font-aldrich opacity-70"
 								>
@@ -123,7 +123,7 @@ function Login() {
 											<button onClick={() => setShowTerms(false)} className="customButton mt-5">{t("common.back")}</button>
 										</div>
 									)}
-								</p>
+								
 							</div>
 						</div>
 					</div>

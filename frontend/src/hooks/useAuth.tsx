@@ -41,9 +41,9 @@ export function useAuth() {
     }
   }, []);
 
-//   useEffect(() => {
-//     auth();
-//   }, [auth]);
+  useEffect(() => {
+    auth();
+  }, [auth]);
 
   // Login
   const login = useCallback(async (email: string, password: string) => {

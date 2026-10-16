@@ -493,119 +493,98 @@ export function DeepDarkDungeon({ onExitToMenu, onMinigameChange, playerRole, ma
     dungeonState.phase === 'resolvingRoom';
 
   return (
-  <main className="min-h-screen w-full overflow-auto bg-slate-950 text-zinc-100 flex justify-center font-mono">
-    <section
-      className="relative flex w-full flex-col gap-1 overflow-hidden bg-cover bg-center bg-no-repeat px-12 py-9"
-      style={{ backgroundImage: `url(${dungeonBackground})` }}
-    >
-      <header className="mt-6 text-center">
-        <p className="m-0 text-sm uppercase tracking-[0.28em] text-zinc-400">{t('ddd.minigame')}</p>
+<main className="flex h-screen w-full justify-center overflow-hidden bg-slate-950 font-mono text-zinc-100">
+  <section
+    className="relative flex h-full w-full max-w-1600px flex-col gap-3 overflow-hidden bg-cover bg-center bg-no-repeat px-12 py-6"
+    style={{ backgroundImage: `url(${dungeonBackground})` }}
+  >
+    <header className="shrink-0 text-center">
+      <p className="m-0 text-sm uppercase tracking-[0.28em] text-zinc-400">{t('ddd.minigame')}</p>
+      <h1 className="mt-2 mb-1 text-[40px] leading-none text-zinc-50">Deep & Dark Dungeon</h1>
+      <p className="m-0 text-base text-zinc-200">{t("ddd.header")}</p>
+    </header>
 
-        <h1 className="mt-2 mb-1 text-[40px] leading-none text-zinc-50">
-          Deep & Dark Dungeon
-        </h1>
-
-        <p className="m-0 text-base text-zinc-200">
-			{t("ddd.header")}
-        </p>
-      </header>
-
-      <section className="grid w-full grid-cols-[360px_minmax(520px,1fr)] items-start gap-8">
+    <section className="grid min-h-0 w-full flex-5 grid-cols-[360px_1fr] gap-8">
+      <div className="min-h-0 overflow-hidden">
         <PlayerHud
           dungeonState={dungeonState}
           playerName={getDungeonPlayerName(matchData, user, t)}
         />
+      </div>
+      <ActiveChallenge dungeonState={dungeonState} />
+    </section>
 
-        <ActiveChallenge dungeonState={dungeonState} />
-      </section>
+    <section className="flex min-h-0 w-full flex-4 items-stretch justify-evenly text-center">
+      {dungeonState.phase === 'bettingCountdown' && <DungeonTutorial />}
 
-      <section className="flex w-full flex-1 items-center justify-evenly text-center">
-          {dungeonState.phase ===
-            'bettingCountdown' && (
-            <DungeonTutorial />
-          )}
+      {shouldShowClassSelection && (
+        <section className="w-full self-center rounded-xl border border-zinc-300/40 bg-zinc-950/80 p-6 text-center shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
+			<p className="m-0 mb-3 text-xs uppercase tracking-[0.12em] text-zinc-400 sm:mb-5 sm:text-sm sm:tracking-[0.16em]">
+				{t("ddd.classes")}
+			</p>
 
-          {shouldShowClassSelection && (
-          <section className="w-full rounded-xl border border-zinc-300/40 bg-zinc-950/80 p-6 text-center shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
-            <p className="m-0 mb-5 text-sm uppercase tracking-[0.16em] text-zinc-400">
-                {t("ddd.classes")}
-              </p>
+			<section className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
+				<ClassOption dungeonClass="mague" />
+				<ClassOption dungeonClass="warrior" />
+				<ClassOption dungeonClass="rogue" />
+			</section>
 
-            <section className="flex flex-wrap items-center justify-center gap-4">
-                <ClassOption dungeonClass="mague" />
-                <ClassOption dungeonClass="warrior" />
-                <ClassOption dungeonClass="rogue" />
-              </section>
+			<p className="mt-3 text-xs text-zinc-300 sm:mt-4 sm:text-sm">
+				{t(DUNGEON_CLASS_CONTROL_TEXT)}
+			</p>
 
-            <p className="mt-4 text-sm text-zinc-300">
-                {t(DUNGEON_CLASS_CONTROL_TEXT)}
-              </p>
+			<p className="mt-2 text-xs text-zinc-200 sm:text-sm">
+				{t("ddd.defClassWarn")}
+			</p>
+		</section>
+      )}
 
-            <p className="mt-2 text-sm text-zinc-200">
-                {t("ddd.defClassWarn")}
-              </p>
-            </section>
-          )}
+      {dungeonState.phase === 'drawingCards' && (
+        <section className="w-full max-w-4xl self-center rounded-xl border border-zinc-300/40 bg-zinc-950/80 p-6 text-center shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
+			<h2 className="m-0 text-lg text-zinc-50 sm:text-2xl">
+				{t('ddd.drawing.title', { defaultValue: 'Robando cartas...' })}
+			</h2>
 
-          {dungeonState.phase === 'drawingCards' && (
-          <section className="w-full max-w-4xl rounded-xl border border-zinc-300/40 bg-zinc-950/80 p-6 text-center shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
-            <h2 className="m-0 text-2xl text-zinc-50">
-                {t('ddd.drawing.title', { defaultValue: 'Robando cartas...' })}
-              </h2>
+			<p className="mt-3 text-xs text-zinc-200 sm:text-sm">
+				{isContinuingCurrentRoom(dungeonState)
+				? t('ddd.drawing.continues', { defaultValue: 'El reto continúa. Robando nuevas cartas para intentarlo de nuevo.' })
+				: t('ddd.drawing.next', { defaultValue: 'Preparando la siguiente sala.' })}
+			</p>
+			</section>
+		)}
 
-            <p className="mt-3 text-sm text-zinc-200">
-                {isContinuingCurrentRoom(dungeonState)
-                  ? t('ddd.drawing.continues', { defaultValue: 'El reto continúa. Robando nuevas cartas para intentarlo de nuevo.' })
-                  : t('ddd.drawing.next', { defaultValue: 'Preparando la siguiente sala.' })}
-              </p>
-            </section>
-          )}
-
-          {shouldShowHand && (
-          <section className="flex flex-col w-full max-w-4xl">
-            <section className="flex flex-row w-full max-w-4xl items-center">
-                {getVisualCardSlots(
-                  dungeonState.hand,
-                ).map(
-                  ({
-                    card,
-                    originalIndex,
-                  }) => (
-                    <DungeonCardImage 
-                      key={`${card.id}-${originalIndex}`}
-                      card={card}
-                    />
-                  ),
-                )}
-              </section>
-
-              <p className="text-sm text-zinc-300">
-                {t(DUNGEON_CARD_CONTROL_TEXT)}
-              </p>
-            </section>
-          )}
-
-          {(dungeonState.phase === 'escaped' ||
-            dungeonState.phase === 'dead' ||
-            dungeonState.phase === 'finished') && (
-            <section className="w-full max-w-4xl rounded-xl border border-zinc-300/40 bg-zinc-950/80 p-6 text-center shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
-              <h2 className="m-0 text-2xl text-zinc-50">
-                {t("ddd.score")}{getResultTitle(dungeonState, t)}
-              </h2>
-
-              <p className="mt-3 text-lg text-zinc-100">
-                {dungeonState.player.score}
-              </p>
-
-              <p className="mt-2 text-sm text-zinc-200">
-                {t("game.backToMenu")}{' '}
-                {dungeonState.resultsCountdown}...
-              </p>
-            </section>
-          )}
+      {shouldShowHand && (
+        <section className="flex h-full min-h-0 w-full max-w-4xl flex-col">
+          <div className="flex min-h-0 w-full flex-1 flex-row items-stretch">
+            {getVisualCardSlots(dungeonState.hand).map(({ card, originalIndex }) => (
+              <DungeonCardImage key={`${card.id}-${originalIndex}`} card={card} />
+            ))}
+          </div>
+          <p className="shrink-0 text-sm text-zinc-300">{t(DUNGEON_CARD_CONTROL_TEXT)}</p>
         </section>
-      </section>
-    </main>
+      )}
+
+      {(dungeonState.phase === 'escaped' ||
+        dungeonState.phase === 'dead' ||
+        dungeonState.phase === 'finished') && (
+        <section className="w-full max-w-4xl self-center rounded-xl border border-zinc-300/40 bg-zinc-950/80 p-6 text-center shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
+			<h2 className="m-0 text-lg text-zinc-50 sm:text-2xl">
+				{t("ddd.score")}{getResultTitle(dungeonState, t)}
+			</h2>
+
+			<p className="mt-3 text-base text-zinc-100 sm:text-lg">
+				{dungeonState.player.score}
+			</p>
+
+			<p className="mt-2 text-xs text-zinc-200 sm:text-sm">
+				{t("game.backToMenu")}{' '}
+				{dungeonState.resultsCountdown}...
+			</p>
+        </section>
+      )}
+    </section>
+  </section>
+</main>
   );
 }
 
@@ -628,11 +607,11 @@ function DungeonCardImage({
   }
 
   return (
-      <article className="flex h-fit w-auto items-center justify-center p-2 text-center">
+      <article className="flex h-full min-h-0 min-w-0 flex-1 items-center justify-center p-2 text-center">
       <img
         src={image}
         alt={t(`ddd.cards.${card.id}`)}
-          className="block h-auto max-h-101.25 w-82.5 object-contain"
+          className="h-full w-full object-contain"
       />
     </article>
   );
@@ -647,19 +626,19 @@ function DungeonCardImage({
 function DungeonTutorial() {
 	const { t } = useTranslation();
   return (
-      <section className="w-full max-w-6xl rounded-xl border border-zinc-300/40 bg-zinc-950/80 p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
+      <section className="h-full w-full max-w-6xl rounded-xl border border-zinc-300/40 bg-zinc-950/80 p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] overflow-scroll">
         <div className="grid gap-5 md:grid-cols-3">
-          <article className="rounded-lg border border-zinc-300/20 bg-zinc-900/70 p-5 text-center">
+          <article className="h-full rounded-lg border border-zinc-300/20 bg-zinc-900/70 p-5 text-center">
             <h3 className="m-0 text-xl text-zinc-50">
             	{t("ddd.tutorial.success.title")}
           	</h3>
-            <p className="mt-3 text-sm text-zinc-200">
+            <p className="text-sm text-zinc-200">
             	{t("ddd.tutorial.success.explanation")}
           	</p>
             <img
 				src={tutorialSuccessImage}
 				alt={t('ddd.tutorial.success.alt')}
-				className="mx-auto mt-4 h-auto w-full max-w-55 object-contain"
+				className="object-contain"
           	/>
         </article>
 
@@ -672,7 +651,7 @@ function DungeonTutorial() {
           	</p>
             <img
 				src={tutorialDamageImage}
-				alt={t('ddd.tutorial.dmg.alt', { defaultValue: 'Carta que no supera el reto y provoca pérdida de vida' })}
+				alt={t('ddd.tutorial.dmg.alt')}
 				className="mx-auto mt-4 h-auto w-full max-w-55 object-contain"
 			/>
         </article>
@@ -686,7 +665,7 @@ function DungeonTutorial() {
 			</p>
             <img
 				src={tutorialProtectionImage}
-				alt={t('ddd.tutorial.protection.alt', { defaultValue: 'Carta que previene el daño' })}
+				alt={t('ddd.tutorial.protection.alt')}
 				className="mx-auto mt-4 h-auto w-full max-w-55 object-contain"
 			/>
         </article>
@@ -812,174 +791,132 @@ function getDungeonPlayerName(matchData: MatchData | null | undefined, user: Ret
  * ============================================================
  */
 
-function ActiveChallenge({
-  dungeonState,
-}: {
-  dungeonState: DungeonState;
-}) {
-  /*
-   * La variante visual se conserva mientras el tipo de
-   * habitación no cambie.
-   */
-  const { t } = useTranslation();
-  const roomType =
-    dungeonState.currentRoom?.type;
+function ChallengePanel({ children }: { children: React.ReactNode }) {
+  return (
+    <section className="flex h-full min-h-0 w-full flex-col items-center justify-center">
+      <article className="flex h-full min-h-0 w-full max-w-140 flex-col items-center justify-center gap-3 p-2 text-center">
+        {children}
+      </article>
+    </section>
+  );
+}
 
-  const [roomImage, setRoomImage] =
-    useState<string | null>(null);
+function RoomImage({ src, alt }: { src: string; alt: string }) {
+  return (
+    <div className="min-h-0 w-full flex-1">
+      <img src={src} alt={alt} className="h-full w-full object-contain" />
+    </div>
+  );
+}
+
+function ActiveChallenge({ dungeonState }: { dungeonState: DungeonState }) {
+  const { t } = useTranslation();
+  const roomType = dungeonState.currentRoom?.type;
+  const [roomImage, setRoomImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!roomType) {
       setRoomImage(null);
       return;
     }
-
-    setRoomImage(
-      getRandomRoomImage(roomType),
-    );
+    setRoomImage(getRandomRoomImage(roomType));
   }, [roomType]);
 
-  if ( dungeonState.phase === 'bettingCountdown') 
-  {
+  if (dungeonState.phase === 'bettingCountdown') {
     return (
-        <section className="flex min-h-80 w-full flex-col items-center justify-start gap-3">
-          <article className="flex min-h-105 w-140 flex-col items-center justify-center gap-3 p-2 text-center">
-            <h2 className="m-0 text-2xl text-zinc-50">
-				{t("ddd.ready")}
-          </h2>
-
-            <p className="m-0 text-7xl font-bold text-zinc-50">
-            {dungeonState.bettingCountdown}
-          </p>
-
-            <p className="m-0 text-sm text-zinc-200">
-
-          </p>
-        </article>
-      </section>
+      <ChallengePanel>
+        <h2 className="m-0 text-2xl text-zinc-50">{t("ddd.ready")}</h2>
+        <p className="m-0 text-7xl font-bold text-zinc-50">{dungeonState.bettingCountdown}</p>
+      </ChallengePanel>
     );
   }
 
   if (dungeonState.phase === 'choosingClass') {
     return (
-        <section className="flex min-h-80 w-full flex-col items-center justify-start gap-3">
-          <article className="flex min-h-105 w-140 flex-col items-center justify-center gap-3 p-2 text-center">
-            <h2 className="m-0 text-2xl text-zinc-50">
-            {t("ddd.chooseClass")}
-          </h2>
-
-            <p className="m-0 text-7xl font-bold text-zinc-50">
-            {dungeonState.classSelectionCountdown}
-          </p>
-
-            <p className="m-0 text-sm text-zinc-200">
-            
-          </p>
-        </article>
-      </section>
+      <ChallengePanel>
+        <h2 className="m-0 text-2xl text-zinc-50">{t("ddd.chooseClass")}</h2>
+        <p className="m-0 text-7xl font-bold text-zinc-50">{dungeonState.classSelectionCountdown}</p>
+      </ChallengePanel>
     );
   }
 
   if (dungeonState.phase === 'drawingCards') {
-    const shouldContinueRoom =
-      isContinuingCurrentRoom(dungeonState);
+    const shouldContinueRoom = isContinuingCurrentRoom(dungeonState);
 
     return (
-        <section className="flex min-h-80 w-full flex-col items-center justify-start gap-3">
-          <article className="flex min-h-105 w-140 flex-col items-center justify-center gap-3 p-2 text-center">
-          {shouldContinueRoom &&
-          dungeonState.currentRoom &&
-          roomImage ? (
-            <img
-              src={roomImage}
-              alt={t(`ddd.roomType.${dungeonState.currentRoom.type}`)}
-                className="block h-auto max-h-101.25 w-82.5 object-contain"
-            />
-          ) : (
-			<>
-				<h2 className="m-0 text-2xl text-zinc-50">
-					{t("ddd.newRoom")}
-				</h2>
-				<p className="m-0 text-sm text-zinc-200">
-					{t("ddd.ready")}
-				</p>
-            </>
-          )}
-        </article>
-      </section>
+      <ChallengePanel>
+        {shouldContinueRoom && dungeonState.currentRoom && roomImage ? (
+          <RoomImage
+            src={roomImage}
+            alt={t(`ddd.roomType.${dungeonState.currentRoom.type}`)}
+          />
+        ) : (
+          <>
+            <h2 className="m-0 text-2xl text-zinc-50">{t("ddd.newRoom")}</h2>
+            <p className="m-0 text-sm text-zinc-200">{t("ddd.ready")}</p>
+          </>
+        )}
+      </ChallengePanel>
     );
   }
 
-  if ((dungeonState.phase === 'choosingCard' || dungeonState.phase === 'resolvingRoom') && dungeonState.currentRoom) {
+  if (
+    (dungeonState.phase === 'choosingCard' || dungeonState.phase === 'resolvingRoom') &&
+    dungeonState.currentRoom
+  ) {
     return (
-      <section className="flex min-h-80 w-full flex-col items-center justify-start gap-3">
-        <article className="flex min-h-105 w-140 flex-col items-center justify-center gap-3 p-2 text-center">
-          {roomImage && (
-            <img
-              src={roomImage}
-              alt={t(`ddd.roomType.${dungeonState.currentRoom.type}`)}
-              className="block h-auto max-h-101.25 w-82.5 object-contain"
-            />
-          )}
+      <ChallengePanel>
+        {roomImage && (
+          <RoomImage
+            src={roomImage}
+            alt={t(`ddd.roomType.${dungeonState.currentRoom.type}`)}
+          />
+        )}
 
-          {dungeonState.phase ===
-            'choosingCard' && (
-            <p className="m-0 text-lg text-zinc-100">
-              {
-                dungeonState.cardSelectionCountdown
-              }
-              {t("ddd.choosingPhase")}
-            </p>
-          )}
-
-          {dungeonState.phase ===
-            'resolvingRoom' && (
-            <>
-              <p className="m-0 text-lg text-zinc-100">
-                {dungeonState.resolveCountdown}s
-                {t("ddd.resolving")}
-              </p>
-
-              {dungeonState.lastTurnResult && (
-                <p className="m-0 text-sm text-zinc-200">
-                  {t(dungeonState.lastTurnResult.message)}
-                </p>
-              )}
-            </>
-          )}
-        </article>
-      </section>
-    );
-  }
-
-  if (dungeonState.phase === 'escaped' || dungeonState.phase === 'dead' || dungeonState.phase === 'finished') {
-    return (
-      <section className="flex min-h-80 w-full flex-col items-center justify-start gap-3">
-        <article className="flex min-h-105 w-140 flex-col items-center justify-center gap-3 p-2 text-center">
-          <h2 className="m-0 text-2xl text-zinc-50">
-            {getResultTitle(dungeonState, t)}
-          </h2>
-
-          <p className="m-0 text-sm text-zinc-200">
-            {t("ddd.score")}{dungeonState.player.score}
+        {dungeonState.phase === 'choosingCard' && (
+          <p className="m-0 shrink-0 text-lg text-zinc-100">
+            {dungeonState.cardSelectionCountdown}
+            {t("ddd.choosingPhase")}
           </p>
-        </article>
-      </section>
+        )}
+
+        {dungeonState.phase === 'resolvingRoom' && (
+          <>
+            <p className="m-0 shrink-0 text-lg text-zinc-100">
+              {dungeonState.resolveCountdown}s
+              {t("ddd.resolving")}
+            </p>
+            {dungeonState.lastTurnResult && (
+              <p className="m-0 shrink-0 text-sm text-zinc-200">
+                {t(dungeonState.lastTurnResult.message)}
+              </p>
+            )}
+          </>
+        )}
+      </ChallengePanel>
+    );
+  }
+
+  if (
+    dungeonState.phase === 'escaped' ||
+    dungeonState.phase === 'dead' ||
+    dungeonState.phase === 'finished'
+  ) {
+    return (
+      <ChallengePanel>
+        <h2 className="m-0 text-2xl text-zinc-50">{getResultTitle(dungeonState, t)}</h2>
+        <p className="m-0 text-sm text-zinc-200">
+          {t("ddd.score")}{dungeonState.player.score}
+        </p>
+      </ChallengePanel>
     );
   }
 
   return (
-    <section className="flex min-h-80 w-full flex-col items-center justify-start gap-3">
-      <article className="flex min-h-105 w-140 flex-col items-center justify-center gap-3 p-2 text-center">
-        <h2 className="m-0 text-2xl text-zinc-50">
-          {t("ddd.dungeon")}
-        </h2>
-
-        <p className="m-0 text-sm text-zinc-200">
-         	{t("ddd.preparingPhase")}
-        </p>
-      </article>
-    </section>
+    <ChallengePanel>
+      <h2 className="m-0 text-2xl text-zinc-50">{t("ddd.dungeon")}</h2>
+      <p className="m-0 text-sm text-zinc-200">{t("ddd.preparingPhase")}</p>
+    </ChallengePanel>
   );
 }
 

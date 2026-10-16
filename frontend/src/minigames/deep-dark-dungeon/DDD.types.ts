@@ -79,7 +79,7 @@ export type DungeonState = {
  */
 
 export const DUNGEON_INITIAL_HEALTH = 5;
-export const DUNGEON_BETTING_COUNTDOWN_SECONDS = 5;
+export const DUNGEON_BETTING_COUNTDOWN_SECONDS = 10;
 export const DUNGEON_CLASS_SELECTION_SECONDS = 20;
 export const DUNGEON_CARD_SELECTION_SECONDS = 3;
 export const DUNGEON_RESOLVE_SECONDS = 0.2;

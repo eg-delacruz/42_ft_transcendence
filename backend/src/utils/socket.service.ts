@@ -601,7 +601,7 @@ export class SocketService {
             phase: 'bettingCountdown',
             round: 1,
             bettingCountdown: 3,
-            selectionTimeLeft: 3,
+            selectionTimeLeft: 5,
             resolutionTimeLeft: 1,
             resultsCountdown: 300,
             player1: this.createFightPlayer('player1'),
@@ -715,9 +715,9 @@ export class SocketService {
     private createDungeonState(): DungeonState {
         return {
             phase: 'bettingCountdown',
-            bettingCountdown: 5,
-            classSelectionCountdown: 5,
-            cardSelectionCountdown: 3,
+            bettingCountdown: 15,
+            classSelectionCountdown: 20,
+            cardSelectionCountdown: 5,
             resolveCountdown: 2,
             resultsCountdown: 2,
             player: { health: 5, score: 0, streak: 0, roundsSurvived: 0 },

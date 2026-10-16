@@ -14,6 +14,18 @@ export function useAuthContext() {
   return ctx;
 }
 
+const register = async (email: string, password: string) => {
+	setLoading(true);
+	try {
+		const res = await api.post("/users/register", { email, password });
+		if (res.error) return { error: res.error };
+		await auth();            // o setUser(res.body.user)
+		return { error: null };
+	} finally {
+		setLoading(false);       // siempre, éxito o error
+	}
+};
+
 /**
  * AuthProvider - Global context of authentication for the app
  * 
